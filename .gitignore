@@ -7,4 +7,6 @@
 !*.h
 !*.hpp
 !*.md
+!*.pdf
+!*.xlsx
 !makefile
