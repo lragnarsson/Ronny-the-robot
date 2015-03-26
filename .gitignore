@@ -2,11 +2,11 @@
 !.gitignore
 !*/
 !*.c
-!*.cc
-!*.cpp
 !*.h
 !*.hpp
 !*.md
 !*.pdf
 !*.xlsx
+!*.atsln
+!*.cproj
 !makefile
