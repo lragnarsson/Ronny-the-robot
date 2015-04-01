@@ -16,15 +16,17 @@
 int main(void) {
 	Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
 	i2c_init(atmega18br, atmega18pc, communication_unit);
-	i2c_start();
-	i2c_write(0xF3);
-	i2c_stop();
 	while(1) {
-		if(UART_not_empty()) {
-			UART_putstring(UART_get_buffer());
-			Send_to_PC('\n');
+		/*if(UART_not_empty()) {
+			//uint8_t data = UART_get_buffer();
+			//UART_putstring(data);
+			//Send_to_PC('\n');
+			i2c_send(sensor_unit, 0x52);
 			UART_empty();
-		}
+		}*/
+		_delay_ms(1000);
+		i2c_send(sensor_unit, 0x41);
+		_delay_ms(5000);
 	}
 	return 0;
 }

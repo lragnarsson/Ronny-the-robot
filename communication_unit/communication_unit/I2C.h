@@ -24,9 +24,14 @@ uint8_t i2c_start();
 //STOP condition
 void i2c_stop();
 
-//Write to I2C
-uint8_t i2c_write(uint8_t data);
+//Getter for bussbuffer
+uint8_t i2c_get_buffer(void);
 
-//Read ACK
-uint8_t i2c_RACK();
+void i2c_clear_buffer(void);
+
+//Write to I2C
+uint8_t i2c_write(uint8_t adress, uint8_t data);
+
+//Send by bus
+uint8_t i2c_send(uint8_t adress, uint8_t data);
 #endif /* I2C_H_ */
