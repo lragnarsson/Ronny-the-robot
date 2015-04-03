@@ -130,6 +130,12 @@
     <Compile Include="I2C.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="personality.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="sound.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="UART.c">
       <SubType>compile</SubType>
     </Compile>
