@@ -187,11 +187,11 @@ ISR(TWI_vect) {
 			break;
 
 		case 0x30: // Data byte has been transmitted, NOT ACK has been received
-			TWCR = STOP;
+			TWCR = START;
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 		case 0x38: //  Arbitration lost in SLA+W or data bytes
-			TWCR = STOP;
+			TWCR = START;
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 			
