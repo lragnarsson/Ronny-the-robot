@@ -113,6 +113,7 @@
         <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
         <avrgcc.compiler.optimization.DebugLevel>Default (-g2)</avrgcc.compiler.optimization.DebugLevel>
         <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+        <avrgcc.compiler.warnings.Pedantic>True</avrgcc.compiler.warnings.Pedantic>
         <avrgcc.linker.libraries.Libraries>
           <ListValues>
             <Value>libm</Value>
@@ -123,10 +124,28 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="bus_communication.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="bus_communication.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="control_system.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="control_system.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="control_unit.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="control_unit.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="map.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="map.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
