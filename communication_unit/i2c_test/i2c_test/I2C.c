@@ -16,9 +16,16 @@
 #include <avr/io.h> 
 #include <avr/interrupt.h>
 #include "I2C.h"
-volatile uint8_t busbuffer;
+#include <string.h>
+volatile uint8_t busbuffer[16];
+volatile uint8_t receiverstart = 0x00;
+volatile uint8_t receiverstop = 0x00;
 volatile uint8_t helpadress = communication_unit;
-volatile uint8_t helpdata = 0x12;
+//volatile uint8_t helpdata = 0x12;
+volatile uint8_t helpdata[16];
+volatile uint8_t startpointer;
+volatile uint8_t endpointer;
+
 
 //TWCR BITS(TWxx):   INT EA STA STO WC EN Res IE
 #define SEND 0xc5 // 1   1  0   0   0  1  0   1
@@ -40,52 +47,23 @@ void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t adress)
 	sei();
 }
 
-uint8_t i2c_get_buffer() {
-	return busbuffer;
+uint8_t i2c_get_buffer(uint8_t* bufferdata) {
+	uint8_t i = 0x00;
+	if(receiverstart < receiverstop) {
+		bufferdata[i++] = busbuffer[receiverstart++];
+	}
+	return i;
 }
 
 void i2c_clear_buffer() {
-	busbuffer = 0x00;
+	memset(busbuffer, 0, sizeof(busbuffer));
+	receiverstart = 0x00;
+	receiverstop = 0x00;
 }
 
-//START condition
-/*
-uint8_t i2c_start(){
-	uint8_t status_code;
-	cli();
-	TWCR = (1<<TWINT)|(1<<TWSTA)|(0<<TWSTO)|(1<<TWEN);
 
-	//Wait for flag to be set
-	while (!(TWCR & (1<<TWINT)));
-	sei();
-	status_code = TWSR & 0xf8; //Check status on bus
-	
-	
-	//atmega1284p p.220
-	switch (status_code) {
-		case 0x08: // Start
-		case 0x10: // Repeated start
-			return 0;
-		//Something went wrong
-		case 0x00: //Buss error p.230
-			cli();
-			
-			//TWCR &= 0xff ^ (1 << TWSTA);
-			//TWCR |= (1 << TWINT) | (1 << TWSTO);
-			
-			TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO);
-			while (!(TWCR & (1 << TWINT)));
-			sei();
-			return 1;
-		case 0xf8: // No relevant state information, try again
-		default:
-			return i2c_start();
-	}
-}
-*/
 void i2c_start() {
 	TWCR = START;
-	//while (!(TWCR & (1<<TWINT)));
 }
 
 //STOP condition
@@ -96,75 +74,19 @@ void i2c_stop(){
 
 //Write to I2C
 
-uint8_t i2c_write(uint8_t adress, uint8_t data) {
+uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 	helpadress = adress | 0;
-	helpdata = data;
+	startpointer = 0x00;
+	endpointer = 0x00;
+	while(endpointer < length) {
+		helpdata[endpointer] = data[endpointer];
+		endpointer++;
+	}
+	
 	i2c_start();
 	return 0;
 }
-/*
-uint8_t i2c_write(uint8_t adress, uint8_t data){
-	uint8_t status_code;
-	cli();
-	TWDR = adress | 0; //Send SLA+W
-	TWCR = (1<<TWINT)|(1<<TWEN); //Set when all data on TWDR
-	while (!(TWCR & (1<<TWINT))); //Make sure TWINT is set
-	sei(); // Set enable interrupts
-	status_code = TWSR & 0xf8; //Check bus status
-	
-	
-	switch(status_code) {
-		case 0x18: // SLA+W has been transmitted, ACK has been received
-		case 0x28:
-			cli();
-			TWDR = data;
-			TWCR = (0<<TWSTA)|(0<<TWSTO)|(1<<TWINT);
-			while (!(TWCR & (1<<TWINT))); //Make sure TWINT is set
-			sei();
-			status_code = TWSR & 0xf8; //Check bus status
-			break;
-		case 0x20: // SLA+W has been transmitted, NOT ACK has been received
-			i2c_stop();
-			return 1;
-		case 0x38: // Arbitration lost in SLA+W or data bytes
-			cli();
-			TWCR = (1<<TWSTA)|(0<<TWSTO)|(1<<TWINT);
-			while (!(TWCR & (1<<TWINT)));
-			sei();
-			return 2;
-		default:
-			return i2c_start();
-	}
-	
-	switch(status_code) {
-		case 0x18:
-		case 0x28: // Data byte has been transmitted, ACK has been received
-			cli();
-			TWCR = (0<<TWSTA)|(1<<TWSTO)|(1<<TWINT);
-			while (!(TWCR & (1<<TWINT)));
-			sei();
-			return 0;
-		case 0x30: // Data byte has been transmitted, NOT ACK has been received
-			i2c_stop();
-			return 3;
-		default:
-			return 4;
-	}
-}
-*/
-/*
-uint8_t i2c_send(uint8_t adress, uint8_t data) {
-	if(i2c_start() == 0) {
-		switch(i2c_write(adress, data)) {
-			case 0:
-				return 0;
-			default:
-				return 1;
-		}
-	}
-	return 2;
-}
-*/
+
 ISR(TWI_vect) {
 	switch (TWSR & 0xf8) {
 		//status codes for master transmitter mode
@@ -176,18 +98,23 @@ ISR(TWI_vect) {
 			break;
 		case 0x18: // SLA+W has been transmitted, ACK has been received
 		case 0x28: // Data byte has been transmitted, ACK has been received
-			TWDR = helpdata;
-			TWCR = SEND;
+			if(startpointer < endpointer) {
+				TWDR = helpdata[startpointer++];
+				TWCR = SEND;
+			}
+			else {
+				startpointer = 0x00;
+				TWCR = STOP;
+			}
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 		case 0x20: // SLA+W has been transmitted, NOT ACK has been received
-			TWDR = helpdata;
-			TWCR = SEND;
+			TWCR = START;
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 
 		case 0x30: // Data byte has been transmitted, NOT ACK has been received
-			TWCR = START;
+			TWCR = STOP;
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 		case 0x38: //  Arbitration lost in SLA+W or data bytes
@@ -214,14 +141,14 @@ ISR(TWI_vect) {
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 		case 0x80: // Previously addressed with own SLA+W, data has been received, ACK has been returned
-			busbuffer = TWDR;
-			TWCR = NACK; //Send ack
-			//while (!(TWCR & (1<<TWINT)));
-			break;
 		case 0x90: // Previously addressed with general call, data has been received, ACK has been returned
-			busbuffer = TWDR;
-			TWCR = ACK; //Send ack
-			//while (!(TWCR & (1<<TWINT)));
+			//if(receiverstart < sizeof(busbuffer)) {
+				busbuffer[receiverstop++] = TWDR;
+				TWCR = ACK; //Send ack
+			/*}
+			else {
+				TWCR = NACK; //Full buffer, send nack
+			}*/
 			break;
 		case 0x88: // Previously addressed with own SLA+W, data has been received, NOT ACK has been returned
 		case 0x98: // Previously addressed with general call, data has been received, NOT ACK has been returned

@@ -6,7 +6,7 @@
  */ 
 #include <avr/io.h>
 #define F_CPU 18432000UL
-//#include <avr/interrupt.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #include "personality.h"
 
@@ -34,10 +34,12 @@ void init_personality() {
 }
 
 int main(void) {
-	//Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
+	Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
 	i2c_init(atmega18br, atmega18pc, communication_unit);
+	uint8_t busvar = 0x00;
+	uint8_t busdata[16];
 	//init_personality();
-	//while(1) {
+	while(1) {
 		//if(UART_not_empty()) {
 			//uint8_t data = UART_get_buffer();
 			//UART_putstring(data);
@@ -46,11 +48,28 @@ int main(void) {
 			//i2c_send(sensor_unit, 0x52);
 			//UART_empty();
 		//}
-		//_delay_ms(1000);
-		i2c_write(sensor_unit, 0xf6);
-		i2c_write(sensor_unit, 0x12);
-		i2c_write(sensor_unit, 0xA4);
-		//_delay_ms(5000);
-	//}
+		/*_delay_ms(1000);
+		uint8_t data[2] = {0xf6,0x51};
+		i2c_write(sensor_unit, data, 2);
+		//i2c_write(sensor_unit, 0x12);
+		//i2c_write(sensor_unit, 0xA4);
+		_delay_ms(1000);*/
+		busvar = i2c_get_buffer(busdata);
+		//_delay_ms(10);
+		if(!(busvar == 0x00)) {
+			cli();
+			_delay_ms(100); 
+			for(uint8_t i=0; i<=busvar; i++) {
+				unsigned char j = busdata[i];
+				Send_to_PC(j);
+				Send_to_PC('\n');
+			}
+			i2c_write(sensor_unit,busdata,9);
+			sei();
+		}
+		i2c_clear_buffer();
+		_delay_ms(100);
+	}
+
 	return 0;
 }

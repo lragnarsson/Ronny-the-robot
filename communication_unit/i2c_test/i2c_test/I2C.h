@@ -25,13 +25,13 @@ void i2c_start();
 void i2c_stop();
 
 //Getter for bussbuffer
-uint8_t i2c_get_buffer(void);
+uint8_t i2c_get_buffer(uint8_t*);
 
 void i2c_clear_buffer(void);
 
 //Write to I2C
-uint8_t i2c_write(uint8_t adress, uint8_t data);
+uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length);
 
 //Send by bus
-uint8_t i2c_send(uint8_t adress, uint8_t data);
+//uint8_t i2c_send(uint8_t adress, uint8_t data);
 #endif /* I2C_H_ */

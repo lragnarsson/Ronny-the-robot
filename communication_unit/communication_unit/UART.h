@@ -14,7 +14,7 @@ uint8_t UART_not_empty(void);
 uint8_t UART_get_buffer(void);
 void UART_empty(void);
 void Init_UART(uint16_t baudrate);
-void UART_putstring(char* StringPtr);
+void UART_putstring(unsigned char* StringPtr);
 void Send_to_PC(unsigned char data);
 unsigned char Receive_from_PC(void);
 void UART_Flush(void);

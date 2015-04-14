@@ -52,7 +52,7 @@ void Init_UART(uint16_t baudrate) {
 }
 
 
-void UART_putstring(char* StringPtr) {
+void UART_putstring(unsigned char* StringPtr) {
 // sends the characters from the string one at a time to the USART
 	while(*StringPtr != 0x00)
 	{
