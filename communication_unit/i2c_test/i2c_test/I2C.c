@@ -17,15 +17,14 @@
 #include <avr/interrupt.h>
 #include "I2C.h"
 #include <string.h>
-volatile uint8_t busbuffer[16];
+/*volatile uint8_t busbuffer[16];
 volatile uint8_t receiverstart = 0x00;
-volatile uint8_t receiverstop = 0x00;
+volatile uint8_t receiverstop = 0x00;*/
 volatile uint8_t helpadress = communication_unit;
 //volatile uint8_t helpdata = 0x12;
 volatile uint8_t helpdata[16];
 volatile uint8_t startpointer;
 volatile uint8_t endpointer;
-
 
 //TWCR BITS(TWxx):   INT EA STA STO WC EN Res IE
 #define SEND 0xc5 // 1   1  0   0   0  1  0   1
@@ -38,6 +37,8 @@ volatile uint8_t endpointer;
 //Init
 void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t adress)
 {
+	receiverstart = 0x00;
+	receiverstop = 0x00;
 	//SCL 
 	cli();
 	TWBR = bitrate;
@@ -155,6 +156,7 @@ ISR(TWI_vect) {
 			break;
 		case 0xA0: // A STOP condition or repeated START condition has been received while still addressed as Slave
 			TWCR = RESET; // Switched to the not addressed Slave mode, own SLA will be recognized
+			handle_recieved_message();
 			break;
 		// Misc. states
 		case 0xF8: // No relevant state information available, TWINT = "0"

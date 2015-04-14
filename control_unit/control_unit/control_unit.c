@@ -6,8 +6,6 @@
 
 uint8_t state_speed = 0;
 uint8_t know_shortest_path = 0;
-uint16_t distance_remaining = 0;
-uint8_t angle_remaining  = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
@@ -205,16 +203,74 @@ state_function navigate() {
 	return state_transition;
 }
 
+void manual_drive() {
+	while(current_mode == MANUAL) {
+		switch(last_manual_command) {
+			case M_FORWARD:
+				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
+				state_speed = MAPPING_SPEED;
+				while(distance_remaining != 0) {
+					set_same_engine_speed();
+				}
+				break;
+			case M_BACKWARD:
+				PORTB = (0<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
+				state_speed = MAPPING_SPEED;
+				while(distance_remaining != 0) {
+					set_same_engine_speed();
+				}
+				break;
+			case M_LEFT:
+				PORTB = (0<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
+				state_speed = TURN_SPEED;
+				while(angle_remaining != 0) {
+					set_same_engine_speed();
+				}
+				break;
+			case M_RIGHT:
+				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
+				state_speed = TURN_SPEED;
+				while(angle_remaining != 0) {
+					set_same_engine_speed();
+				}
+				break;
+			case M_FORWARD_LEFT:
+				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
+				state_speed = MAPPING_SPEED;
+				while(angle_remaining != 0) {
+					set_manual_forward_left_engine_speed();
+				}
+				break;
+			case M_FORWARD_RIGHT:
+				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
+				state_speed = MAPPING_SPEED;
+				while(angle_remaining != 0) {
+					set_manual_forward_right_engine_speed();
+				}
+				break;
+			default:
+				stop_engines();
+				break;
+		}
+	}
+}
 
-int main(void) {
-	initialize_control_unit();
-
+void autonomous_drive() {
 	state_function state_transition;
 	// ## TEMP_COMMENT ## Will currently follow the predefined path 4 times in a row since no new path is ever calculated for next task.
 	do {
 		state_transition = navigate();
 		(*state_transition)();
 	} while (current_task != IDLE);
-	
 	stop_engines();
+}
+
+int main(void) {
+	initialize_control_unit();
+	while (1) {
+		if(current_mode == MANUAL)
+			manual_drive();
+		else
+			autonomous_drive();
+	}
 }

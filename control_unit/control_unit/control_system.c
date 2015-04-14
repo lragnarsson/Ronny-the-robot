@@ -53,7 +53,7 @@ void set_same_engine_speed() {
 
 /* Calculates the control_speed based on current angle and error in distance to the middle of the corridor */
 void calculate_control_speed() {
-	uint16_t control_speed_16 = P_COEFFICIENT * current_distance_error + D_COEFFICIENT * current_angle;
+	uint16_t control_speed_16 = P_COEFFICIENT * current_distance_error + D_COEFFICIENT * current_angle_error;
 	if (control_speed_16 > control_speed_max)
 	control_speed = control_speed_max;
 	else
@@ -64,6 +64,16 @@ void set_controlled_engine_speed() {
 	calculate_control_speed();
 	ENGINE_LEFT_SPEED = current_speed - control_speed;
 	ENGINE_RIGHT_SPEED = current_speed + control_speed;
+}
+
+void set_manual_forward_left_engine_speed() {
+	ENGINE_LEFT_SPEED = current_speed - 30;
+	ENGINE_RIGHT_SPEED = current_speed + 30;
+}
+
+void set_manual_forward_right_engine_speed() {
+	ENGINE_LEFT_SPEED = current_speed + 30;
+	ENGINE_RIGHT_SPEED = current_speed - 30;
 }
 
 /* Absolute value of linear approximation of left "angle" derivative */

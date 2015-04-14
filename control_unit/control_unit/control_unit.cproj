@@ -142,6 +142,12 @@
     <Compile Include="control_unit.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="I2C.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="I2C.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="map.c">
       <SubType>compile</SubType>
     </Compile>
