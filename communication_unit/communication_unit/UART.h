@@ -11,7 +11,7 @@
 volatile uint8_t buffer[20];
 volatile uint8_t StrRxFlag=0;*/
 uint8_t UART_not_empty(void);
-uint8_t UART_get_buffer(void);
+void UART_get_buffer(uint8_t* data);
 void UART_empty(void);
 void Init_UART(uint16_t baudrate);
 void UART_putstring(unsigned char* StringPtr);

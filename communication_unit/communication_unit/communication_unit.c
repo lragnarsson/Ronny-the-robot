@@ -38,15 +38,28 @@ int main(void) {
 	i2c_init(atmega18br, atmega18pc, communication_unit);
 	uint8_t busvar = 0x00;
 	uint8_t busdata[16];
+	uint8_t data[16];
 	//init_personality();
 	while(1) {
-		//if(UART_not_empty()) {
-			//uint8_t data = UART_get_buffer();
+		_delay_ms(10);
+		if(UART_not_empty()) {
+			UART_get_buffer(data);
+			switch(data[0] & 0x30) { //Check end destination
+				case 0x00: //To control_unit
+					i2c_write(control_unit, data, 1);
+					break;
+				case 0x10: // To sensor_unit
+					i2c_write(sensor_unit, data, 1);
+					break;
+				default: // Should not happen
+					break;
+			}
 			//UART_putstring(data);
 			//Send_to_PC('\n');
-			//i2c_write(sensor_unit, data);
+				//i2c_write(sensor_unit, data,4);
 			//i2c_send(sensor_unit, 0x52);
-			//UART_empty();
+			UART_empty();
+		}
 		//}
 		/*_delay_ms(1000);
 		uint8_t data[2] = {0xf6,0x51};
@@ -54,6 +67,8 @@ int main(void) {
 		//i2c_write(sensor_unit, 0x12);
 		//i2c_write(sensor_unit, 0xA4);
 		_delay_ms(1000);*/
+		
+		/*
 		busvar = i2c_get_buffer(busdata);
 		//_delay_ms(10);
 		if(!(busvar == 0x00)) {
@@ -69,6 +84,7 @@ int main(void) {
 		}
 		i2c_clear_buffer();
 		_delay_ms(100);
+		*/
 	}
 
 	return 0;

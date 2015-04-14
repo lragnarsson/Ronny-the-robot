@@ -69,24 +69,21 @@ void i2c_start() {
 //STOP condition
 void i2c_stop(){
 	TWCR = STOP;
-	//while (!(TWCR & (1<<TWINT)));
 }
 
 //Write to I2C
 
 uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
-	helpadress = adress | 0;
+	helpadress = adress | 0; //Write
 	startpointer = 0x00;
 	endpointer = 0x00;
 	while(endpointer < length) {
 		helpdata[endpointer] = data[endpointer];
 		endpointer++;
 	}
-	
 	i2c_start();
 	return 0;
 }
-
 
 ISR(TWI_vect) {
 	switch (TWSR & 0xf8) {
@@ -115,7 +112,7 @@ ISR(TWI_vect) {
 			break;
 
 		case 0x30: // Data byte has been transmitted, NOT ACK has been received
-			TWCR = STOP;
+			TWCR = START;
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 		case 0x38: //  Arbitration lost in SLA+W or data bytes
@@ -158,7 +155,6 @@ ISR(TWI_vect) {
 			break;
 		case 0xA0: // A STOP condition or repeated START condition has been received while still addressed as Slave
 			TWCR = RESET; // Switched to the not addressed Slave mode, own SLA will be recognized
-			//while (!(TWCR & (1<<TWINT)));
 			break;
 		// Misc. states
 		case 0xF8: // No relevant state information available, TWINT = "0"

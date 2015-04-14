@@ -28,15 +28,17 @@ void UART_Flush() {
 }
 
 uint8_t UART_not_empty(void) {
-	return i;
+	return StrRxFlag;
 }
 
 void UART_empty(void) {
 	StrRxFlag = 0;
 }
 
-uint8_t UART_get_buffer(void) {
-	return buffer;
+void UART_get_buffer(uint8_t* data) {
+	for(uint8_t j=0; (!(buffer[j]==0x00)); j++) {
+	data[j] = buffer[j];
+	}
 }
 
 void Init_UART(uint16_t baudrate) {
