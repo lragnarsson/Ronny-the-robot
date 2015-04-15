@@ -4,9 +4,6 @@
  */ 
 #include "bus_communication.h"
 
-volatile uint16_t left_wall_distance;
-volatile uint16_t right_wall_distance;
-
 void init_bus_communication() {
 	i2c_init(atmega20br, atmega20pc, control_unit);
 	current_angle_error = 0;
@@ -15,8 +12,11 @@ void init_bus_communication() {
 	current_distance_error = 0;
 	left_wall_distance = 0;
 	right_wall_distance = 0;
+	front_wall_distance = 0;
 	last_tick_angle_left = 0;
 	last_tick_angle_right = 0;
+	distance_remaining = 0;
+	square_distance_remaining = 0;
 	inverse_sampling_speed = 1;
 }
 
@@ -37,6 +37,10 @@ void update_distance_and_angle(uint8_t distance, uint8_t angle) {
 		distance_remaining -= distance;
 	else
 		distance_remaining = 0;
+	if(square_distance_remaining > distance)
+		square_distance_remaining -= distance;
+	else
+		square_distance_remaining = 0;	
 	if(angle_remaining > angle)
 		angle_remaining -= angle;
 	else

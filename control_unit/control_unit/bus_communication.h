@@ -21,6 +21,9 @@ volatile manual_command last_manual_command;
 
 volatile uint8_t goal_found;
 
+volatile uint16_t left_wall_distance;
+volatile uint16_t right_wall_distance;
+volatile uint8_t front_wall_distance;
 volatile uint8_t current_angle_error;
 volatile uint8_t current_angle_left;
 volatile uint8_t current_angle_right;
@@ -28,7 +31,9 @@ volatile uint8_t current_distance_error;
 volatile uint8_t last_tick_angle_left;
 volatile uint8_t last_tick_angle_right;
 volatile uint16_t distance_remaining;
+volatile uint16_t square_distance_remaining;
 volatile uint8_t angle_remaining;
+
 uint8_t inverse_sampling_speed;
 
 void init_bus_communication();

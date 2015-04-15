@@ -142,6 +142,12 @@
     <Compile Include="control_unit.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="flood_fill.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="flood_fill.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="I2C.c">
       <SubType>compile</SubType>
     </Compile>
