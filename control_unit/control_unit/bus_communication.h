@@ -36,6 +36,14 @@ void init_bus_communication();
 void handle_recieved_message();
 void update_sensor_readings(uint8_t front_left, uint8_t rear_left, uint8_t front_right, uint8_t rear_right, uint8_t front);
 void update_distance_and_angle(uint8_t distance, uint8_t angle);
+void tape_found();
+void manual_drive_forward();
+void manual_turn_right();
+void manual_turn_left();
+void manual_drive_forward_right();
+void manual_drive_forward_left();
+void manual_drive_backward();
+void handle_recieved_message();
 
 
 #endif /* BUS_COMMUNICATION_H_ */

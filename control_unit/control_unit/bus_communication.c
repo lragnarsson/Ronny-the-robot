@@ -43,6 +43,11 @@ void update_distance_and_angle(uint8_t distance, uint8_t angle) {
 		angle_remaining = 0;
 }
 
+void tape_found() {
+	goal_found = 1;
+	//TODO
+}
+
 void manual_drive_forward() {
 	last_manual_command = M_FORWARD;
 	if(distance_remaining < 100)
@@ -89,7 +94,7 @@ void handle_recieved_message() {
 			update_distance_and_angle(busbuffer[1], busbuffer[2]);
 			break;
 		case TAPE_FOUND:
-			goal_found = 1;
+			tape_found();
 			break;
 		case DRIVE_FORWARD:
 			manual_drive_forward();

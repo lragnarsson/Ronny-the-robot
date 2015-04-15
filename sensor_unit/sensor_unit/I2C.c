@@ -157,6 +157,7 @@ ISR(TWI_vect) {
 		case 0xA0: // A STOP condition or repeated START condition has been received while still addressed as Slave
 			TWCR = RESET; // Switched to the not addressed Slave mode, own SLA will be recognized
 			handle_recieved_message();
+			i2c_clear_buffer();
 			break;
 		// Misc. states
 		case 0xF8: // No relevant state information available, TWINT = "0"

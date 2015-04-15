@@ -9,7 +9,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = AUTONOMOUS;
+	current_mode = MANUAL;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -263,6 +263,8 @@ void autonomous_drive() {
 		(*state_transition)();
 	} while (current_task != IDLE);
 	stop_engines();
+	while(current_mode == AUTONOMOUS)
+		_delay_ms(25);
 }
 
 int main(void) {
