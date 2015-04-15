@@ -33,6 +33,12 @@ void init_personality() {
 	}
 }
 
+void handle_recieved_message() {
+	for(uint8_t j=0; busbuffer[j]!=0x00; j++) {
+		Send_to_PC(busbuffer[j]);
+	}
+}
+
 int main(void) {
 	Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
 	i2c_init(atmega18br, atmega18pc, communication_unit);
@@ -41,8 +47,9 @@ int main(void) {
 	uint8_t data[16];
 	//init_personality();
 	while(1) {
-		_delay_ms(10);
-		if(UART_not_empty()) {
+		//_delay_ms(100);
+	
+		/*if(UART_not_empty()) {
 			UART_get_buffer(data);
 			switch(data[0] & 0x30) { //Check end destination
 				case 0x00: //To control_unit
@@ -59,7 +66,40 @@ int main(void) {
 				//i2c_write(sensor_unit, data,4);
 			//i2c_send(sensor_unit, 0x52);
 			UART_empty();
+		}*/
+		if(UART_not_empty()) {
+			//UART_get_buffer(data);
+			switch(buffer[0]) {
+				case 'q':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT, 1);
+					break;
+				case 'w':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD, 1);
+					break;
+				case 'e':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT, 1);
+					break;
+				case 'a':
+					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT, 1);
+					break;
+				case 's':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD, 1);
+					break;
+				case 'd':
+					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT, 1);
+					break;
+				default:
+					break;
+			}
+			UART_empty();
 		}
+	}
+		//UART_putstring(data);
+		//Send_to_PC('\n');
+		//i2c_write(sensor_unit, data,4);
+		//i2c_send(sensor_unit, 0x52);
+		
+	
 		//}
 		/*_delay_ms(1000);
 		uint8_t data[2] = {0xf6,0x51};
@@ -85,7 +125,14 @@ int main(void) {
 		i2c_clear_buffer();
 		_delay_ms(100);
 		*/
-	}
+	//}
 
 	return 0;
 }
+	/*	if(buffer[0]=='a') {
+			for(uint8_t j=0; buffer[j]!=0x00; j++) {
+				Send_to_PC(buffer[j]);
+			}
+		}
+		UART_empty();
+		}*/

@@ -10,6 +10,7 @@
 /*volatile int i=0;
 volatile uint8_t buffer[20];
 volatile uint8_t StrRxFlag=0;*/
+volatile uint8_t buffer[20];
 uint8_t UART_not_empty(void);
 void UART_get_buffer(uint8_t* data);
 void UART_empty(void);

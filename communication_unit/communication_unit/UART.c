@@ -10,7 +10,7 @@
 #include <util/delay.h>
 #include "UART.h"
 volatile int i=0;
-volatile uint8_t buffer[20];
+
 volatile uint8_t StrRxFlag=0;
 ISR(USART0_RX_vect)
 {
@@ -32,7 +32,12 @@ uint8_t UART_not_empty(void) {
 }
 
 void UART_empty(void) {
+	cli();
 	StrRxFlag = 0;
+	for(uint8_t j=0; j<20; j++) {
+		buffer[j] = 0x00;
+	}
+	sei();
 }
 
 void UART_get_buffer(uint8_t* data) {
@@ -58,7 +63,7 @@ void UART_putstring(unsigned char* StringPtr) {
 // sends the characters from the string one at a time to the USART
 	while(*StringPtr != 0x00)
 	{
-		Send_to_PC(*StringPtr);
+		Send_to_PC(StringPtr);
 		StringPtr++;
 	}
 }

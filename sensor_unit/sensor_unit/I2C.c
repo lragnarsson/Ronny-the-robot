@@ -86,6 +86,15 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 	return 0;
 }
 
+uint8_t i2c_write_byte(uint8_t adress, uint8_t data, uint8_t length) {
+	helpadress = adress | 0; //Write
+	startpointer = 0x00;
+	endpointer = 0x01;
+	helpdata[0] = data;
+	i2c_start();
+	return 0;
+}
+
 ISR(TWI_vect) {
 	switch (TWSR & 0xf8) {
 		//status codes for master transmitter mode

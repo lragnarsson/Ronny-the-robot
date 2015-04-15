@@ -58,6 +58,8 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length);
 
 void handle_recieved_message();
 
+uint8_t i2c_write_byte(uint8_t adress, uint8_t data, uint8_t length);
+
 //Send by bus
 //uint8_t i2c_send(uint8_t adress, uint8_t data);
 #endif /* I2C_H_ */
