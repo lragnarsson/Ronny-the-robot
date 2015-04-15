@@ -11,7 +11,9 @@ void init_map() {
 			map[i][j] = UNMAPPED;
 			
 	current_position = (coordinate) {START_POSITION_X, START_POSITION_Y};
-	current_route[0] = 10;
+	current_direction = NORTH;
+	current_route[0] = NORTH;
+	current_route[1] = 10;
 }
 
 /* Sets the current direction (NORTH, EAST, SOUTH or WEST) */

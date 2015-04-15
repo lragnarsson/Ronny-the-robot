@@ -67,13 +67,13 @@ void set_controlled_engine_speed() {
 }
 
 void set_manual_forward_left_engine_speed() {
-	ENGINE_LEFT_SPEED = current_speed - 30;
-	ENGINE_RIGHT_SPEED = current_speed + 30;
+	ENGINE_LEFT_SPEED = current_speed - 0.1 * current_speed;
+	ENGINE_RIGHT_SPEED = current_speed +  0.1 * current_speed;
 }
 
 void set_manual_forward_right_engine_speed() {
-	ENGINE_LEFT_SPEED = current_speed + 30;
-	ENGINE_RIGHT_SPEED = current_speed - 30;
+	ENGINE_LEFT_SPEED = current_speed + 0.1 * current_speed;
+	ENGINE_RIGHT_SPEED = current_speed - 0.1 * current_speed;
 }
 
 /* Absolute value of linear approximation of left "angle" derivative */

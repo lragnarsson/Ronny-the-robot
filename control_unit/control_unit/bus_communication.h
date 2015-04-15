@@ -15,7 +15,7 @@
 
 #include "I2C.h"
 
-typedef enum { M_FORWARD, M_LEFT, M_RIGHT, M_FORWARD_LEFT, M_FORWARD_RIGHT, M_BACKWARD } manual_command;
+typedef enum { M_FORWARD, M_LEFT, M_RIGHT, M_FORWARD_LEFT, M_FORWARD_RIGHT, M_BACKWARD, DO_NOTHING } manual_command;
 
 volatile manual_command last_manual_command;
 
@@ -23,7 +23,7 @@ volatile uint8_t goal_found;
 
 volatile uint16_t left_wall_distance;
 volatile uint16_t right_wall_distance;
-volatile uint8_t front_wall_distance;
+volatile uint16_t front_wall_distance;
 volatile uint8_t current_angle_error;
 volatile uint8_t current_angle_left;
 volatile uint8_t current_angle_right;
@@ -39,7 +39,8 @@ uint8_t inverse_sampling_speed;
 void init_bus_communication();
 
 void handle_recieved_message();
-void update_sensor_readings(uint8_t front_left, uint8_t rear_left, uint8_t front_right, uint8_t rear_right, uint8_t front);
+void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t front_left_h, uint8_t front_left_l,
+							uint8_t rear_right_h, uint8_t rear_right_l, uint8_t front_right_h, uint8_t front_right_l, front_h, front_l);
 void update_distance_and_angle(uint8_t distance, uint8_t angle);
 void tape_found();
 void manual_drive_forward();

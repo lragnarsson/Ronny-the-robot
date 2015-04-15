@@ -18,10 +18,30 @@ void init_bus_communication() {
 	distance_remaining = 0;
 	square_distance_remaining = 0;
 	inverse_sampling_speed = 1;
+	last_manual_command = M_FORWARD;
 }
 
-void update_sensor_readings(uint8_t front_left, uint8_t rear_left, uint8_t front_right, uint8_t rear_right, uint8_t front) {
-	left_wall_distance = front_left + rear_left;
+void (uint8_t rear_left_h, uint8_t rear_left_l, uint8_t front_left_h, uint8_t front_left_l,
+uint8_t rear_right_h, uint8_t rear_right_l, uint8_t front_right_h, uint8_t front_right_l, front_h, front_l) {
+	uint16_t rear_left = rear_left_h;
+	rear_left << 8;
+	rear_left |= rear_left_l;
+	uint16_t front_left = front_left_h;
+	front_left << 8;
+	front_left |= front_left_l;
+	uint16_t rear_right = rear_right_h;
+	rear_right << 8;
+	rear_right |= rear_right_l;
+	uint16_t front_right = front_right_h;
+	front_right << 8;
+	front_right |= front_right_l;
+	uint16_t front = front_h;
+	front << 8;
+	front |= front_l;
+	
+	
+	
+	left_wall_distance = (front_left + rear_left;
 	right_wall_distance = front_right + rear_right;
 	current_distance_error = left_wall_distance - right_wall_distance;
 
@@ -54,38 +74,32 @@ void tape_found() {
 
 void manual_drive_forward() {
 	last_manual_command = M_FORWARD;
-	if(distance_remaining < 100)
-		distance_remaining += 20;
+	distance_remaining = 40;
 }
 
 void manual_turn_right() {
 	last_manual_command = M_RIGHT;
-	if(angle_remaining < 20)
-		angle_remaining += 5;
+	angle_remaining = 40;
 }
 
 void manual_turn_left() {
 	last_manual_command = M_LEFT;
-	if(angle_remaining < 20)
-		angle_remaining += 5;
+	angle_remaining = 40;
 }
 
 void manual_drive_forward_right() {
 	last_manual_command = M_FORWARD_RIGHT;
-	if(distance_remaining < 100)
-		distance_remaining += 20;
+	distance_remaining = 40;
 }
 
 void manual_drive_forward_left() {
 	last_manual_command = M_FORWARD_LEFT;
-	if(distance_remaining < 100)
-		distance_remaining += 20;
+	distance_remaining = 40;
 }
 
 void manual_drive_backward() {
 	last_manual_command = M_BACKWARD;
-	if(distance_remaining < 100)
-		distance_remaining += 20;
+	distance_remaining = 40;
 }
 
 void handle_recieved_message() {

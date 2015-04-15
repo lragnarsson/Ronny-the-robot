@@ -240,64 +240,78 @@ state_function navigate() {
 void manual_drive() {
 	while(current_mode == MANUAL) {
 		switch(last_manual_command) {
+			case DO_NOTHING:
+				break;
 			case M_FORWARD:
 				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 				state_speed = MAPPING_SPEED;
+				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_same_engine_speed();
 					--distance_remaining; //simulation
-					_delay_ms(5);
+					_delay_ms(10);
 				}
+				last_manual_command = DO_NOTHING;
 				break;
 			case M_BACKWARD:
 				PORTB = (0<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
 				state_speed = MAPPING_SPEED;
+				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_same_engine_speed();
 					--distance_remaining;
-					_delay_ms(5);
+					_delay_ms(10);
 				}
+				last_manual_command = DO_NOTHING;
 				break;
 			case M_LEFT:
 				PORTB = (0<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 				state_speed = TURN_SPEED;
+				set_desired_speed(state_speed);
 				while(angle_remaining != 0) {
 					set_same_engine_speed();
 					--angle_remaining;
-					_delay_ms(5);
+					_delay_ms(10);
 				}
+				last_manual_command = DO_NOTHING;
 				break;
 			case M_RIGHT:
 				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
 				state_speed = TURN_SPEED;
+				set_desired_speed(state_speed);
 				while(angle_remaining != 0) {
 					set_same_engine_speed();
 					--angle_remaining;
-					_delay_ms(5);
+					_delay_ms(10);
 				}
+				last_manual_command = DO_NOTHING;
 				break;
 			case M_FORWARD_LEFT:
 				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 				state_speed = MAPPING_SPEED;
+				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_manual_forward_left_engine_speed();
 					--distance_remaining;
-					_delay_ms(5);
+					_delay_ms(10);
 				}
+				last_manual_command = DO_NOTHING;
 				break;
 			case M_FORWARD_RIGHT:
 				PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 				state_speed = MAPPING_SPEED;
+				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_manual_forward_right_engine_speed();
 					--distance_remaining;
-					_delay_ms(5);
+					_delay_ms(10);
 				}
+				last_manual_command = DO_NOTHING;
 				break;
 			default:
-				stop_engines();
 				break;
 		}
+		stop_engines();
 	}
 }
 
@@ -315,10 +329,12 @@ void autonomous_drive() {
 
 int main(void) {
 	initialize_control_unit();
+	sei();
 	while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();
 		else if(current_mode == AUTONOMOUS)
 			autonomous_drive();
+		_delay_ms(5);
 	}
 }
