@@ -37,7 +37,7 @@ void move_map_position_forward() {
 			--current_position.x;
 			break;
 	}
-	map[current_position.x][current_position.y] = 0; // Not unmapped value
+	map[current_position.x][current_position.y] = NOT_WALL;
 }
 
 /* Updated map with a detected wall to the left of Ronny */

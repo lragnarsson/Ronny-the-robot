@@ -11,6 +11,7 @@
 #define RIGHT 3
 #define ROUTE_END 10
 
+#define NOT_WALL 253
 #define UNMAPPED 254
 #define WALL 255
 #define START_POSITION_X 15

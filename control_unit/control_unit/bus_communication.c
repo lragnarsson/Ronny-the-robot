@@ -21,27 +21,27 @@ void init_bus_communication() {
 	last_manual_command = M_FORWARD;
 }
 
-void (uint8_t rear_left_h, uint8_t rear_left_l, uint8_t front_left_h, uint8_t front_left_l,
-uint8_t rear_right_h, uint8_t rear_right_l, uint8_t front_right_h, uint8_t front_right_l, front_h, front_l) {
+void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t front_left_h, uint8_t front_left_l,
+							uint8_t rear_right_h, uint8_t rear_right_l, uint8_t front_right_h, uint8_t front_right_l, uint8_t front_h, uint8_t front_l) {
 	uint16_t rear_left = rear_left_h;
-	rear_left << 8;
+	rear_left = rear_left << 8;
 	rear_left |= rear_left_l;
 	uint16_t front_left = front_left_h;
-	front_left << 8;
+	front_left = front_left << 8;
 	front_left |= front_left_l;
 	uint16_t rear_right = rear_right_h;
-	rear_right << 8;
+	rear_right = rear_right << 8;
 	rear_right |= rear_right_l;
 	uint16_t front_right = front_right_h;
-	front_right << 8;
+	front_right = front_right << 8;
 	front_right |= front_right_l;
 	uint16_t front = front_h;
-	front << 8;
+	front = front << 8;
 	front |= front_l;
 	
 	
 	
-	left_wall_distance = (front_left + rear_left;
+	left_wall_distance = front_left + rear_left;
 	right_wall_distance = front_right + rear_right;
 	current_distance_error = left_wall_distance - right_wall_distance;
 
@@ -102,11 +102,11 @@ void manual_drive_backward() {
 	distance_remaining = 40;
 }
 
-void handle_recieved_message() {
+void handle_received_message() {
 	cli();
 	switch(busbuffer[0]) {
 		case SENSOR_READINGS:
-			update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5]);
+			update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
 			break;
 		case MOVED_DISTANCE_AND_ANGLE:
 			update_distance_and_angle(busbuffer[1], busbuffer[2]);

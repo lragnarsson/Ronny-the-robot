@@ -33,7 +33,7 @@ void init_personality() {
 	}
 }
 
-void handle_recieved_message() {
+void handle_received_message() {
 	for(uint8_t j=0; busbuffer[j]!=0x00; j++) {
 		Send_to_PC(busbuffer[j]);
 	}
