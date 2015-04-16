@@ -37,9 +37,7 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	front_right |= front_right_l;
 	uint16_t front = front_h;
 	front = front << 8;
-	front |= front_l;
-	
-	
+	front |= front_l;	
 	
 	left_wall_distance = front_left + rear_left;
 	right_wall_distance = front_right + rear_right;

@@ -71,22 +71,22 @@ int main(void) {
 			//UART_get_buffer(data);
 			switch(buffer[0]) {
 				case 'q':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT, 1);
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT);
 					break;
 				case 'w':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD, 1);
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD);
 					break;
 				case 'e':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT, 1);
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT);
 					break;
 				case 'a':
-					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT, 1);
+					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT);
 					break;
 				case 's':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD, 1);
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD);
 					break;
 				case 'd':
-					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT, 1);
+					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT);
 					break;
 				default:
 					break;

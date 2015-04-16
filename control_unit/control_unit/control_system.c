@@ -32,12 +32,12 @@ ISR(TIMER1_COMPA_vect) {
 		++current_speed;
 	else if(desired_speed < current_speed)
 		--current_speed;
+	control_speed_max = 0.49 * current_speed;
 }
 
-/* Set desired_speed and update control_speed_max */
+/* Set desired_speed */
 void set_desired_speed(uint8_t speed) {
 	desired_speed = speed;
-	control_speed_max = 0.49 * speed;
 }
 
 /* Stop engines by settings PWM duty cycles to 0. Direction unaffected */

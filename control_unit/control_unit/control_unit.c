@@ -9,7 +9,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = MANUAL;
+	current_mode = TEST;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -327,14 +327,23 @@ void autonomous_drive() {
 		_delay_ms(25);
 }
 
+void test_mode()
+{
+	flood_fill_to_destination((coordinate){12, 16});
+	navigate();
+}
+
 int main(void) {
 	initialize_control_unit();
 	sei();
-	while (1) {
+	test_mode();
+	/*while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();
 		else if(current_mode == AUTONOMOUS)
 			autonomous_drive();
+		else if (current_mode == TEST)
+			test_mode();
 		_delay_ms(5);
-	}
+	}*/
 }

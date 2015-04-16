@@ -21,7 +21,7 @@ static const uint8_t TURN_SPEED = 100;
 
 typedef void (*state_function)();
 
-typedef enum { MANUAL, AUTONOMOUS } mode;
+typedef enum { MANUAL, AUTONOMOUS, TEST } mode;
 typedef enum { SEARCH, RETRIEVE, DELIVER, RETURN, IDLE } task;
 
 mode current_mode;
