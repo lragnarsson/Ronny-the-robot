@@ -16,15 +16,17 @@
 #define sensor_unit 0x14
 #define communication_unit 0x16
 
+/* Headers */
 #define ABSOLUTE_X_Y 0x30
 #define AUTONOMOUS_MODE 0x31
 #define MANUAL_MODE 0x32
 #define MAPPED_SQUARE 0x33 // 3 bytes
 #define MAPPED_WALL 0x34 // 3 bytes
 #define MAPPED_GOAL 0x35 // 3 bytes
-#define SENSOR_READINGS 0x40 // 6 bytes
+#define SENSOR_READINGS 0x40 // 11 bytes
 #define MOVED_DISTANCE_AND_ANGLE 0x41 // 3 bytes
 #define TAPE_FOUND 0x42
+#define TAPE_SENSOR_VALUE 0x70 // 2 bytes
 #define DRIVE_FORWARD 0xC1
 #define TURN_RIGHT 0xC2
 #define TURN_LEFT 0xC3
@@ -55,10 +57,10 @@ void i2c_clear_buffer(void);
 
 //Write to I2C
 uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length);
+uint8_t i2c_write_byte(uint8_t adress, uint8_t data);
 
-void handle_recieved_message();
+void handle_received_message();
 
-uint8_t i2c_write_byte(uint8_t adress, uint8_t data, uint8_t length);
 
 //Send by bus
 //uint8_t i2c_send(uint8_t adress, uint8_t data);
