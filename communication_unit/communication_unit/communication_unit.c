@@ -33,7 +33,7 @@ void init_personality() {
 	}
 }
 
-void handle_recieved_message() {
+void handle_received_message() {
 	for(uint8_t j=0; busbuffer[j]!=0x00; j++) {
 		Send_to_PC(busbuffer[j]);
 	}
@@ -42,99 +42,53 @@ void handle_recieved_message() {
 int main(void) {
 	Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
 	i2c_init(atmega18br, atmega18pc, communication_unit);
-	uint8_t busvar = 0x00;
-	uint8_t busdata[16];
-	uint8_t data[16];
 	//init_personality();
 	while(1) {
-		//_delay_ms(100);
-	
-		/*if(UART_not_empty()) {
-			UART_get_buffer(data);
-			switch(data[0] & 0x30) { //Check end destination
-				case 0x00: //To control_unit
-					i2c_write(control_unit, data, 1);
-					break;
-				case 0x10: // To sensor_unit
-					i2c_write(sensor_unit, data, 1);
-					break;
-				default: // Should not happen
-					break;
-			}
-			//UART_putstring(data);
-			//Send_to_PC('\n');
-				//i2c_write(sensor_unit, data,4);
-			//i2c_send(sensor_unit, 0x52);
-			UART_empty();
-		}*/
 		if(UART_not_empty()) {
-			//UART_get_buffer(data);
-			i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD, 1);
-			/*switch(buffer[0]) {
-				case :
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT, 1);
+			switch(buffer[0]) {
+				//Correct byte
+				case 0xc6:
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT);
 					break;
-				
 				case 0xc1:
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD, 1);
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD);
 					break;
-				case 'e':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT, 1);
+				case 0xc5:
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT);
 					break;
 				case 0xc3:
-					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT, 1);
+					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT);
 					break;
 				case 0xc4:
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD, 1);
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD);
 					break;
 				case 0xc2:
-					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT, 1);
+					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT);
+					break;
+				//Testing
+				case 'q':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT);
+					break;
+				case 'w':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD);
+					break;
+				case 'e':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT);
+					break;
+				case 'a':
+					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT);
+					break;
+				case 's':
+					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD);
+					break;
+				case 'd':
+					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT);
 					break;
 				default:
 					break;
-			}*/
+			}
 			UART_empty();
 		}
 	}
-		//UART_putstring(data);
-		//Send_to_PC('\n');
-		//i2c_write(sensor_unit, data,4);
-		//i2c_send(sensor_unit, 0x52);
-		
-	
-		//}
-		/*_delay_ms(1000);
-		uint8_t data[2] = {0xf6,0x51};
-		i2c_write(sensor_unit, data, 2);
-		//i2c_write(sensor_unit, 0x12);
-		//i2c_write(sensor_unit, 0xA4);
-		_delay_ms(1000);*/
-		
-		/*
-		busvar = i2c_get_buffer(busdata);
-		//_delay_ms(10);
-		if(!(busvar == 0x00)) {
-			cli();
-			_delay_ms(100); 
-			for(uint8_t i=0; i<=busvar; i++) {
-				unsigned char j = busdata[i];
-				Send_to_PC(j);
-				Send_to_PC('\n');
-			}
-			i2c_write(sensor_unit,busdata,9);
-			sei();
-		}
-		i2c_clear_buffer();
-		_delay_ms(100);
-		*/
-	//}
-
 	return 0;
 }
-	/*	if(buffer[0]=='a') {
-			for(uint8_t j=0; buffer[j]!=0x00; j++) {
-				Send_to_PC(buffer[j]);
-			}
-		}
-		UART_empty();
-		}*/

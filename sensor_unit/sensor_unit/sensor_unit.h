@@ -25,7 +25,7 @@
 #define TIMER1_MATCH_FREQUENCY_25HZ F_CPU / 25 / 64		// = 12500
 #define TIMER1_INTERRUPT_ENABLE (1<<OCIE1A)
 
-#define ADC_PRESCALE_128 (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0)
+#define ADC_PRESCALE_128 (1<<ADEN) | (1<<ADPS2) | (1<<ADPS1) | (1<<ADPS0)	// 20 MHz / 128 = 156.25 kHz
 
 #define INTERRUPT_INT0_INT1 (1<<INT1) | (1<<INT0)
 #define INTERRUPT_INT0_INT1_RISING_EDGE (1<<ISC01) | (1<<ISC00) | (1<<ISC11) | (1<<ISC10)
@@ -49,6 +49,9 @@
 #define IR_LONG_MAX 550
 #define IR_NUM_SAMPLES 8
 
+#define ENCODER_DISTANCE_SCALE 1
+#define ENCODER_ROTATION_SCALE 1
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -67,6 +70,9 @@ const uint16_t ir_long_lut[IR_LONG_MAX - IR_LONG_MIN + 1] PROGMEM = { 891, 884, 
 const uint16_t ir_long_lut_index_offset = IR_LONG_MIN;
 
 uint8_t calibrate_reflectance_sensor();
+void handle_recieved_message();
+void send_distance_readings();
+void send_odometry_readings();
 void init_ir();
 void init_reflectance();
 void init_wheel_encoder();

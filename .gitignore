@@ -1,6 +1,7 @@
 *
 !.gitignore
 !*/
+*Debug/
 !*.c
 !*.h
 !*.hpp

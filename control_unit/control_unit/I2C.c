@@ -86,7 +86,7 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 	return 0;
 }
 
-uint8_t i2c_write_byte(uint8_t adress, uint8_t data, uint8_t length) {
+uint8_t i2c_write_byte(uint8_t adress, uint8_t data) {
 	helpadress = adress | 0; //Write
 	startpointer = 0x00;
 	endpointer = 0x01;
@@ -165,7 +165,7 @@ ISR(TWI_vect) {
 			break;
 		case 0xA0: // A STOP condition or repeated START condition has been received while still addressed as Slave
 			TWCR = RESET; // Switched to the not addressed Slave mode, own SLA will be recognized
-			handle_recieved_message();
+			handle_received_message();
 			i2c_clear_buffer();
 			break;
 		// Misc. states

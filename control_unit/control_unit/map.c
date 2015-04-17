@@ -5,15 +5,51 @@
 #include <avr/io.h>
 #include "map.h"
 
+											// 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32
+extern uint8_t map[MAP_SIZE][MAP_SIZE] = { {254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 0
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 1
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 2
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 3
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 4
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 5
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 6
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 7
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 8
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 9
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 100, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 10
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 100, 254, 100, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 11
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 100, 100, 100, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 12
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 100, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 13
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 100, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 14
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 100, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 15
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 16
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 17
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 18
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 19
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 20
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 21
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 22
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 23
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 24
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 25
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 26
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 27
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 28
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 29
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 30
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 31
+											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254} }; // 32
+
 void init_map() {
+	/*
 	for (int i = 0; i < MAP_SIZE; ++i)
 		for(int j = 0; j < MAP_SIZE; ++j)
 			map[i][j] = UNMAPPED;
-			
-	position_x = START_POSITION_X;
-	position_y = START_POSITION_Y;
-	route_index = 0;
-	current_route[0] = 10;
+	*/ //While test map is used		
+	current_position = (coordinate) {START_POSITION_X, START_POSITION_Y};
+	current_direction = NORTH;
+	current_route[0] = NORTH;
+	current_route[1] = 10;
 }
 
 /* Sets the current direction (NORTH, EAST, SOUTH or WEST) */
@@ -25,35 +61,35 @@ void set_current_direction(direction dir) {
 void move_map_position_forward() {
 	switch(current_direction) {
 		case NORTH:
-			--position_y;
+			--current_position.x;
 			break;
 		case EAST:
-			++position_x;
+			++current_position.y;
 			break;
 		case SOUTH:
-			++position_y;
+			++current_position.x;
 			break;
 		case WEST:
-			--position_x;
+			--current_position.y;
 			break;
 	}
-	map[position_x][position_y] = 0; // Not unmapped value
+	map[current_position.x][current_position.y] = NOT_WALL;
 }
 
 /* Updated map with a detected wall to the left of Ronny */
 void set_wall_left() {
 	switch(current_direction) {
 		case NORTH:
-			map[position_x - 1][position_y] = WALL;
+			map[current_position.x][current_position.y - 1] = WALL;
 			break;
 		case EAST:
-			map[position_x][position_y - 1] = WALL;
+			map[current_position.x - 1][current_position.y] = WALL;
 			break;
 		case SOUTH:
-			map[position_x + 1][position_y] = WALL;
+			map[current_position.x][current_position.y + 1] = WALL;
 			break;
 		case WEST:
-			map[position_x][position_y + 1] = WALL;
+			map[current_position.x + 1][current_position.y] = WALL;
 			break;
 	}
 }
@@ -62,16 +98,16 @@ void set_wall_left() {
 void set_wall_right() {
 	switch(current_direction) {
 		case NORTH:
-			map[position_x + 1][position_y] = WALL;
+			map[current_position.x][current_position.y + 1] = WALL;
 			break;
 		case EAST:
-			map[position_x][position_y + 1] = WALL;
+			map[current_position.x + 1][current_position.y] = WALL;
 			break;
 		case SOUTH:
-			map[position_x - 1][position_y] = WALL;
+			map[current_position.x][current_position.y - 1] = WALL;
 			break;
 		case WEST:
-			map[position_x][position_y - 1] = WALL;
+			map[current_position.x - 1][current_position.y] = WALL;
 			break;
 	}
 }
@@ -80,22 +116,59 @@ void set_wall_right() {
 void set_wall_front() {
 	switch(current_direction) {
 		case NORTH:
-			map[position_x][position_y - 1] = WALL;
+			map[current_position.x - 1][current_position.y] = WALL;
 			break;
 		case EAST:
-			map[position_x + 1][position_y] = WALL;
+			map[current_position.x][current_position.y + 1] = WALL;
 			break;
 		case SOUTH:
-			map[position_x][position_y + 1] = WALL;
+			map[current_position.x + 1][current_position.y] = WALL;
 			break;
 		case WEST:
-			map[position_x - 1][position_y] = WALL;
+			map[current_position.x][current_position.y - 1] = WALL;
 			break;
+	}
+}
+
+uint8_t is_wall_left() {
+	switch(current_direction) {
+		case NORTH:
+			return (uint8_t)(map[current_position.x][current_position.y - 1] == WALL);
+			break;
+		case EAST:
+			return (uint8_t)(map[current_position.x - 1][current_position.y] == WALL);
+			break;
+		case SOUTH:
+			return (uint8_t)(map[current_position.x][current_position.y + 1] == WALL);
+			break;
+		case WEST:
+			return (uint8_t)(map[current_position.x + 1][current_position.y] == WALL);
+			break;
+		default:
+			return 0;
+	}
+}
+
+uint8_t is_wall_right() {
+	switch(current_direction) {
+		case NORTH:
+			return (uint8_t)(map[current_position.x][current_position.y + 1] == WALL);
+			break;
+		case EAST:
+			return (uint8_t)(map[current_position.x + 1][current_position.y] == WALL);
+			break;
+		case SOUTH:
+			return (uint8_t)(map[current_position.x][current_position.y - 1] == WALL);
+			break;
+		case WEST:
+			return (uint8_t)(map[current_position.x - 1][current_position.y] == WALL);
+			break;
+		default:
+			return 0;
 	}
 }
 
 /* Updated map with the detected goal */
 void set_goal_position() {
-	goal_position_x = position_x;
-	goal_position_y = position_y;
+	goal_position = current_position;
 }
