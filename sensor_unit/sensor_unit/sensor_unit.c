@@ -11,7 +11,7 @@
 int main(void)
 {
 	init_ir();
-	//init_reflectance();
+	init_reflectance();
 	init_wheel_encoder();
 	i2c_init(atmega20br, atmega20pc, sensor_unit);
 	
@@ -68,7 +68,7 @@ ISR(TIMER1_COMPA_vect, ISR_NOBLOCK)
 	if (++sample_index == IR_NUM_SAMPLES)
 		sample_index = 0;
 		
-	send_distance_readings();
+	//send_distance_readings();
 }
 
 // Wheel encoder counting routines
@@ -78,7 +78,7 @@ ISR(INT0_vect)
 	{
 		if (++encoder_left > 10)
 		{
-			send_odometry_readings();
+			//send_odometry_readings();
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -86,7 +86,7 @@ ISR(INT0_vect)
 	{
 		if (--encoder_left < -10)
 		{
-			send_odometry_readings();
+			//send_odometry_readings();
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -98,7 +98,7 @@ ISR(INT1_vect)
 	{
 		if (++encoder_right > 10)
 		{
-			send_odometry_readings();
+			//send_odometry_readings();
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -106,7 +106,7 @@ ISR(INT1_vect)
 	{
 		if (--encoder_right < -10)
 		{
-			send_odometry_readings();
+			//send_odometry_readings();
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -124,7 +124,7 @@ ISR(ANALOG_COMP_vect)
 	else 
 	{
 		tape_found = 1;
-		i2c_write_byte(general_call, TAPE_FOUND);
+		i2c_write_byte(communication_unit, TAPE_FOUND);
 		_delay_us(500);
 		ACSR |= (1<<ACI); // Avoid double interrupt, requires delay	
 	}

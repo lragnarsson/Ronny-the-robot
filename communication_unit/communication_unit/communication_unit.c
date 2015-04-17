@@ -34,9 +34,6 @@ void init_personality() {
 }
 
 void handle_received_message() {
-	for(uint8_t j=0; busbuffer[j]!=0x00; j++) {
-		Send_to_PC(busbuffer[j]);
-	}
 	switch(busbuffer[0]) {
 		case ABSOLUTE_X_Y:
 		case AUTONOMOUS_MODE:
@@ -70,6 +67,7 @@ int main(void) {
 	i2c_init(atmega18br, atmega18pc, communication_unit);
 	//init_personality();
 	while(1) {
+		_delay_ms(50);
 		if(UART_not_empty()) {
 			switch(buffer[0]) {
 				//Correct byte
