@@ -25,6 +25,7 @@ volatile uint8_t helpadress = communication_unit;
 volatile uint8_t helpdata[16];
 volatile uint8_t startpointer;
 volatile uint8_t endpointer;
+volatile uint8_t isSending;
 
 //TWCR BITS(TWxx):   INT EA STA STO WC EN Res IE
 #define SEND 0xc5 // 1   1  0   0   0  1  0   1
@@ -75,24 +76,34 @@ void i2c_stop(){
 //Write to I2C
 
 uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
-	helpadress = adress | 0; //Write
-	startpointer = 0x00;
-	endpointer = 0x00;
-	while(endpointer < length) {
-		helpdata[endpointer] = data[endpointer];
-		endpointer++;
+	if(!isSending) {
+		helpadress = adress | 0; //Write
+		startpointer = 0x00;
+		endpointer = 0x00;
+		while(endpointer < length) {
+			helpdata[endpointer] = data[endpointer];
+			endpointer++;
+		}
+		isSending = 0x01;
+		i2c_start();
+		return 1;
 	}
-	i2c_start();
-	return 0;
+	else
+		return 0;
 }
 
-uint8_t i2c_write_byte(uint8_t adress, uint8_t data, uint8_t length) {
-	helpadress = adress | 0; //Write
-	startpointer = 0x00;
-	endpointer = 0x01;
-	helpdata[0] = data;
-	i2c_start();
-	return 0;
+uint8_t i2c_write_byte(uint8_t adress, uint8_t data) {
+	if (!isSending) {
+		helpadress = adress | 0; //Write
+		startpointer = 0x00;
+		endpointer = 0x01;
+		helpdata[0] = data;
+		isSending = 0x01;
+		i2c_start();
+		return 1;
+	}
+	else
+		return 0;
 }
 
 ISR(TWI_vect) {
@@ -112,6 +123,7 @@ ISR(TWI_vect) {
 			}
 			else {
 				startpointer = 0x00;
+				isSending = 0x00;
 				TWCR = STOP;
 			}
 			//while (!(TWCR & (1<<TWINT)));
@@ -165,7 +177,7 @@ ISR(TWI_vect) {
 			break;
 		case 0xA0: // A STOP condition or repeated START condition has been received while still addressed as Slave
 			TWCR = RESET; // Switched to the not addressed Slave mode, own SLA will be recognized
-			handle_recieved_message();
+			handle_received_message();
 			i2c_clear_buffer();
 			break;
 		// Misc. states

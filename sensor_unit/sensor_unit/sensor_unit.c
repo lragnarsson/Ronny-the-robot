@@ -11,7 +11,7 @@
 int main(void)
 {
 	init_ir();
-	init_reflectance();
+	//init_reflectance();
 	init_wheel_encoder();
 	i2c_init(atmega20br, atmega20pc, sensor_unit);
 	
@@ -19,6 +19,9 @@ int main(void)
 	
     while(1)
     {
+		//uint8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, 0x42 };
+		//i2c_write(communication_unit, msg, sizeof(msg));
+		_delay_ms(100);
         //TODO:: Please write your application code
     }
 }
@@ -72,29 +75,41 @@ ISR(TIMER1_COMPA_vect, ISR_NOBLOCK)
 ISR(INT0_vect)
 {
 	if (PINB & (1<<ENC_L_B))
+	{
 		if (++encoder_left > 10)
 		{
 			send_odometry_readings();
+			encoder_left = encoder_right = 0;
 		}
+	}
 	else
+	{
 		if (--encoder_left < -10)
 		{
 			send_odometry_readings();
+			encoder_left = encoder_right = 0;
 		}
+	}
 }
 
 ISR(INT1_vect)
 {	
 	if (PINB & (1<<ENC_R_B))
+	{
 		if (++encoder_right > 10)
 		{
 			send_odometry_readings();
+			encoder_left = encoder_right = 0;
 		}
+	}
 	else
+	{
 		if (--encoder_right < -10)
 		{
 			send_odometry_readings();
+			encoder_left = encoder_right = 0;
 		}
+	}
 }
 
 // Reflectance sensor routine
@@ -199,18 +214,18 @@ void send_distance_readings()
 	}
 	
 	uint8_t msg[] = { SENSOR_READINGS,
-		(uint8_t)(distances[0]>>8),
-		(uint8_t) distances[0],
-		(uint8_t)(distances[1]>>8),
-		(uint8_t) distances[1],
-		(uint8_t)(distances[2]>>8),
-		(uint8_t) distances[2],
-		(uint8_t)(distances[3]>>8),
-		(uint8_t) distances[3],
-		(uint8_t)(distances[4]>>8),
-		(uint8_t) distances[4] };
+					(uint8_t)(distances[0]>>8),
+					(uint8_t) distances[0],
+					(uint8_t)(distances[1]>>8),
+					(uint8_t) distances[1],
+					(uint8_t)(distances[2]>>8),
+					(uint8_t) distances[2],
+					(uint8_t)(distances[3]>>8),
+					(uint8_t) distances[3],
+					(uint8_t)(distances[4]>>8),
+					(uint8_t) distances[4] };
 	
-	i2c_write(general_call, msg, sizeof(msg));
+	i2c_write(communication_unit, msg, sizeof(msg));
 }
 
 void send_odometry_readings()
@@ -220,5 +235,5 @@ void send_odometry_readings()
 	
 	uint8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
 	
-	i2c_write(general_call, msg, sizeof(msg));
+	i2c_write(communication_unit, msg, sizeof(msg));
 }

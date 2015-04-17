@@ -37,6 +37,32 @@ void handle_received_message() {
 	for(uint8_t j=0; busbuffer[j]!=0x00; j++) {
 		Send_to_PC(busbuffer[j]);
 	}
+	switch(busbuffer[0]) {
+		case ABSOLUTE_X_Y:
+		case AUTONOMOUS_MODE:
+		case MANUAL_MODE:
+		case TAPE_FOUND:
+			Send_to_PC(busbuffer[0]);
+			break;
+		case MAPPED_SQUARE:
+		case MAPPED_WALL:
+		case MAPPED_GOAL:
+		case MOVED_DISTANCE_AND_ANGLE:
+			for(uint8_t j=0; j<3; j++) {
+				Send_to_PC(busbuffer[j]);
+			}
+			break;
+		case SENSOR_READINGS:
+			for(uint8_t j=0; j<11; j++) {
+				Send_to_PC(busbuffer[j]);
+			}
+			break;
+		default:
+			Send_to_PC('F');
+			Send_to_PC('E');
+			Send_to_PC('L');
+			break;
+	}
 }
 
 int main(void) {
