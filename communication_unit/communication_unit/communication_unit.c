@@ -69,28 +69,30 @@ int main(void) {
 		}*/
 		if(UART_not_empty()) {
 			//UART_get_buffer(data);
-			switch(buffer[0]) {
-				case 'q':
+			i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD, 1);
+			/*switch(buffer[0]) {
+				case :
 					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT, 1);
 					break;
-				case 'w':
+				
+				case 0xc1:
 					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD, 1);
 					break;
 				case 'e':
 					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT, 1);
 					break;
-				case 'a':
+				case 0xc3:
 					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT, 1);
 					break;
-				case 's':
+				case 0xc4:
 					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD, 1);
 					break;
-				case 'd':
+				case 0xc2:
 					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT, 1);
 					break;
 				default:
 					break;
-			}
+			}*/
 			UART_empty();
 		}
 	}

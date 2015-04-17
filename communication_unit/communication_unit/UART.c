@@ -15,12 +15,13 @@ volatile uint8_t StrRxFlag=0;
 ISR(USART0_RX_vect)
 {
 	buffer[i]=UDR0;
-	if(buffer[i++]=='\r')
+	StrRxFlag = 1;
+	/*if(buffer[i++]=='\r')
 	{
 		StrRxFlag=1;
 		buffer[i-1]=0x00;
 		i=0;
-	}
+	}*/
 }
 
 void UART_Flush() {

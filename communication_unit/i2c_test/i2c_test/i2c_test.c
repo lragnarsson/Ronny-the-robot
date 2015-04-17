@@ -13,7 +13,7 @@
 #include "I2C.h"
 
 void handle_recieved_message() {
-	i2c_write(communication_unit, 0x66,1);
+	i2c_write(0x18, 0x66,1);
 }
 
 
@@ -25,7 +25,7 @@ int main(void)
 	DDRB = 0x01; //PB0 output
 	PORTB = (0<<PB0);
 	sei();
-	i2c_init(atmega18br, atmega18pc, control_unit); // Test module
+	i2c_init(atmega18br, atmega18pc, 0x18); // Test module
 	while(1)
     {
 		//_delay_ms(10);
