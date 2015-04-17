@@ -8,7 +8,6 @@
 
 #include "map.h"
 
-void swap_wavefronts(coordinate** wavefront1, coordinate** wavefront2);
 void reset_flood_fill_values();
 void calculate_route(coordinate destination);
 void flood_fill_to_destination(coordinate destination);

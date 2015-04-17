@@ -9,7 +9,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = TEST;
+	current_mode = MANUAL;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -29,7 +29,7 @@ void step_forward() {
 	set_desired_speed(state_speed);
 	while (distance_remaining != 0) {
 		set_same_engine_speed();
-		--distance_remaining;
+		//--distance_remaining;
 		if(current_task==SEARCH && square_distance_remaining == 0)
 			return; // In the middle of a crossroad section during search
 		if (corner_detected_left() || corner_detected_right())
@@ -45,7 +45,7 @@ void drive_forward() {
 	set_desired_speed(state_speed);
 	while (distance_remaining != 0) {
 		set_controlled_engine_speed();
-		--distance_remaining; // Should be controlled by wheel encoders
+		//--distance_remaining; // Should be controlled by wheel encoders
 		if (corner_detected_left() || corner_detected_right())
 			step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
 		_delay_ms(5);
@@ -61,7 +61,7 @@ void rotate_left_90() {
 	while(angle_remaining != 0) {
 		set_same_engine_speed();
 		_delay_ms(3);
-		--angle_remaining; // simulering
+		//--angle_remaining; // simulering
 	}
 	--current_direction;
 	current_direction &= 3;
@@ -76,7 +76,7 @@ void rotate_right_90() {
 	while(angle_remaining != 0) {
 		set_same_engine_speed();
 		_delay_ms(3);
-		--angle_remaining; // simulering
+		//--angle_remaining; // simulering
 	}
 	++current_direction;
 	current_direction &= 3;
@@ -91,7 +91,7 @@ void rotate_180() {
 	while(angle_remaining != 0) {
 		set_same_engine_speed();
 		_delay_ms(5);
-		--angle_remaining; // simulering
+		//--angle_remaining; // simulering
 	}
 	current_direction += 2;
 	current_direction &= 3;
@@ -189,7 +189,7 @@ state_function navigate() {
 		distance_remaining = 0;
 		/* Calculate straight line distance remaining in current direction */
 		do {
-			distance_remaining += 100;
+			distance_remaining += 400;
 			++route_index;
 		} while (next_direction == current_route[route_index]);
 		/* Decide what turn to make based on current direction and next direction in route */
@@ -248,8 +248,8 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_same_engine_speed();
-					--distance_remaining; //simulation
-					_delay_ms(10);
+					//--distance_remaining; //simulation
+					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -259,8 +259,8 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_same_engine_speed();
-					--distance_remaining;
-					_delay_ms(10);
+					//--distance_remaining;
+					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -270,8 +270,8 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(angle_remaining != 0) {
 					set_same_engine_speed();
-					--angle_remaining;
-					_delay_ms(10);
+					//--angle_remaining;
+					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -281,8 +281,8 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(angle_remaining != 0) {
 					set_same_engine_speed();
-					--angle_remaining;
-					_delay_ms(10);
+					//--angle_remaining;
+					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -292,8 +292,8 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_manual_forward_left_engine_speed();
-					--distance_remaining;
-					_delay_ms(10);
+					//--distance_remaining;
+					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -303,8 +303,8 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_manual_forward_right_engine_speed();
-					--distance_remaining;
-					_delay_ms(10);
+					//--distance_remaining;
+					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -329,15 +329,17 @@ void autonomous_drive() {
 
 void test_mode()
 {
-	flood_fill_to_destination((coordinate){12, 16});
+	flood_fill_to_destination((coordinate){12, 15});
 	navigate();
 }
 
 int main(void) {
 	initialize_control_unit();
 	sei();
-	test_mode();
-	/*while (1) {
+
+	//test_mode();
+	//navigate();
+	while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();
 		else if(current_mode == AUTONOMOUS)
@@ -345,5 +347,5 @@ int main(void) {
 		else if (current_mode == TEST)
 			test_mode();
 		_delay_ms(5);
-	}*/
+	}
 }

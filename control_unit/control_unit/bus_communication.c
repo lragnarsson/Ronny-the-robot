@@ -50,7 +50,7 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	current_angle_error = current_angle_left + current_angle_right;
 }
 
-void update_distance_and_angle(uint8_t distance, uint8_t angle) {
+void update_distance_and_angle(int8_t distance, int8_t angle) {
 	if(distance_remaining > distance)
 		distance_remaining -= distance;
 	else
@@ -72,39 +72,39 @@ void tape_found() {
 
 void manual_drive_forward() {
 	last_manual_command = M_FORWARD;
-	distance_remaining = 40;
+	distance_remaining = 100;
 }
 
 void manual_turn_right() {
 	last_manual_command = M_RIGHT;
-	angle_remaining = 40;
+	angle_remaining = 20;
 }
 
 void manual_turn_left() {
 	last_manual_command = M_LEFT;
-	angle_remaining = 40;
+	angle_remaining = 20;
 }
 
 void manual_drive_forward_right() {
 	last_manual_command = M_FORWARD_RIGHT;
-	distance_remaining = 40;
+	distance_remaining = 100;
 }
 
 void manual_drive_forward_left() {
 	last_manual_command = M_FORWARD_LEFT;
-	distance_remaining = 40;
+	distance_remaining = 100;
 }
 
 void manual_drive_backward() {
 	last_manual_command = M_BACKWARD;
-	distance_remaining = 40;
+	distance_remaining = 100;
 }
 
 void handle_received_message() {
 	cli();
 	switch(busbuffer[0]) {
 		case SENSOR_READINGS:
-			update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
+			//update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
 			break;
 		case MOVED_DISTANCE_AND_ANGLE:
 			update_distance_and_angle(busbuffer[1], busbuffer[2]);

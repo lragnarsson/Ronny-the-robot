@@ -41,7 +41,7 @@ void init_bus_communication();
 void handle_received_message();
 void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t front_left_h, uint8_t front_left_l,
 							uint8_t rear_right_h, uint8_t rear_right_l, uint8_t front_right_h, uint8_t front_right_l, uint8_t front_h, uint8_t front_l);
-void update_distance_and_angle(uint8_t distance, uint8_t angle);
+void update_distance_and_angle(int8_t distance, int8_t angle);
 void tape_found();
 void manual_drive_forward();
 void manual_turn_right();

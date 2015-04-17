@@ -71,8 +71,8 @@ const uint16_t ir_long_lut_index_offset = IR_LONG_MIN;
 
 uint8_t calibrate_reflectance_sensor();
 void handle_recieved_message();
-void send_distance_readings();
-void send_odometry_readings();
+uint8_t send_distance_readings();
+uint8_t send_odometry_readings();
 void init_ir();
 void init_reflectance();
 void init_wheel_encoder();
