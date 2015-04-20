@@ -7,14 +7,17 @@
 #ifndef I2C_H_
 #define I2C_H_
 
+// Set SCL speed around 100kHz
 #define atmega20br 25 // scl freq 92593Hz
 #define atmega18br 91 // scl freq 93091Hz
 #define atmega20pc 1 // prescaler atmega 20kHz clock
 #define atmega18pc 0 // prescaler atmega 18.432kHz clock
-#define general_call 0x00
-#define control_unit 0x12
-#define sensor_unit 0x14
-#define communication_unit 0x16
+
+
+#define GENERAL_CALL 0x00
+#define CONTROL_UNIT 0x12
+#define SENSOR_UNIT 0x14
+#define COMMUNICATION_UNIT 0x16
 
 /* Headers */
 #define ABSOLUTE_X_Y 0x30
@@ -33,6 +36,8 @@
 #define DRIVE_BACKWARD 0xC4
 #define DRIVE_FORWARD_RIGHT 0xC5
 #define DRIVE_FORWARD_LEFT 0xC6
+#define P_PARAMETER 0xC7 // 2 bytes
+#define D_PARAMETER 0xC8 // 2 bytes
 #define CALIBRATE_TAPE_SENSOR 0xD0
 
 

@@ -5,29 +5,18 @@
  *  Author: Filip
  */ 
 
-#define atmega20br 25 // scl freq 92593Hz
-#define atmega18br 91 // scl freq 93091Hz
-#define atmega20pc 1 // prescaler atmega 20kHz clock
-#define atmega18pc 0 // prescaler atmega 18.432kHz clock
-#define general_call 0x00
-#define control_unit 0x12
-#define sensor_unit 0x14
-#define communication_unit 0x16
-#include <avr/io.h> 
+#include <avr/io.h>
 #include <avr/interrupt.h>
 #include "I2C.h"
 #include <string.h>
-/*volatile uint8_t busbuffer[16];
-volatile uint8_t receiverstart = 0x00;
-volatile uint8_t receiverstop = 0x00;*/
-volatile uint8_t helpadress = communication_unit;
-//volatile uint8_t helpdata = 0x12;
+
+volatile uint8_t helpadress;
 volatile uint8_t helpdata[16];
 volatile uint8_t startpointer;
 volatile uint8_t endpointer;
 volatile uint8_t isSending;
 
-//TWCR BITS(TWxx):   INT EA STA STO WC EN Res IE
+//TWCR definitions
 #define SEND 0xc5 // 1   1  0   0   0  1  0   1
 #define STOP 0xd5 // 1   1  0   1   0  1  0   1
 #define START 0xe5// 1   1  1   0   0  1  0   1
@@ -36,11 +25,9 @@ volatile uint8_t isSending;
 #define RESET 0xc5// 1   1  0   0   0  1  0   1
 
 //Init
-void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t adress)
-{
+void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t adress) {
 	receiverstart = 0x00;
 	receiverstop = 0x00;
-	//SCL 
 	cli();
 	TWBR = bitrate;
 	TWSR |= prescaler;
@@ -69,12 +56,11 @@ void i2c_start() {
 }
 
 //STOP condition
-void i2c_stop(){
+void i2c_stop() {
 	TWCR = STOP;
 }
 
 //Write to I2C
-
 uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 	if(!isSending) {
 		helpadress = adress | 0; //Write
@@ -92,6 +78,7 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 		return 0;
 }
 
+// Write one byte to I2C
 uint8_t i2c_write_byte(uint8_t adress, uint8_t data) {
 	if (!isSending) {
 		helpadress = adress | 0; //Write
@@ -162,13 +149,8 @@ ISR(TWI_vect) {
 			break;
 		case 0x80: // Previously addressed with own SLA+W, data has been received, ACK has been returned
 		case 0x90: // Previously addressed with general call, data has been received, ACK has been returned
-			//if(receiverstart < sizeof(busbuffer)) {
-				busbuffer[receiverstop++] = TWDR;
-				TWCR = ACK; //Send ack
-			/*}
-			else {
-				TWCR = NACK; //Full buffer, send nack
-			}*/
+			busbuffer[receiverstop++] = TWDR;
+			TWCR = ACK; //Send ack
 			break;
 		case 0x88: // Previously addressed with own SLA+W, data has been received, NOT ACK has been returned
 		case 0x98: // Previously addressed with general call, data has been received, NOT ACK has been returned

@@ -64,49 +64,43 @@ void handle_received_message() {
 
 int main(void) {
 	Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
-	i2c_init(atmega18br, atmega18pc, communication_unit);
+	i2c_init(atmega18br, atmega18pc, COMMUNICATION_UNIT);
 	//init_personality();
 	while(1) {
 		_delay_ms(50);
 		if(UART_not_empty()) {
 			switch(buffer[0]) {
 				//Correct byte
-				case 0xc6:
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT);
-					break;
-				case 0xc1:
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD);
-					break;
-				case 0xc5:
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT);
-					break;
-				case 0xc3:
-					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT);
-					break;
-				case 0xc4:
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD);
-					break;
-				case 0xc2:
-					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT);
-					break;
-				//Testing
+				case DRIVE_FORWARD_LEFT:
 				case 'q':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_LEFT);
+					i2c_write_byte(CONTROL_UNIT, (uint8_t)DRIVE_FORWARD_LEFT);
 					break;
+				case DRIVE_FORWARD:
 				case 'w':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD);
+					i2c_write_byte(CONTROL_UNIT, (uint8_t)DRIVE_FORWARD);
 					break;
+				case DRIVE_FORWARD_RIGHT:
 				case 'e':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_FORWARD_RIGHT);
+					i2c_write_byte(CONTROL_UNIT, (uint8_t)DRIVE_FORWARD_RIGHT);
 					break;
+				case TURN_LEFT:
 				case 'a':
-					i2c_write_byte(control_unit, (uint8_t)TURN_LEFT);
+					i2c_write_byte(CONTROL_UNIT, (uint8_t)TURN_LEFT);
 					break;
+				case DRIVE_BACKWARD:
 				case 's':
-					i2c_write_byte(control_unit, (uint8_t)DRIVE_BACKWARD);
+					i2c_write_byte(CONTROL_UNIT, (uint8_t)DRIVE_BACKWARD);
 					break;
+				case TURN_RIGHT:
 				case 'd':
-					i2c_write_byte(control_unit, (uint8_t)TURN_RIGHT);
+					i2c_write_byte(CONTROL_UNIT, (uint8_t)TURN_RIGHT);
+					break;
+				case CALIBRATE_TAPE_SENSOR:
+					i2c_write_byte(SENSOR_UNIT, (uint8_t)CALIBRATE_TAPE_SENSOR);
+					break;
+				case P_PARAMETER:
+				case D_PARAMETER:
+					i2c_write(CONTROL_UNIT, buffer, 2);
 					break;
 				default:
 					break;
