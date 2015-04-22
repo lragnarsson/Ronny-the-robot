@@ -3,6 +3,7 @@
 !*/
 *Debug/
 !*.c
+!*.cpp
 !*.h
 !*.hpp
 !*.md
@@ -10,4 +11,9 @@
 !*.xlsx
 !*.atsln
 !*.cproj
+!*.sdf
+!*.sln
+!*.resx
+!*.vcxproj
+!*.filters
 !makefile
