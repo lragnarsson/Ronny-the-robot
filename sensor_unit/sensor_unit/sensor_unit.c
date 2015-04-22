@@ -13,7 +13,7 @@ int main(void)
 	init_ir();
 	init_reflectance();
 	init_wheel_encoder();
-	i2c_init(atmega20br, atmega20pc, sensor_unit);
+	i2c_init(atmega20br, atmega20pc, SENSOR_UNIT);
 	
 	sei();
 	
@@ -134,7 +134,7 @@ ISR(ANALOG_COMP_vect)
 	{
 		tape_found = 1;
 
-		i2c_write_byte(communication_unit, TAPE_FOUND);
+		i2c_write_byte(COMMUNICATION_UNIT, TAPE_FOUND);
 
 		_delay_us(500);
 		ACSR |= (1<<ACI); // Avoid double interrupt, requires delay	
@@ -205,7 +205,7 @@ void handle_received_message()
 		{
 			uint8_t val = calibrate_reflectance_sensor();
 			uint8_t msg[] = {TAPE_SENSOR_VALUE, val};
-			i2c_write(communication_unit, msg, sizeof(msg));
+			i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
 			break;
 		}
 	}
@@ -236,8 +236,8 @@ uint8_t send_distance_readings()
 		(uint8_t)(distances[4]>>8),
 		(uint8_t) distances[4] };
 	
-	return i2c_write(general_call, msg, sizeof(msg));
-
+	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
+}
 
 uint8_t send_odometry_readings()
 {
@@ -246,4 +246,5 @@ uint8_t send_odometry_readings()
 	
 	int8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
 	
-	return i2c_write(general_call, msg, sizeof(msg));
+	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
+}

@@ -9,7 +9,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = MANUAL;
+	current_mode = TEST;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -329,23 +329,36 @@ void autonomous_drive() {
 
 void test_mode()
 {
-	flood_fill_to_destination((coordinate){12, 15});
-	navigate();
+	//flood_fill_to_destination((coordinate){12, 15});
+	//navigate();
+	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
+	set_desired_speed(state_speed);
+	while (distance_remaining != 0) {
+		set_controlled_engine_speed();
+		//--distance_remaining; // Should be controlled by wheel encoders
+		/*if (corner_detected_left() || corner_detected_right())
+		step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
+		_delay_ms(5);*/
+	}
+	stop_engines();
 }
 
 int main(void) {
 	initialize_control_unit();
 	sei();
-
-	//test_mode();
-	//navigate();
+	
+	_delay_ms(2000);
+	distance_remaining = 500; //TEST
+	
 	while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();
 		else if(current_mode == AUTONOMOUS)
 			autonomous_drive();
 		else if (current_mode == TEST)
+		{
 			test_mode();
+		}
 		_delay_ms(5);
 	}
 }

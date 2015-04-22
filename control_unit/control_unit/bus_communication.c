@@ -5,7 +5,7 @@
 #include "bus_communication.h"
 
 void init_bus_communication() {
-	i2c_init(atmega20br, atmega20pc, control_unit);
+	i2c_init(atmega20br, atmega20pc, CONTROL_UNIT);
 	current_angle_error = 0;
 	current_angle_left = 0;
 	current_angle_right = 0;
