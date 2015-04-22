@@ -13,16 +13,23 @@ volatile uint8_t current_speed = 0;
 uint8_t control_speed = 0;
 uint8_t control_speed_max = 0;
 
+
 /* Initialize hardware ports */
 void init_control_system() {
-	TCCR0A = (0<<WGM01)|(1<<WGM00)|(1<<COM0A1)|(0<<COM0A0)|(1<<COM0B1)|(0<<COM0B0); // PWM for left and right engine
-	TCCR0B = (0<<WGM02)|(1<<CS02)|(0<<CS01)|(0<<CS00); // PWM for left and right engine
-	DDRB = (1<<DDB0)|(1<<DDB1)|(1<<DDB3)|(1<<DDB4);	// Left and right engine speed and direction as output
-	DDRD = 0<<DDD1; // Input, reset button
+	TCCR0A = TIMER0_CLEAR_ON_MATCH_H; // PWM for left and right engine
+	TCCR0B = TIMER0_CLEAR_ON_MATCH_L; // PWM for left and right engine
+	DDRB = ENGINE_OUTPUT; // Left and right engine speed and direction as output
+	
 	TCCR1A = TIMER1_CLEAR_ON_MATCH_L;
 	TCCR1B = TIMER1_CLEAR_ON_MATCH_H | TIMER1_PRESCALE_64;
 	TIMSK1 = TIMER1_INTERRUPT_ENABLE;
 	OCR1A = TIMER1_MATCH_FREQUENCY_100HZ;
+	
+	TCCR2A = TIMER2_CLEAR_ON_MATCH_H;
+	TCCR2B = TIMER2_CLEAR_ON_MATCH_L;
+
+	DDRD = (0<<DDD0) | (1<<DDD7); // Button input and claw output
+	//CLAW_POSITION = CLAW_CLOSED;
 	sei();
 }
 
@@ -32,7 +39,7 @@ ISR(TIMER1_COMPA_vect) {
 		++current_speed;
 	else if(desired_speed < current_speed)
 		--current_speed;
-	control_speed_max = 0.49 * current_speed;
+	control_speed_max = 0.4 * current_speed;
 }
 
 /* Set desired_speed */
@@ -96,4 +103,12 @@ uint8_t corner_detected_left() {
 
 uint8_t corner_detected_right() {
 	return (uint8_t)(get_angle_change_right() > ANGLE_CHANGE_THRESHOLD);	
+}
+
+void open_claw() {
+	CLAW_POSITION = CLAW_OPEN;
+}
+
+void close_claw() {
+	CLAW_POSITION = CLAW_CLOSED;
 }

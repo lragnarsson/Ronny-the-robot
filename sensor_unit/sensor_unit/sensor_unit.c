@@ -21,7 +21,7 @@ int main(void)
     {
 		//uint8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, 0x42 };
 		//i2c_write(communication_unit, msg, sizeof(msg));
-		_delay_ms(100);
+		//_delay_ms(100);
         //TODO:: Please write your application code
     }
 }
@@ -76,7 +76,7 @@ ISR(INT0_vect)
 {
 	if (PINB & (1<<ENC_L_B))
 	{
-		if (++encoder_left > 10)
+		if (--encoder_left < -10)
 		{
 
 			send_odometry_readings();
@@ -86,7 +86,7 @@ ISR(INT0_vect)
 	}
 	else
 	{
-		if (--encoder_left < -10)
+		if (++encoder_left > 10)
 		{
 			send_odometry_readings();
 
@@ -112,7 +112,6 @@ ISR(INT1_vect)
 	{
 		if (--encoder_right < -10)
 		{
-
 
 			send_odometry_readings();
 

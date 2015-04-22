@@ -3,6 +3,7 @@
  *
  */ 
 #include "bus_communication.h"
+#include <stdlib.h>
 
 void init_bus_communication() {
 	i2c_init(atmega20br, atmega20pc, CONTROL_UNIT);
@@ -39,8 +40,8 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	front = front << 8;
 	front |= front_l;	
 	
-	left_wall_distance = front_left + rear_left;
-	right_wall_distance = front_right + rear_right;
+	left_wall_distance = front_left;// + rear_left;
+	right_wall_distance = front_right;// + rear_right;
 	current_distance_error = left_wall_distance - right_wall_distance;
 
 	last_tick_angle_left = current_angle_left;
@@ -51,23 +52,51 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 }
 
 void update_distance_and_angle(int8_t distance, int8_t angle) {
-	if(distance_remaining > distance)
-		distance_remaining -= distance;
-	else
-		distance_remaining = 0;
-	if(square_distance_remaining > distance)
-		square_distance_remaining -= distance;
-	else
-		square_distance_remaining = 0;	
-	if(angle_remaining > angle)
-		angle_remaining -= angle;
-	else
-		angle_remaining = 0;
+	if(distance_remaining > 0)
+	{
+		if(distance_remaining > distance)
+			distance_remaining -= distance;
+		else
+			distance_remaining = 0;
+	} else if(distance_remaining < 0)
+	{
+		if(distance_remaining < distance)
+			distance_remaining -= distance;
+		else
+			distance_remaining = 0;
+	}
+
+	if(square_distance_remaining > 0)
+	{
+		if(square_distance_remaining > distance)
+			square_distance_remaining -= distance;
+		else
+			square_distance_remaining = 0;
+	} else if(square_distance_remaining < 0)
+	{
+		if(square_distance_remaining < distance)
+			square_distance_remaining -= distance;
+		else
+			square_distance_remaining = 0;
+	}
+
+	if(angle_remaining > 0)
+	{
+		if(angle_remaining > angle)
+			angle_remaining -= angle;
+		else
+			angle_remaining = 0;
+	} else if (angle_remaining < 0)
+	{
+		if(angle_remaining < angle)
+			angle_remaining -= angle;
+		else
+			angle_remaining = 0;
+	}
 }
 
 void tape_found() {
-	goal_found = 1;
-	//TODO
+	tape_square = 1;
 }
 
 void manual_drive_forward() {
@@ -77,7 +106,7 @@ void manual_drive_forward() {
 
 void manual_turn_right() {
 	last_manual_command = M_RIGHT;
-	angle_remaining = 20;
+	angle_remaining = -20;
 }
 
 void manual_turn_left() {
@@ -97,7 +126,7 @@ void manual_drive_forward_left() {
 
 void manual_drive_backward() {
 	last_manual_command = M_BACKWARD;
-	distance_remaining = 100;
+	distance_remaining = -100;
 }
 
 void handle_received_message() {
@@ -107,7 +136,7 @@ void handle_received_message() {
 			update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
 			break;
 		case MOVED_DISTANCE_AND_ANGLE:
-			//update_distance_and_angle(busbuffer[1], busbuffer[2]);
+			update_distance_and_angle(busbuffer[1], busbuffer[2]);
 			break;
 		case TAPE_FOUND:
 			tape_found();

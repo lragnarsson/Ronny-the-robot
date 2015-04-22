@@ -4,6 +4,7 @@
 
 #include <avr/io.h>
 #include "map.h"
+#include "bus_communication.h"
 
 											// 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32
 extern uint8_t map[MAP_SIZE][MAP_SIZE] = { {254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 0
@@ -48,10 +49,7 @@ void init_map() {
 	*/ //While test map is used		
 	current_position = (coordinate) {START_POSITION_X, START_POSITION_Y};
 	current_direction = NORTH;
-	current_route[0] = NORTH;
-	current_route[1] = NORTH;
-	current_route[2] = NORTH;
-	current_route[3] = 10;
+	current_route[0] = 10;
 }
 
 /* Sets the current direction (NORTH, EAST, SOUTH or WEST) */
@@ -75,6 +73,12 @@ void move_map_position_forward() {
 			--current_position.y;
 			break;
 	}
+	if (!goal_found && tape_square) // If goal has not yet been found and a tape was detected while entering current square
+	{
+		goal_position = current_position;
+		goal_found = 1;
+	}
+	tape_square = 0;
 	map[current_position.x][current_position.y] = NOT_WALL;
 }
 

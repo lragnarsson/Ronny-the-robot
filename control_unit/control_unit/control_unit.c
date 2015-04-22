@@ -9,7 +9,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = TEST;
+	current_mode = MANUAL;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -29,11 +29,10 @@ void step_forward() {
 	set_desired_speed(state_speed);
 	while (distance_remaining != 0) {
 		set_same_engine_speed();
-		//--distance_remaining;
 		if(current_task==SEARCH && square_distance_remaining == 0)
 			return; // In the middle of a crossroad section during search
-		if (corner_detected_left() || corner_detected_right())
-			return; // Reentered the corridor
+		//if (corner_detected_left() || corner_detected_right())
+		//	return; // Reentered the corridor
 		_delay_ms(5);
 	}
 	stop_engines();
@@ -45,7 +44,7 @@ void drive_forward() {
 	set_desired_speed(state_speed);
 	while (distance_remaining != 0) {
 		set_controlled_engine_speed();
-		--distance_remaining; // Should be controlled by wheel encoders
+		//set_same_engine_speed(); // no control!!!!
 		//if (corner_detected_left() || corner_detected_right())
 		//	step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
 		_delay_ms(5);
@@ -60,8 +59,6 @@ void rotate_left_90() {
 	set_desired_speed(TURN_SPEED);
 	while(angle_remaining != 0) {
 		set_same_engine_speed();
-		_delay_ms(3);
-		//--angle_remaining; // simulering
 	}
 	--current_direction;
 	current_direction &= 3;
@@ -70,13 +67,11 @@ void rotate_left_90() {
 
 /* Rotate 90 degrees to the right based on wheel encoder feedback */
 void rotate_right_90() {
-	angle_remaining = 90;
+	angle_remaining = -90;
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
 	set_desired_speed(TURN_SPEED);
 	while(angle_remaining != 0) {
 		set_same_engine_speed();
-		_delay_ms(3);
-		//--angle_remaining; // simulering
 	}
 	++current_direction;
 	current_direction &= 3;
@@ -90,8 +85,6 @@ void rotate_180() {
 	set_desired_speed(TURN_SPEED);
 	while(angle_remaining != 0) {
 		set_same_engine_speed();
-		_delay_ms(5);
-		//--angle_remaining; // simulering
 	}
 	current_direction += 2;
 	current_direction &= 3;
@@ -165,12 +158,14 @@ void retrieve_state() {
 
 /* Ronny is back at the start to pick up the package (in a shady way) */
 void grab_package_state() {
+	close_claw();
 	current_task = DELIVER;
 	state_speed = SUPER_SPEED;
 }
 
 /* Drops the package and positions Ronny to avoid running it over later */
 void drop_package_state() {
+	open_claw();
 	current_task = RETURN;
 	state_speed = SUPER_SPEED;
 }
@@ -183,7 +178,7 @@ void end_state() {
 /* Follows the current path until the end and then selects state transition */
 state_function navigate() {
 	uint8_t route_index = 0;
-	direction next_direction = current_route[route_index];
+  	direction next_direction = current_route[route_index];
 	/* Follow current path */
 	while(next_direction != ROUTE_END) {
 		distance_remaining = 0;
@@ -248,8 +243,6 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_same_engine_speed();
-					//--distance_remaining; //simulation
-					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -259,8 +252,6 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_same_engine_speed();
-					//--distance_remaining;
-					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -270,8 +261,6 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(angle_remaining != 0) {
 					set_same_engine_speed();
-					//--angle_remaining;
-					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -281,8 +270,6 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(angle_remaining != 0) {
 					set_same_engine_speed();
-					//--angle_remaining;
-					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -292,8 +279,6 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_manual_forward_left_engine_speed();
-					//--distance_remaining;
-					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -303,8 +288,6 @@ void manual_drive() {
 				set_desired_speed(state_speed);
 				while(distance_remaining != 0) {
 					set_manual_forward_right_engine_speed();
-					//--distance_remaining;
-					//_delay_ms(10);
 				}
 				last_manual_command = DO_NOTHING;
 				break;
@@ -327,37 +310,29 @@ void autonomous_drive() {
 		_delay_ms(25);
 }
 
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
 void test_mode()
 {
-	coordinate current_wavefront[4] = {(coordinate){1,1},(coordinate){2,2},(coordinate){3,3},(coordinate){4,4}};
-	coordinate new_wavefront[4] = {(coordinate){5,5},(coordinate){6,6},(coordinate){7,7},(coordinate){8,8}};
-	swap_wavefronts(&current_wavefront, &new_wavefront);
-	
-	//flood_fill_to_destination((coordinate){12, 15});
+	//drive_forward();
+	//open_claw();
+	_delay_ms(2000);
+	//close_claw();
+	//flood_fill_to_destination((coordinate){10, 17});
 	//navigate();
+	distance_remaining = 5000;
+	drive_forward();
 }
-#pragma GCC pop_options
+
 int main(void) {
 	initialize_control_unit();
 	sei();
-	
-	_delay_ms(2000);
-	distance_remaining = 500; //TEST
-	
+
 	while (1) {
-	test_mode();
-	//navigate();
-	/*while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();
 		else if(current_mode == AUTONOMOUS)
 			autonomous_drive();
 		else if (current_mode == TEST)
-		{
 			test_mode();
-		}
-		_delay_ms(5);
-	}*/
+		_delay_ms(1);
+	}
 }

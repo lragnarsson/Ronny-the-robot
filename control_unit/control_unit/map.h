@@ -25,6 +25,7 @@ typedef struct {
 uint8_t map[MAP_SIZE][MAP_SIZE];
 coordinate current_position;
 coordinate goal_position;
+uint8_t goal_found;
 
 direction current_direction;
 direction current_route[64];
