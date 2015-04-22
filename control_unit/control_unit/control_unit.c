@@ -45,9 +45,9 @@ void drive_forward() {
 	set_desired_speed(state_speed);
 	while (distance_remaining != 0) {
 		set_controlled_engine_speed();
-		//--distance_remaining; // Should be controlled by wheel encoders
-		if (corner_detected_left() || corner_detected_right())
-			step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
+		--distance_remaining; // Should be controlled by wheel encoders
+		//if (corner_detected_left() || corner_detected_right())
+		//	step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
 		_delay_ms(5);
 	}
 	stop_engines();
@@ -327,22 +327,18 @@ void autonomous_drive() {
 		_delay_ms(25);
 }
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 void test_mode()
 {
+	coordinate current_wavefront[4] = {(coordinate){1,1},(coordinate){2,2},(coordinate){3,3},(coordinate){4,4}};
+	coordinate new_wavefront[4] = {(coordinate){5,5},(coordinate){6,6},(coordinate){7,7},(coordinate){8,8}};
+	swap_wavefronts(&current_wavefront, &new_wavefront);
+	
 	//flood_fill_to_destination((coordinate){12, 15});
 	//navigate();
-	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
-	set_desired_speed(state_speed);
-	while (distance_remaining != 0) {
-		set_controlled_engine_speed();
-		//--distance_remaining; // Should be controlled by wheel encoders
-		/*if (corner_detected_left() || corner_detected_right())
-		step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
-		_delay_ms(5);*/
-	}
-	stop_engines();
 }
-
+#pragma GCC pop_options
 int main(void) {
 	initialize_control_unit();
 	sei();
@@ -351,6 +347,9 @@ int main(void) {
 	distance_remaining = 500; //TEST
 	
 	while (1) {
+	test_mode();
+	//navigate();
+	/*while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();
 		else if(current_mode == AUTONOMOUS)
@@ -360,5 +359,5 @@ int main(void) {
 			test_mode();
 		}
 		_delay_ms(5);
-	}
+	}*/
 }

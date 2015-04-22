@@ -68,7 +68,7 @@ ISR(TIMER1_COMPA_vect, ISR_NOBLOCK)
 	if (++sample_index == IR_NUM_SAMPLES)
 		sample_index = 0;
 		
-	//send_distance_readings();
+	send_distance_readings();
 }
 
 // Wheel encoder counting routines
@@ -245,6 +245,6 @@ uint8_t send_odometry_readings()
 	int8_t rotation = (encoder_left - encoder_right) * ENCODER_ROTATION_SCALE;
 	
 	int8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
-	
+
 	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
 }

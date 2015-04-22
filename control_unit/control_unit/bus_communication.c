@@ -104,10 +104,10 @@ void handle_received_message() {
 	cli();
 	switch(busbuffer[0]) {
 		case SENSOR_READINGS:
-			//update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
+			update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
 			break;
 		case MOVED_DISTANCE_AND_ANGLE:
-			update_distance_and_angle(busbuffer[1], busbuffer[2]);
+			//update_distance_and_angle(busbuffer[1], busbuffer[2]);
 			break;
 		case TAPE_FOUND:
 			tape_found();

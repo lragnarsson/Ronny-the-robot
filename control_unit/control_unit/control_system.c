@@ -6,7 +6,7 @@
 
 const uint8_t ANGLE_CHANGE_THRESHOLD = 20;
 volatile uint8_t P_COEFFICIENT = 1;
-volatile uint8_t D_COEFFICIENT = 1;
+volatile uint8_t D_COEFFICIENT = 0;
 
 uint8_t desired_speed = 0;
 volatile uint8_t current_speed = 0;
@@ -55,9 +55,9 @@ void set_same_engine_speed() {
 void calculate_control_speed() {
 	uint16_t control_speed_16 = P_COEFFICIENT * current_distance_error + D_COEFFICIENT * current_angle_error;
 	if (control_speed_16 > control_speed_max)
-	control_speed = control_speed_max;
+		control_speed = control_speed_max;
 	else
-	control_speed = (uint8_t) control_speed_16;
+		control_speed = (uint8_t) control_speed_16;
 }
 
 void set_controlled_engine_speed() {
