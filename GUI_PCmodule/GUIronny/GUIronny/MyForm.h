@@ -13,6 +13,9 @@ namespace GUIronny {
 	using namespace System::Text;
 	using namespace System::Windows;
 
+	bool Header = false;
+	bool Recieved_all_bytes = false;
+
 	/// <summary>
 	/// Summary for MyForm
 	/// </summary>
@@ -23,6 +26,12 @@ namespace GUIronny {
 		{
 			InitializeComponent();
 			findPorts();
+			testbitmap(image1, prevx, prevy, Color::White);
+			testbitmap(image1, prevx, prevy - 15, Color::White);
+			testbitmap(image1, prevx, prevy - 30, Color::White);
+			testbitmap(image1, prevx, prevy - 45, Color::White);
+			testbitmap(image1, prevx, prevy - 60, Color::White);
+			testbitmap(image1, prevx, prevy - 75, Color::White);
 
 			//
 			//TODO: Add the constructor code here
@@ -30,6 +39,14 @@ namespace GUIronny {
 		}
 
 	protected:
+	protected:
+		Bitmap^ image1 = gcnew Bitmap(200, 200);
+		int prevx = 100;
+		int prevy = 200;
+		array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
+		int write_position = 0;
+		int expected_length = 0;
+
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
@@ -55,15 +72,7 @@ namespace GUIronny {
 	private: System::Windows::Forms::TextBox^  IRsensor_HF;
 	private: System::Windows::Forms::TextBox^  IRsensor_HB;
 	private: System::Windows::Forms::TextBox^  IRsensor_Front;
-	//private: System::Windows::Forms::DataGridView^  dataGridView1;
 	private: System::IO::Ports::SerialPort^  serialPort1;
-	private: System::Windows::Forms::DataGridViewTextBoxColumn^  Sträcka;
-	private: System::Windows::Forms::DataGridViewTextBoxColumn^  Vinkel;
-	private: System::Windows::Forms::DataGridViewTextBoxColumn^  sensorfram;
-	private: System::Windows::Forms::DataGridViewTextBoxColumn^  SensorframH;
-	private: System::Windows::Forms::DataGridViewTextBoxColumn^  SensorbakH;
-	private: System::Windows::Forms::DataGridViewTextBoxColumn^  SensorbakL;
-	private: System::Windows::Forms::DataGridViewTextBoxColumn^  SensorframL;
 	private: System::Windows::Forms::Button^  button3;
 	private: System::Windows::Forms::Button^  button4;
 	private: System::Windows::Forms::TextBox^  Kommandon;
@@ -72,8 +81,8 @@ namespace GUIronny {
 	private: System::Windows::Forms::ComboBox^  comboBox1;
 	private: System::Windows::Forms::Label^  label2;
 	private: System::Windows::Forms::TextBox^  open_closed;
+	private: System::Windows::Forms::PictureBox^  pictureBox1;
 	private: System::ComponentModel::IContainer^  components;
-
 
 	private:
 		/// <summary>
@@ -105,13 +114,6 @@ namespace GUIronny {
 			this->IRsensor_HF = (gcnew System::Windows::Forms::TextBox());
 			this->IRsensor_HB = (gcnew System::Windows::Forms::TextBox());
 			this->IRsensor_Front = (gcnew System::Windows::Forms::TextBox());
-			this->Sträcka = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->Vinkel = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->sensorfram = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->SensorframH = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->SensorbakH = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->SensorbakL = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			this->SensorframL = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
 			this->serialPort1 = (gcnew System::IO::Ports::SerialPort(this->components));
 			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->button4 = (gcnew System::Windows::Forms::Button());
@@ -121,6 +123,7 @@ namespace GUIronny {
 			this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->open_closed = (gcnew System::Windows::Forms::TextBox());
+			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Ronny_robot))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_unpressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_pressed))->BeginInit();
@@ -130,6 +133,7 @@ namespace GUIronny {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Uparrow_pressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Downarrow_pressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Rightarrow_pressed))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// Ronny_robot
@@ -292,48 +296,6 @@ namespace GUIronny {
 			this->IRsensor_Front->TabIndex = 14;
 			this->IRsensor_Front->Text = L"20";
 			// 
-			// Sträcka
-			// 
-			this->Sträcka->HeaderText = L"Sträcka";
-			this->Sträcka->Name = L"Sträcka";
-			this->Sträcka->ReadOnly = true;
-			// 
-			// Vinkel
-			// 
-			this->Vinkel->HeaderText = L"Vinkel";
-			this->Vinkel->Name = L"Vinkel";
-			this->Vinkel->ReadOnly = true;
-			// 
-			// sensorfram
-			// 
-			this->sensorfram->HeaderText = L"sensorfram";
-			this->sensorfram->Name = L"sensorfram";
-			this->sensorfram->ReadOnly = true;
-			// 
-			// SensorframH
-			// 
-			this->SensorframH->HeaderText = L"SensorframH";
-			this->SensorframH->Name = L"SensorframH";
-			this->SensorframH->ReadOnly = true;
-			// 
-			// SensorbakH
-			// 
-			this->SensorbakH->HeaderText = L"SensorbakH";
-			this->SensorbakH->Name = L"SensorbakH";
-			this->SensorbakH->ReadOnly = true;
-			// 
-			// SensorbakL
-			// 
-			this->SensorbakL->HeaderText = L"SensorbakL";
-			this->SensorbakL->Name = L"SensorbakL";
-			this->SensorbakL->ReadOnly = true;
-			// 
-			// SensorframL
-			// 
-			this->SensorframL->HeaderText = L"SensorframL";
-			this->SensorframL->Name = L"SensorframL";
-			this->SensorframL->ReadOnly = true;
-			// 
 			// serialPort1
 			// 
 			this->serialPort1->BaudRate = 115200;
@@ -426,12 +388,21 @@ namespace GUIronny {
 			this->open_closed->Size = System::Drawing::Size(100, 13);
 			this->open_closed->TabIndex = 22;
 			// 
+			// pictureBox1
+			// 
+			this->pictureBox1->Location = System::Drawing::Point(447, 110);
+			this->pictureBox1->Name = L"pictureBox1";
+			this->pictureBox1->Size = System::Drawing::Size(744, 480);
+			this->pictureBox1->TabIndex = 23;
+			this->pictureBox1->TabStop = false;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::White;
 			this->ClientSize = System::Drawing::Size(1300, 667);
+			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->open_closed);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->comboBox1);
@@ -471,6 +442,7 @@ namespace GUIronny {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Uparrow_pressed))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Downarrow_pressed))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Rightarrow_pressed))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -539,6 +511,8 @@ private: System::Void MyForm_KeyPress(System::Object^  sender, System::Windows::
 	auto databack = gcnew array < System::Byte > { 0xC4 };
 	auto dataforward = gcnew array < System::Byte > { 0xC1 };
 	auto dataright = gcnew array < System::Byte > { 0xC2 };
+	auto datarforwardright = gcnew array < System::Byte > { 0xC5 };
+	auto dataforwardleft = gcnew array < System::Byte > { 0xC6 };
 
 	switch (e->KeyChar){
 
@@ -565,8 +539,19 @@ private: System::Void MyForm_KeyPress(System::Object^  sender, System::Windows::
 		this->Kommandon->Text = "sväng höger1100 0010";
 		this->serialPort1->Write(dataright, 0, dataright->Length);
 		break;
+
+	case 'q':
+		this->Kommandon->Text = "sväng vänster-fram 1100 0110 ";
+		this->serialPort1->Write(dataforward, 0, dataforwardleft->Length);
+		break;
+
+	case 'e':
+		this->Kommandon->Text = "sväng höger-fram 1100 0101";
+		this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
+		break;
 	default:
 		this->Kommandon->Text = "fel styrkommando";
+		break;
 	}
 }
 
@@ -636,6 +621,30 @@ private: System::Void button4_Click(System::Object^  sender, System::EventArgs^ 
 		this->open_closed->Text = "connection closed";
 	}
 }
+			private: void testbitmap(Bitmap^ image1, int prevx, int prevy, Color color){
+
+
+				for (int x = prevx; x < prevx + 15; x++)
+				{
+					for (int y = prevy - 15; y < prevy; y++)
+					{
+						//Color pixelColor = image1->GetPixel(x, y);
+						//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
+						image1->SetPixel(x, y, color);
+						image1->SetPixel(x + 15, y, Color::Black);
+						if (y + 15 < 200){
+							image1->SetPixel(x - 15, y, Color::Black);
+						}
+						else
+						{
+							image1->SetPixel(x - 15, y, Color::Black);
+						}
+					}
+				}
+
+				this->pictureBox1->Image = image1;
+
+			}
 
 
 private: System::Void IRsensor_VF_TextChanged(System::Object^  sender, System::EventArgs^  e) {
@@ -643,7 +652,6 @@ private: System::Void IRsensor_VF_TextChanged(System::Object^  sender, System::E
 private: System::Void Sensordata_Click(System::Object^  sender, System::EventArgs^  e) {
 	Grafer_data^ iform = (gcnew Grafer_data());
 	iform->Show();
-
 }
 };
 }
