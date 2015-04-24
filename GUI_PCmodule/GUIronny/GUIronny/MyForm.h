@@ -48,6 +48,18 @@ namespace GUIronny {
 		array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		int write_position = 0;
 		int expected_length = 0;
+		int rear_left = 0;
+		int front_left = 0;
+		int rear_right = 0;
+		int front_right = 0;
+		int front = 0;
+
+		int stracka = 0;
+		int vinkel = 0;
+
+		int w = 0;
+		int d = 0;
+		int en = 0;
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -302,6 +314,7 @@ namespace GUIronny {
 			// 
 			this->serialPort1->BaudRate = 115200;
 			this->serialPort1->PortName = L"COM3";
+			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &MyForm::serialPort1_DataReceived_1);
 			// 
 			// button3
 			// 
@@ -518,24 +531,33 @@ namespace GUIronny {
 
 			this->Kommandon->Text = "sväng vänster 1100 0011";
 			this->serialPort1->Write(dataleft, 0, dataleft->Length);
+			d = d - 1;
+			//Console::WriteLine("d=" + d);
 			break;
 
 		case 's':
 
 			this->Kommandon->Text = "bakåt 1100 0100";
 			this->serialPort1->Write(databack, 0, databack->Length);
+			w = w - 1;
+			//Console::WriteLine("w=" + w);
 			break;
 
 		case 'w':
 
 			this->Kommandon->Text = "framåt 1100 0001";
 			this->serialPort1->Write(dataforward, 0, dataforward->Length);
+			w = w + 1;
+			//Console::WriteLine("w =" + w);
 			break;
 
 		case 'd':
 
 			this->Kommandon->Text = "sväng höger1100 0010";
 			this->serialPort1->Write(dataright, 0, dataright->Length);
+			d = d + 1;
+			//Console::WriteLine("d = " + d);
+
 			break;
 
 		case 'q':
@@ -546,6 +568,8 @@ namespace GUIronny {
 		case 'e':
 			this->Kommandon->Text = "sväng höger-fram 1100 0101";
 			this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
+			en = en + 1;
+			//Console::WriteLine("speed = " + en);
 			break;
 		default:
 			this->Kommandon->Text = "fel styrkommando";
@@ -553,8 +577,9 @@ namespace GUIronny {
 		}
 	}
 
-	private: System::Void serialPort1_DataReceived(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
+	private: System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
 		
+		Console::WriteLine("recieved data");
 		SerialPort^ sp = (SerialPort^)sender;
 		System::Byte byte = sp->ReadByte();
 		
@@ -588,18 +613,31 @@ namespace GUIronny {
 			{
 				int rear_left = data_recieved[1] << 8;
 				rear_left |= data_recieved[2];
+
 				int front_left = data_recieved[3] << 8;
 				front_left |= data_recieved[4];
+
 				int rear_right = data_recieved[5] << 8;
 				rear_right |= data_recieved[6];
+
 				int front_right = data_recieved[7] << 8;
 				front_right |= data_recieved[8];
+
 				int front = data_recieved[9] << 8;
 				front |= data_recieved[10];
+
+				changeIR(front, front_left, front_right, rear_left, rear_right);
+
+
 				Console::WriteLine(rear_left + " " + front_left + " " + rear_right + " " + front_right + " " + front);
 				//sensorvalues(front, front_right, rear_right, rear_left, front_left);
 
 				break;
+
+			/*case 0x41:
+				stracka = data_recieved[1] << 8;
+				stracka |= dat
+				*/
 			}
 			default:
 				break;
@@ -678,10 +716,17 @@ namespace GUIronny {
 	private: System::Void Sensordata_Click(System::Object^  sender, System::EventArgs^  e) {
 		Grafer_data^ iform = (gcnew Grafer_data());
 		iform->Show();
-		iform->sensorvalues(10, 10, 10, 10, 10);
-		iform->sensorvalues(11, 11, 11, 11, 11);
-		iform->sensorvalues(12, 12, 12, 12, 12);
+	//	iform->sensorvalues(front, front_left, front_right, rear_left, rear_right);
+
 	}
-	};
+
+	private: System::Void changeIR(int front, int front_left, int front_right, int rear_left, int rear_right){
+		  
+		//		this->IRsensor_Front->Text = front;
+
+
+	}
+	
+};
 }
 

@@ -155,16 +155,16 @@ namespace GUIronny {
 	public: System::Void Grafer_data_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
 
-	public: void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
+	public: void sensorvalues(int front, int front_left, int front_right, int back_left, int back_right){
 
 		int rowcount = this->dataGridView1->RowCount;
 		Console::WriteLine(rowcount);
 		this->dataGridView1->Rows->Add();
-		this->dataGridView1->Rows[rowcount - 1]->Cells[2]->Value = byte1 + 1;
-		this->dataGridView1->Rows[rowcount - 1]->Cells[3]->Value = byte2 + 1;
-		this->dataGridView1->Rows[rowcount - 1]->Cells[4]->Value = byte3 + 1;
-		this->dataGridView1->Rows[rowcount - 1]->Cells[5]->Value = byte4 + 1;
-		this->dataGridView1->Rows[rowcount - 1]->Cells[6]->Value = byte5 + 1;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[2]->Value = front;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[3]->Value = front_left;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[4]->Value = front_right;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[5]->Value = back_left;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[6]->Value = back_right;
 		
 	}
 
