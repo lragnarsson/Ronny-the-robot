@@ -4,7 +4,8 @@
  */
 #include "control_unit.h"
 #include "flood_fill.h"
-uint8_t state_speed = 0;
+
+//uint8_t state_speed = 0;
 uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
@@ -33,7 +34,7 @@ void step_forward() {
 			return; // In the middle of a crossroad section during search
 		//if (corner_detected_left() || corner_detected_right())
 		//	return; // Reentered the corridor
-		_delay_ms(5);
+		//_delay_ms(5);
 	}
 	stop_engines();
 }
@@ -41,13 +42,16 @@ void step_forward() {
 /* Drive forward until distance_remaining is 0. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. */
 void drive_forward() {
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
-	set_desired_speed(state_speed);
 	while (distance_remaining != 0) {
+		set_desired_speed(state_speed);
 		set_controlled_engine_speed();
-		//set_same_engine_speed(); // no control!!!!
 		//if (corner_detected_left() || corner_detected_right())
 		//	step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
-		_delay_ms(5);
+		_delay_ms(20);
+		//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
+		//static uint8_t i = 0;
+		/*uint8_t msg[2] = {0xFF, ++i};
+		i2c_write(COMMUNICATION_UNIT, msg, 2);*/
 	}
 	stop_engines();
 }
@@ -318,8 +322,9 @@ void test_mode()
 	//close_claw();
 	//flood_fill_to_destination((coordinate){10, 17});
 	//navigate();
-	distance_remaining = 5000;
+	distance_remaining = 10000;
 	drive_forward();
+	//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 }
 
 int main(void) {

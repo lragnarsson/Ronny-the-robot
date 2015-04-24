@@ -234,7 +234,7 @@ uint8_t send_distance_readings()
 		(uint8_t) distances[3],
 		(uint8_t)(distances[4]>>8),
 		(uint8_t) distances[4] };
-	
+
 	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
 }
 
@@ -244,6 +244,5 @@ uint8_t send_odometry_readings()
 	int8_t rotation = (encoder_left - encoder_right) * ENCODER_ROTATION_SCALE;
 	
 	int8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
-
-	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
+	return i2c_write(CONTROL_UNIT, msg, sizeof(msg));
 }

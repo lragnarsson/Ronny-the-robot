@@ -14,7 +14,7 @@ volatile uint8_t helpadress;
 volatile uint8_t helpdata[16];
 volatile uint8_t startpointer;
 volatile uint8_t endpointer;
-volatile uint8_t isSending;
+volatile uint8_t isSending = 0;
 
 //TWCR definitions
 #define SEND 0xc5 // 1   1  0   0   0  1  0   1
@@ -70,7 +70,7 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 			helpdata[endpointer] = data[endpointer];
 			endpointer++;
 		}
-		isSending = 0x01;
+		//isSending = 0x01;
 		i2c_start();
 		return 1;
 	}
@@ -85,7 +85,7 @@ uint8_t i2c_write_byte(uint8_t adress, uint8_t data) {
 		startpointer = 0x00;
 		endpointer = 0x01;
 		helpdata[0] = data;
-		isSending = 0x01;
+		//isSending = 0x01;
 		i2c_start();
 		return 1;
 	}
