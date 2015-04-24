@@ -33,6 +33,8 @@ namespace GUIronny {
 			testbitmap(image1, prevx, prevy - 60, Color::White);
 			testbitmap(image1, prevx, prevy - 75, Color::White);
 
+			changeIR(10, 2, 23, 6, 2);
+
 			//sensorvalues(10, 10, 10, 10, 10);
 
 			//
@@ -577,9 +579,8 @@ namespace GUIronny {
 		}
 	}
 
-	private: System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
+	private: virtual System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
 		
-		Console::WriteLine("recieved data");
 		SerialPort^ sp = (SerialPort^)sender;
 		System::Byte byte = sp->ReadByte();
 		
@@ -587,7 +588,7 @@ namespace GUIronny {
 		{
 			switch (byte)
 			{
-			case 0x40:
+			case 0x40: //sensor värden 
 				expected_length = 11;
 				data_recieved[write_position] = byte;
 				++write_position;
@@ -625,6 +626,9 @@ namespace GUIronny {
 
 				int front = data_recieved[9] << 8;
 				front |= data_recieved[10];
+
+				String^ s = Convert::ToString(front);
+				this->IRsensor_Front->Text = s;
 
 				changeIR(front, front_left, front_right, rear_left, rear_right);
 
@@ -716,13 +720,14 @@ namespace GUIronny {
 	private: System::Void Sensordata_Click(System::Object^  sender, System::EventArgs^  e) {
 		Grafer_data^ iform = (gcnew Grafer_data());
 		iform->Show();
-	//	iform->sensorvalues(front, front_left, front_right, rear_left, rear_right);
+		iform->sensorvalues(front, front_left, front_right, rear_left, rear_right);
 
 	}
 
 	private: System::Void changeIR(int front, int front_left, int front_right, int rear_left, int rear_right){
 		  
-		//		this->IRsensor_Front->Text = front;
+		String^ s_front = Convert::ToString(front);
+		this->IRsensor_Front->Text = s_front;
 
 
 	}
