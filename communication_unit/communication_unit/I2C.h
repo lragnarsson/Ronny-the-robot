@@ -8,9 +8,9 @@
 #define I2C_H_
 
 // Set SCL speed around 100kHz
-#define atmega20br 25 // scl freq 92593Hz
-#define atmega18br 91 // scl freq 93091Hz
-#define atmega20pc 1 // prescaler atmega 20kHz clock
+#define atmega20br 20 // scl freq 92593Hz 25
+#define atmega18br 18 // scl freq 93091Hz 91
+#define atmega20pc 0 // prescaler atmega 20kHz clock 1
 #define atmega18pc 0 // prescaler atmega 18.432kHz clock
 
 

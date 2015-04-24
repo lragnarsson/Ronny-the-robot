@@ -35,6 +35,9 @@ void init_personality() {
 
 void handle_received_message() {
 	switch(busbuffer[0]) {
+		case 0xFF:
+			Send_to_PC(busbuffer[1]);
+			break;
 		case ABSOLUTE_X_Y:
 		case AUTONOMOUS_MODE:
 		case MANUAL_MODE:

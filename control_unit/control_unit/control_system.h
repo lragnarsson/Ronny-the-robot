@@ -36,6 +36,9 @@
 #define TIMER2_CLEAR_ON_MATCH_H (0<<WGM01)|(1<<WGM00)|(1<<COM0A1)|(0<<COM0A0)
 #define TIMER2_CLEAR_ON_MATCH_L (0<<WGM02)|(1<<CS02)|(0<<CS01)|(0<<CS00)
 
+volatile uint16_t P_COEFFICIENT;
+volatile uint16_t D_COEFFICIENT;
+
 void init_control_system(void);
 void set_desired_speed(uint8_t speed);
 void stop_engines(void);

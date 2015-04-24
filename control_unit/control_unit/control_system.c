@@ -3,15 +3,17 @@
  *
  */
 #include "control_system.h"
+#include "mult16x16.h"
 
 const uint8_t ANGLE_CHANGE_THRESHOLD = 20;
-volatile uint8_t P_COEFFICIENT = 1;
-volatile uint8_t D_COEFFICIENT = 0;
+//volatile uint8_t P_COEFFICIENT = 20;
+//volatile uint8_t D_COEFFICIENT = 20;
 
-uint8_t desired_speed = 0;
+volatile uint8_t desired_speed = 0;
 volatile uint8_t current_speed = 0;
-uint8_t control_speed = 0;
-uint8_t control_speed_max = 0;
+volatile uint8_t control_speed_left = 0;
+volatile uint8_t control_speed_right = 0;
+volatile uint8_t control_speed_max = 0;
 
 
 /* Initialize hardware ports */
@@ -30,6 +32,9 @@ void init_control_system() {
 
 	DDRD = (0<<DDD0) | (1<<DDD7); // Button input and claw output
 	//CLAW_POSITION = CLAW_CLOSED;
+	
+	P_COEFFICIENT = 0x0500;
+	D_COEFFICIENT = 0x0000;
 	sei();
 }
 
@@ -39,7 +44,7 @@ ISR(TIMER1_COMPA_vect) {
 		++current_speed;
 	else if(desired_speed < current_speed)
 		--current_speed;
-	control_speed_max = 0.4 * current_speed;
+	control_speed_max = current_speed / 2;
 }
 
 /* Set desired_speed */
@@ -60,27 +65,49 @@ void set_same_engine_speed() {
 
 /* Calculates the control_speed based on current angle and error in distance to the middle of the corridor */
 void calculate_control_speed() {
-	uint16_t control_speed_16 = P_COEFFICIENT * current_distance_error + D_COEFFICIENT * current_angle_error;
-	if (control_speed_16 > control_speed_max)
-		control_speed = control_speed_max;
-	else
-		control_speed = (uint8_t) control_speed_16;
+	int32_t p;
+	MultiSU16X16to32(p, current_distance_error, P_COEFFICIENT);
+	int32_t d;
+	MultiSU16X16to32(d, current_angle_error, D_COEFFICIENT);
+	int16_t control_speed_raw = (p + d)>>16;
+	
+	if (control_speed_raw > 0)
+	{
+		control_speed_left = (uint8_t)abs(control_speed_raw);
+		if (control_speed_left > control_speed_max)
+		{
+			control_speed_left = control_speed_max;
+		}
+		control_speed_right = 0;
+	}
+	else 
+	{
+		control_speed_right = (uint8_t)abs(control_speed_raw);
+		if (control_speed_right > control_speed_max)
+		{
+			control_speed_right = control_speed_max;
+		}
+		control_speed_left = 0;
+	}
+	
+	uint8_t msg[2] = {0xFF, control_speed_left};
+	i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
 }
 
 void set_controlled_engine_speed() {
 	calculate_control_speed();
-	ENGINE_LEFT_SPEED = current_speed - control_speed;
-	ENGINE_RIGHT_SPEED = current_speed + control_speed;
+	ENGINE_LEFT_SPEED = current_speed - control_speed_left;
+	ENGINE_RIGHT_SPEED = current_speed - control_speed_right;
 }
 
 void set_manual_forward_left_engine_speed() {
-	ENGINE_LEFT_SPEED = current_speed - 0.1 * current_speed;
-	ENGINE_RIGHT_SPEED = current_speed +  0.1 * current_speed;
+	ENGINE_LEFT_SPEED = current_speed - (current_speed >> 3);
+	ENGINE_RIGHT_SPEED = current_speed +  (current_speed >> 3);
 }
 
 void set_manual_forward_right_engine_speed() {
-	ENGINE_LEFT_SPEED = current_speed + 0.1 * current_speed;
-	ENGINE_RIGHT_SPEED = current_speed - 0.1 * current_speed;
+	ENGINE_LEFT_SPEED = current_speed + (current_speed >> 3);
+	ENGINE_RIGHT_SPEED = current_speed - (current_speed >> 3) ;
 }
 
 /* Absolute value of linear approximation of left "angle" derivative */
