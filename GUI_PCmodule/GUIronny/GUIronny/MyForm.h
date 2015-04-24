@@ -33,6 +33,8 @@ namespace GUIronny {
 			testbitmap(image1, prevx, prevy - 60, Color::White);
 			testbitmap(image1, prevx, prevy - 75, Color::White);
 
+			//sensorvalues(10, 10, 10, 10, 10);
+
 			//
 			//TODO: Add the constructor code here
 			//
@@ -40,9 +42,9 @@ namespace GUIronny {
 
 	protected:
 	protected:
-		Bitmap^ image1 = gcnew Bitmap(200, 200);
-		int prevx = 100;
-		int prevy = 200;
+		Bitmap^ image1 = gcnew Bitmap(744, 480);
+		int prevx = 450;
+		int prevy = 480;
 		array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		int write_position = 0;
 		int expected_length = 0;
@@ -88,7 +90,7 @@ namespace GUIronny {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-	//	System::ComponentModel::Container ^components;
+		//	System::ComponentModel::Container ^components;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -390,7 +392,7 @@ namespace GUIronny {
 			// 
 			// pictureBox1
 			// 
-			this->pictureBox1->Location = System::Drawing::Point(447, 110);
+			this->pictureBox1->Location = System::Drawing::Point(440, 110);
 			this->pictureBox1->Name = L"pictureBox1";
 			this->pictureBox1->Size = System::Drawing::Size(744, 480);
 			this->pictureBox1->TabIndex = 23;
@@ -448,10 +450,9 @@ namespace GUIronny {
 
 		}
 #pragma endregion
-	
+
 	private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
-	
 
 			 // find available ports
 	private: void findPorts(void)
@@ -464,7 +465,6 @@ namespace GUIronny {
 
 	private: System::Void non(System::Object^  sender, System::EventArgs^  e) {
 	}
-
 
 	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 		switch (e->KeyCode){
@@ -494,7 +494,7 @@ namespace GUIronny {
 		case Keys::D:
 			this->Rightarrow_unpressed->Visible = true;
 			break;
-		
+
 		case Keys::S:
 			this->Downarrow_unpressed->Visible = true;
 			break;
@@ -504,155 +504,184 @@ namespace GUIronny {
 			break;
 		}
 	}
+	private: System::Void MyForm_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
+		auto dataleft = gcnew array < System::Byte > { 0xC3 };
+		auto databack = gcnew array < System::Byte > { 0xC4 };
+		auto dataforward = gcnew array < System::Byte > { 0xC1 };
+		auto dataright = gcnew array < System::Byte > { 0xC2 };
+		auto datarforwardright = gcnew array < System::Byte > { 0xC5 };
+		auto dataforwardleft = gcnew array < System::Byte > { 0xC6 };
 
+		switch (e->KeyChar){
 
-private: System::Void MyForm_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-	auto dataleft = gcnew array < System::Byte > { 0xC3 };
-	auto databack = gcnew array < System::Byte > { 0xC4 };
-	auto dataforward = gcnew array < System::Byte > { 0xC1 };
-	auto dataright = gcnew array < System::Byte > { 0xC2 };
-	auto datarforwardright = gcnew array < System::Byte > { 0xC5 };
-	auto dataforwardleft = gcnew array < System::Byte > { 0xC6 };
+		case 'a':
 
-	switch (e->KeyChar){
+			this->Kommandon->Text = "sväng vänster 1100 0011";
+			this->serialPort1->Write(dataleft, 0, dataleft->Length);
+			break;
 
-	case 'a':
+		case 's':
 
-		this->Kommandon->Text = "sväng vänster 1100 0011";
-		this->serialPort1->Write(dataleft, 0, dataleft->Length);
-		break;
+			this->Kommandon->Text = "bakåt 1100 0100";
+			this->serialPort1->Write(databack, 0, databack->Length);
+			break;
 
-	case 's':
+		case 'w':
 
-		this->Kommandon->Text = "bakåt 1100 0100";
-		this->serialPort1->Write(databack, 0, databack->Length);
-		break;
+			this->Kommandon->Text = "framåt 1100 0001";
+			this->serialPort1->Write(dataforward, 0, dataforward->Length);
+			break;
 
-	case 'w':
+		case 'd':
 
-		this->Kommandon->Text = "framåt 1100 0001";
-		this->serialPort1->Write(dataforward, 0, dataforward->Length);
-		break;
+			this->Kommandon->Text = "sväng höger1100 0010";
+			this->serialPort1->Write(dataright, 0, dataright->Length);
+			break;
 
-	case 'd':
+		case 'q':
+			this->Kommandon->Text = "sväng vänster-fram 1100 0110 ";
+			this->serialPort1->Write(dataforward, 0, dataforwardleft->Length);
+			break;
 
-		this->Kommandon->Text = "sväng höger1100 0010";
-		this->serialPort1->Write(dataright, 0, dataright->Length);
-		break;
-
-	case 'q':
-		this->Kommandon->Text = "sväng vänster-fram 1100 0110 ";
-		this->serialPort1->Write(dataforward, 0, dataforwardleft->Length);
-		break;
-
-	case 'e':
-		this->Kommandon->Text = "sväng höger-fram 1100 0101";
-		this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
-		break;
-	default:
-		this->Kommandon->Text = "fel styrkommando";
-		break;
-	}
-}
-
-
-/*private: System::Void serialPort1_DataReceived(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-
-	SerialPort^ sp = (SerialPort^)sender;
-	auto data = gcnew array < System::Byte >(5);
-	Console::WriteLine("recieving data");
-	System::Byte cases = sp->ReadByte();
-	Console::WriteLine(cases);
-	switch (cases){
-		Console::WriteLine("recieving data");
-		//Sensormodulen till PC
-	case 0x40: //Sensordata
-		Console::WriteLine("in switch, case0x40");
-		for (int i; i < 5; i++){
-			data[i] = sp->ReadByte();
+		case 'e':
+			this->Kommandon->Text = "sväng höger-fram 1100 0101";
+			this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
+			break;
+		default:
+			this->Kommandon->Text = "fel styrkommando";
+			break;
 		}
-		sensorvalues(data[0], data[1], data[2], data[3], data[4]);
-	case 0x41: //sträcka + vinkel
-		Console::WriteLine("In switch, case0x41");
-		for (int i; i < 2; i++){
-			data[i] = sp->ReadByte();
+	}
+
+	private: System::Void serialPort1_DataReceived(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
+		
+		SerialPort^ sp = (SerialPort^)sender;
+		System::Byte byte = sp->ReadByte();
+		
+		if (write_position == 0)
+		{
+			switch (byte)
+			{
+			case 0x40:
+				expected_length = 11;
+				data_recieved[write_position] = byte;
+				++write_position;
+				break;
+			case 0x41:
+				expected_length = 3;
+				data_recieved[write_position] = byte;
+				++write_position;
+				break;
+			default:
+				break;
+			}
+			return;
 		}
-		wheelvalues(data[0], data[1]);
-		break;
 
-	default:
-		break;
-	}*/
-	/*System::Byte indata = sp->ReadByte();
-	//Console::Write("incomming data:");
-	if (indata != 0x41){
-	Console::WriteLine(indata);
-	}*/
+		data_recieved[write_position] = byte;
 
-	/*private: void wheelvalues(System::Byte^ byte1, System::Byte^ byte2){
+		if (++write_position == expected_length)
+		{
+			switch (data_recieved[0])
+			{
+			case 0x40:
+			{
+				int rear_left = data_recieved[1] << 8;
+				rear_left |= data_recieved[2];
+				int front_left = data_recieved[3] << 8;
+				front_left |= data_recieved[4];
+				int rear_right = data_recieved[5] << 8;
+				rear_right |= data_recieved[6];
+				int front_right = data_recieved[7] << 8;
+				front_right |= data_recieved[8];
+				int front = data_recieved[9] << 8;
+				front |= data_recieved[10];
+				Console::WriteLine(rear_left + " " + front_left + " " + rear_right + " " + front_right + " " + front);
+				//sensorvalues(front, front_right, rear_right, rear_left, front_left);
 
-		this->dataGridView1->Rows->Add(byte1, byte2);
-		//this->dataGridView1->Rows->Add(byte1, byte2);
-	}
-	private: void sensorvalues(System::Byte^ byte1, System::Byte^ byte2, System::Byte^ byte3, System::Byte^ byte4, System::Byte^ byte5){
-		this->dataGridView1->Rows[0]->Cells[2]->Value = byte1;
-		this->dataGridView1->Rows[0]->Cells[3]->Value = byte2;
-		this->dataGridView1->Rows[0]->Cells[4]->Value = byte3;
-		this->dataGridView1->Rows[0]->Cells[5]->Value = byte4;
-		this->dataGridView1->Rows[0]->Cells[6]->Value = byte5;
-		this->dataGridView1->Rows->Add();
-
-	}*/
-private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
-	auto data = gcnew array < System::Byte > { 12 };
-	if (!this->serialPort1->IsOpen){
-		this->serialPort1->PortName = this->comboBox1->Text;
-		this->open_closed->Text = "port openeing, waiting";
-		this->serialPort1->Open();
-		this->open_closed->Text = "port open";
-	}
-	else{
-		this->open_closed->Text = "something went wrong";
-	}
-}
-private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
-	if (this->serialPort1->IsOpen){
-		this->serialPort1->Close();
-		this->open_closed->Text = "connection closed";
-	}
-}
-			private: void testbitmap(Bitmap^ image1, int prevx, int prevy, Color color){
-
-
-				for (int x = prevx; x < prevx + 15; x++)
-				{
-					for (int y = prevy - 15; y < prevy; y++)
-					{
-						//Color pixelColor = image1->GetPixel(x, y);
-						//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
-						image1->SetPixel(x, y, color);
-						image1->SetPixel(x + 15, y, Color::Black);
-						if (y + 15 < 200){
-							image1->SetPixel(x - 15, y, Color::Black);
-						}
-						else
-						{
-							image1->SetPixel(x - 15, y, Color::Black);
-						}
-					}
-				}
-
-				this->pictureBox1->Image = image1;
-
+				break;
+			}
+			default:
+				break;
 			}
 
+			write_position = 0;
+			expected_length = 0;
+		}
+	}
 
-private: System::Void IRsensor_VF_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+	private: void wheelvalues(System::Byte^ byte1, System::Byte^ byte2){
+
+		Grafer_data^ grafer = gcnew Grafer_data();
+		grafer->dataGridView1->Rows->Add(byte1, byte2);
+		//this->dataGridView1->Rows->Add(byte1, byte2);
+	}
+	/*private: void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
+		Grafer_data^ grafer = gcnew Grafer_data();
+		grafer->dataGridView1->Rows[0]->Cells[2]->Value = byte1;
+		grafer->dataGridView1->Rows[0]->Cells[3]->Value = byte2;
+		grafer->dataGridView1->Rows[0]->Cells[4]->Value = byte3;
+		grafer->dataGridView1->Rows[0]->Cells[5]->Value = byte4;
+		grafer->dataGridView1->Rows[0]->Cells[6]->Value = byte5;
+		grafer->dataGridView1->Rows->Add();
+
+	}*/
+
+	private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
+		auto data = gcnew array < System::Byte > { 12 };
+		if (!this->serialPort1->IsOpen){
+			this->serialPort1->PortName = this->comboBox1->Text;
+			this->open_closed->Text = "port openeing, waiting";
+			this->serialPort1->Open();
+			this->open_closed->Text = "port open";
+		}
+		else{
+			this->open_closed->Text = "something went wrong";
+		}
+	}
+
+	private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (this->serialPort1->IsOpen){
+			this->serialPort1->Close();
+			this->open_closed->Text = "connection closed";
+		}
+	}
+
+	private: void testbitmap(Bitmap^ image1, int prevx, int prevy, Color color){
+
+
+		for (int x = prevx; x < prevx + 40; x++)
+		{
+			for (int y = prevy - 40; y < prevy; y++)
+			{
+				//Color pixelColor = image1->GetPixel(x, y);
+				//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
+				image1->SetPixel(x, y, color);
+				image1->SetPixel(x + 40, y, Color::Black);
+				if (y + 40 < 200){
+					image1->SetPixel(x - 40, y, Color::Black);
+				}
+				else
+				{
+					image1->SetPixel(x - 40, y, Color::Black);
+				}
+			}
+		}
+
+		this->pictureBox1->Image = image1;
+
+	}
+
+	private: System::Void IRsensor_VF_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+	}
+
+	private: System::Void Sensordata_Click(System::Object^  sender, System::EventArgs^  e) {
+		Grafer_data^ iform = (gcnew Grafer_data());
+		iform->Show();
+		iform->sensorvalues(10, 10, 10, 10, 10);
+		iform->sensorvalues(11, 11, 11, 11, 11);
+		iform->sensorvalues(12, 12, 12, 12, 12);
+	}
+	};
 }
-private: System::Void Sensordata_Click(System::Object^  sender, System::EventArgs^  e) {
-	Grafer_data^ iform = (gcnew Grafer_data());
-	iform->Show();
-}
-};
-}
-		 
+

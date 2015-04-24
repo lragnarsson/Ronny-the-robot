@@ -34,7 +34,7 @@ namespace GUIronny {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::DataGridView^  dataGridView1;
+	public: System::Windows::Forms::DataGridView^  dataGridView1;
 	private: System::IO::Ports::SerialPort^  serialPort1;
 	private: System::Windows::Forms::DataGridViewTextBoxColumn^  Sträcka;
 	private: System::Windows::Forms::DataGridViewTextBoxColumn^  Vinkel;
@@ -152,7 +152,21 @@ namespace GUIronny {
 
 		}
 #pragma endregion
-	private: System::Void Grafer_data_Load(System::Object^  sender, System::EventArgs^  e) {
+	public: System::Void Grafer_data_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
+
+	public: void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
+
+		int rowcount = this->dataGridView1->RowCount;
+		Console::WriteLine(rowcount);
+		this->dataGridView1->Rows->Add();
+		this->dataGridView1->Rows[rowcount - 1]->Cells[2]->Value = byte1 + 1;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[3]->Value = byte2 + 1;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[4]->Value = byte3 + 1;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[5]->Value = byte4 + 1;
+		this->dataGridView1->Rows[rowcount - 1]->Cells[6]->Value = byte5 + 1;
+		
+	}
+
 	};
 }
