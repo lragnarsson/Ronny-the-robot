@@ -30,11 +30,12 @@ void step_forward() {
 	set_desired_speed(state_speed);
 	while (distance_remaining != 0) {
 		set_same_engine_speed();
-		if(current_task==SEARCH && square_distance_remaining == 0)
-			return; // In the middle of a crossroad section during search
-		//if (corner_detected_left() || corner_detected_right())
-		//	return; // Reentered the corridor
-		//_delay_ms(5);
+		if (square_distance_remaining == 0) {
+			move_map_position_forward();
+			square_distance_remaining = 400;
+		}
+		if (corner_detected_left() || corner_detected_right())
+			return; // Reentered the corridor
 	}
 	stop_engines();
 }
@@ -45,13 +46,12 @@ void drive_forward() {
 	while (distance_remaining != 0) {
 		set_desired_speed(state_speed);
 		set_controlled_engine_speed();
-		//if (corner_detected_left() || corner_detected_right())
-		//	step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
-		_delay_ms(20);
-		//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
-		//static uint8_t i = 0;
-		/*uint8_t msg[2] = {0xFF, ++i};
-		i2c_write(COMMUNICATION_UNIT, msg, 2);*/
+		if (square_distance_remaining == 0) {
+			move_map_position_forward();
+			square_distance_remaining = 400;
+		}
+		if (corner_detected_left() || corner_detected_right())
+			step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
 	}
 	stop_engines();
 }
@@ -95,36 +95,47 @@ void rotate_180() {
 	stop_engines();
 }
 
+uint8_t map_surroundings() {
+	if(left_wall_distance < 300)
+		set_wall_left();
+	if(right_wall_distance < 300)
+		set_wall_right();
+	if(front_wall_distance < 300) {
+		set_wall_front();
+		if (!is_wall_left())
+			rotate_left_90();
+		else if(!is_wall_right())
+			rotate_right_90();
+		else
+			return 0;
+	}
+	return 1;
+}
+
 /* Drive forward and map surroundings until reaching a wall. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. */
 uint8_t drive_and_map() {
+	uint8_t in_corridor = 1;
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 	distance_remaining = 1000;
-	square_distance_remaining = 40;
+	square_distance_remaining = 400;
+	if (!map_surroundings())
+		return 0;
 	set_desired_speed(state_speed);
 	while (goal_found != 1) {
-		set_controlled_engine_speed();
-		--distance_remaining; // Should be controlled by wheel encoders
+		if (in_corridor)
+			set_controlled_engine_speed();
+		else
+			set_same_engine_speed();
+
 		if (square_distance_remaining == 0) { // Ronny is in the middle of the next square, update map.
 			move_map_position_forward(); // Update map coordinates
-			if(left_wall_distance < 30)
-				set_wall_left();
-			if(right_wall_distance < 30)
-				set_wall_right();
-			if(front_wall_distance < 30) {
-				set_wall_front();
-				if (!is_wall_left())
-					rotate_left_90();
-				else if(!is_wall_right())
-					rotate_right_90();
-				else
-					return 0;
-			}
+			if (!map_surroundings()) // Update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
+				return 0;
 			distance_remaining = 1000;
-			square_distance_remaining = 40;
+			square_distance_remaining = 400;
 		}
 		if (corner_detected_left() || corner_detected_right())
-			step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
-		_delay_ms(5); //TEMP
+			in_corridor = 1 - in_corridor; // Exited or entered a crossroad section  (turn on/off sensor feedback temporarily)
 	}
 	return 1;
 }
@@ -137,27 +148,22 @@ void create_route() {
 /* Contains all logic for mapping and searching through the map */
 void search_state() { 
 	if(drive_and_map()) { //The goal was found
-		distance_remaining = 200;
-		step_forward();
-		move_map_position_forward(); // Update map coordinates
-		if(left_wall_distance < 30)
-			set_wall_left();
-		if(right_wall_distance < 30)
-			set_wall_right();
-		if(front_wall_distance < 30)
-			set_wall_front();
-		//TEMP COMMENT: calculate route to start
 		current_task = RETRIEVE;
 		state_speed = SUPER_SPEED;
-	} else {
-		//TEMP COMMENT: calculate route to closest unmapped square
-	}
+	} else
+		flood_fill_to_unmapped();// calculate route to closest unmapped square
 }
 
 /* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
 void retrieve_state() {
-
 	know_shortest_path = 1;
+	uint8_t route_index;
+	direction next_direction;
+	while (!flood_fill_home_optimistic()) {
+		route_index = 0;
+		next_direction = current_route[route_index];
+		
+	}
 }
 
 /* Ronny is back at the start to pick up the package (in a shady way) */

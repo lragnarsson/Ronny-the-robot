@@ -194,6 +194,6 @@ void flood_fill_to_unmapped() {
 	}
 }
 
-void flood_fill_home_optimistic() {
+uint8_t flood_fill_home_optimistic() {
 	//TODO: copy and modify other flood fill.
 }

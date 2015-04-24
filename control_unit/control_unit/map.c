@@ -77,63 +77,79 @@ void move_map_position_forward() {
 	{
 		goal_position = current_position;
 		goal_found = 1;
+		uint8_t msg[3] = {MAPPED_GOAL, goal_position.x, goal_position.y};
+		i2c_write(COMMUNICATION_UNIT, msg, 3);
 	}
 	tape_square = 0;
 	map[current_position.x][current_position.y] = NOT_WALL;
+	uint8_t msg[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
+	i2c_write(COMMUNICATION_UNIT, msg, 3);
 }
 
 /* Updated map with a detected wall to the left of Ronny */
 void set_wall_left() {
+	coordinate wall_pos = current_position;
 	switch(current_direction) {
 		case NORTH:
-			map[current_position.x][current_position.y - 1] = WALL;
+			--wall_pos.y;
 			break;
 		case EAST:
-			map[current_position.x - 1][current_position.y] = WALL;
+			--wall_pos.x;
 			break;
 		case SOUTH:
-			map[current_position.x][current_position.y + 1] = WALL;
+			++wall_pos.y;
 			break;
 		case WEST:
-			map[current_position.x + 1][current_position.y] = WALL;
+			++wall_pos.x;
 			break;
 	}
+	map[wall_pos.x][wall_pos.y] = WALL;
+	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
+	i2c_write(COMMUNICATION_UNIT, msg, 3);
 }
 
 /* Updated map with a detected wall to the right of Ronny */
 void set_wall_right() {
+	coordinate wall_pos = current_position;
 	switch(current_direction) {
 		case NORTH:
-			map[current_position.x][current_position.y + 1] = WALL;
+			++wall_pos.y;
 			break;
 		case EAST:
-			map[current_position.x + 1][current_position.y] = WALL;
+			++wall_pos.x;
 			break;
 		case SOUTH:
-			map[current_position.x][current_position.y - 1] = WALL;
+			--wall_pos.y;
 			break;
 		case WEST:
-			map[current_position.x - 1][current_position.y] = WALL;
+			--wall_pos.x;
 			break;
 	}
+	map[wall_pos.x][wall_pos.y] = WALL;
+	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
+	i2c_write(COMMUNICATION_UNIT, msg, 3);
 }
 
 /* Updated map with a detected wall in front of Ronny */
 void set_wall_front() {
+	coordinate wall_pos = current_position;
 	switch(current_direction) {
 		case NORTH:
-			map[current_position.x - 1][current_position.y] = WALL;
+			--wall_pos.x;
 			break;
 		case EAST:
-			map[current_position.x][current_position.y + 1] = WALL;
+			++wall_pos.y;
 			break;
 		case SOUTH:
-			map[current_position.x + 1][current_position.y] = WALL;
+			++wall_pos.x;
 			break;
 		case WEST:
-			map[current_position.x][current_position.y - 1] = WALL;
+			--wall_pos.y;
 			break;
 	}
+	map[wall_pos.x][wall_pos.y] = WALL;
+	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
+	i2c_write(COMMUNICATION_UNIT, msg, 3);
 }
 
 uint8_t is_wall_left() {
