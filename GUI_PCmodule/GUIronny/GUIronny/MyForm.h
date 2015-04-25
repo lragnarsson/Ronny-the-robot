@@ -1,6 +1,30 @@
 #pragma once
 #include "Grafer_data.h"
 
+/* 
+TODO v17:
+* Bluetooth till data:
+	-> lägga till cases för inkommande data. ---> CECK
+	-> hantera inkommande data.
+* Utritning: 
+	-> Skapa bitmap array med lämplig storlek
+* Visning av sensorvärden på robot.
+* Visa sensorvärden i tabell i nytt fönster.    --->TESTA
+* Möjlighet att ändra reglerkonstanter.
+* Grafer till sensorvärden.
+*/
+
+#define ABSOLUTEVALUE 0x30
+#define AUTOMODE 0x31
+#define MANUALMODE 0x32
+#define DRIVABLE_SQUARE 0x33
+#define WALL 0x34
+#define DISTRESSEDFOUND 0x35
+#define SENSOR_VALUES 0x40
+#define WHEELENCODERS 0x41
+#define TEJP_FOUND 0x42
+#define TEJP_REF 0x70
+
 namespace GUIronny {
 
 	using namespace System;
@@ -35,7 +59,8 @@ namespace GUIronny {
 
 			changeIR(10, 2, 23, 6, 2);
 
-			//sensorvalues(10, 10, 10, 10, 10);
+			sensorwindow->sensorvalues(10, 10, 10, 10, 10);
+			sensorwindow->sensorvalues(11, 11, 11, 11, 11);
 
 			//
 			//TODO: Add the constructor code here
@@ -50,14 +75,17 @@ namespace GUIronny {
 		array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		int write_position = 0;
 		int expected_length = 0;
-		int rear_left = 0;
+		bool automode = false;
+		Grafer_data^ sensorwindow = (gcnew Grafer_data());
+		bool showing_sensor_window = false;
+		/*int rear_left = 0;
 		int front_left = 0;
 		int rear_right = 0;
 		int front_right = 0;
 		int front = 0;
 
 		int stracka = 0;
-		int vinkel = 0;
+		int vinkel = 0;*/
 
 		int w = 0;
 		int d = 0;
@@ -469,18 +497,19 @@ namespace GUIronny {
 	private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
 
-			 // find available ports
+// find available ports
 	private: void findPorts(void)
 	{
-		// get port names
+// get port names
 		array<Object^>^ objectArray = SerialPort::GetPortNames();
-		// add string array to combobox
+// add string array to combobox
 		this->comboBox1->Items->AddRange(objectArray);
 	}
 
 	private: System::Void non(System::Object^  sender, System::EventArgs^  e) {
 	}
 
+// Keypressevents
 	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 		switch (e->KeyCode){
 		case Keys::A:
@@ -527,76 +556,111 @@ namespace GUIronny {
 		auto datarforwardright = gcnew array < System::Byte > { 0xC5 };
 		auto dataforwardleft = gcnew array < System::Byte > { 0xC6 };
 
-		switch (e->KeyChar){
+		if (!automode)
+		{
 
-		case 'a':
+			switch (e->KeyChar){
 
-			this->Kommandon->Text = "sväng vänster 1100 0011";
-			this->serialPort1->Write(dataleft, 0, dataleft->Length);
-			d = d - 1;
-			//Console::WriteLine("d=" + d);
-			break;
+			case 'a':
 
-		case 's':
+				this->Kommandon->Text = "sväng vänster 1100 0011";
+				this->serialPort1->Write(dataleft, 0, dataleft->Length);
+				d = d - 1;
+				//Console::WriteLine("d=" + d);
+				break;
 
-			this->Kommandon->Text = "bakåt 1100 0100";
-			this->serialPort1->Write(databack, 0, databack->Length);
-			w = w - 1;
-			//Console::WriteLine("w=" + w);
-			break;
+			case 's':
 
-		case 'w':
+				this->Kommandon->Text = "bakåt 1100 0100";
+				this->serialPort1->Write(databack, 0, databack->Length);
+				w = w - 1;
+				//Console::WriteLine("w=" + w);
+				break;
 
-			this->Kommandon->Text = "framåt 1100 0001";
-			this->serialPort1->Write(dataforward, 0, dataforward->Length);
-			w = w + 1;
-			//Console::WriteLine("w =" + w);
-			break;
+			case 'w':
 
-		case 'd':
+				this->Kommandon->Text = "framåt 1100 0001";
+				this->serialPort1->Write(dataforward, 0, dataforward->Length);
+				w = w + 1;
+				//Console::WriteLine("w =" + w);
+				break;
 
-			this->Kommandon->Text = "sväng höger1100 0010";
-			this->serialPort1->Write(dataright, 0, dataright->Length);
-			d = d + 1;
-			//Console::WriteLine("d = " + d);
+			case 'd':
 
-			break;
+				this->Kommandon->Text = "sväng höger1100 0010";
+				this->serialPort1->Write(dataright, 0, dataright->Length);
+				d = d + 1;
+				//Console::WriteLine("d = " + d);
 
-		case 'q':
-			this->Kommandon->Text = "sväng vänster-fram 1100 0110 ";
-			this->serialPort1->Write(dataforward, 0, dataforwardleft->Length);
-			break;
+				break;
 
-		case 'e':
-			this->Kommandon->Text = "sväng höger-fram 1100 0101";
-			this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
-			en = en + 1;
-			//Console::WriteLine("speed = " + en);
-			break;
-		default:
-			this->Kommandon->Text = "fel styrkommando";
-			break;
+			case 'q':
+				this->Kommandon->Text = "sväng vänster-fram 1100 0110 ";
+				this->serialPort1->Write(dataforward, 0, dataforwardleft->Length);
+				break;
+
+			case 'e':
+				this->Kommandon->Text = "sväng höger-fram 1100 0101";
+				this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
+				en = en + 1;
+				//Console::WriteLine("speed = " + en);
+				break;
+			default:
+				this->Kommandon->Text = "fel styrkommando";
+				break;
+			}
+		}
+		else
+		{
+			this->Kommandon->Text = "Autonomt läge";
 		}
 	}
 
+//DAta recieved from serialport.
 	private: virtual System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
 		
 		SerialPort^ sp = (SerialPort^)sender;
-		System::Byte byte = sp->ReadByte();
+		System::Byte byte = sp->ReadByte(); //Recieved byte
 		
-		if (write_position == 0)
+		if (write_position == 0)  //If readposition = 0 we have a header. 
 		{
 			switch (byte)
 			{
-			case 0x40: //sensor värden 
+			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
+				expected_length = 4; 
+				data_recieved[write_position] = byte;
+				++write_position;
+				break;
+			case AUTOMODE: //Autonomt läge
+				write_position = 0;
+				automode = true;
+				break;
+			case MANUALMODE: //Manuellt läge
+				write_position = 0;
+				automode = false;
+				break;
+			case DRIVABLE_SQUARE: //Körbar ruta x,y
+				expected_length = 3;
+				data_recieved[write_position] = byte;
+				++write_position;
+				break;
+			case DISTRESSEDFOUND: //Nödställd funnen
+				expected_length = 3;
+				data_recieved[write_position] = byte;
+				break;
+			case SENSOR_VALUES: //IRsensor värden 
 				expected_length = 11;
 				data_recieved[write_position] = byte;
 				++write_position;
 				break;
-			case 0x41:
+			case WHEELENCODERS://Wheelencodervärden
 				expected_length = 3;
 				data_recieved[write_position] = byte;
 				++write_position;
+				break;
+			case TEJP_FOUND: //Tejpbit funnen.
+				break;
+			case TEJP_REF: //Referensvärde tejp
 				break;
 			default:
 				break;
@@ -610,7 +674,25 @@ namespace GUIronny {
 		{
 			switch (data_recieved[0])
 			{
-			case 0x40:
+
+			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
+				/*
+				TODO
+				*/
+				break;
+
+			case DRIVABLE_SQUARE: //Körbar ruta x,y
+				/*
+				TODO
+				*/
+				break;
+			case DISTRESSEDFOUND: //Nödställd funnen
+				/*
+				TODO
+				*/
+				break;
+
+			case SENSOR_VALUES:  //Dealing with sensorvalues
 			{
 				int rear_left = data_recieved[1] << 8;
 				rear_left |= data_recieved[2];
@@ -627,22 +709,33 @@ namespace GUIronny {
 				int front = data_recieved[9] << 8;
 				front |= data_recieved[10];
 
-				String^ s = Convert::ToString(front);
-				this->IRsensor_Front->Text = s;
+
 
 				changeIR(front, front_left, front_right, rear_left, rear_right);
-
-
 				Console::WriteLine(rear_left + " " + front_left + " " + rear_right + " " + front_right + " " + front);
-				//sensorvalues(front, front_right, rear_right, rear_left, front_left);
-
+				if (showing_sensor_window){
+					sensorwindow->sensorvalues(front, front_right, rear_right, rear_left, front_left);
+				}
+			}
 				break;
 
-			/*case 0x41:
-				stracka = data_recieved[1] << 8;
-				stracka |= dat
+			case WHEELENCODERS:
+				/*
+				TODO
 				*/
-			}
+				break;
+
+			case TEJP_FOUND: //Tejpbit funnen.
+				/*
+				TODO
+				*/
+				break;
+			case TEJP_REF: //Referensvärde tejp
+				/*
+				TODO
+				*/
+				break;
+			
 			default:
 				break;
 			}
@@ -718,9 +811,9 @@ namespace GUIronny {
 	}
 
 	private: System::Void Sensordata_Click(System::Object^  sender, System::EventArgs^  e) {
-		Grafer_data^ iform = (gcnew Grafer_data());
-		iform->Show();
-		iform->sensorvalues(front, front_left, front_right, rear_left, rear_right);
+		showing_sensor_window = true;
+		sensorwindow->Show();
+		//iform->sensorvalues(front, front_left, front_right, rear_left, rear_right);
 
 	}
 
