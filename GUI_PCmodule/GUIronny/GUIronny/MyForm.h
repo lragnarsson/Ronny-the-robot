@@ -48,6 +48,7 @@ namespace GUIronny {
 	public:
 		MyForm(void)
 		{
+			CheckForIllegalCrossThreadCalls = false;
 			InitializeComponent();
 			findPorts();
 			testbitmap(image1, prevx, prevy, Color::White);
@@ -57,7 +58,7 @@ namespace GUIronny {
 			testbitmap(image1, prevx, prevy - 60, Color::White);
 			testbitmap(image1, prevx, prevy - 75, Color::White);
 
-			changeIR(10, 2, 23, 6, 2);
+			//changeIR(10, 2, 23, 6, 2);
 
 			sensorwindow->sensorvalues(10, 10, 10, 10, 10);
 			sensorwindow->sensorvalues(11, 11, 11, 11, 11);
@@ -111,11 +112,17 @@ namespace GUIronny {
 	private: System::Windows::Forms::PictureBox^  Uparrow_pressed;
 	private: System::Windows::Forms::PictureBox^  Downarrow_pressed;
 	private: System::Windows::Forms::PictureBox^  Rightarrow_pressed;
-	private: System::Windows::Forms::TextBox^  IRsensor_VF;
-	private: System::Windows::Forms::TextBox^  IRsensor_VB;
-	private: System::Windows::Forms::TextBox^  IRsensor_HF;
-	private: System::Windows::Forms::TextBox^  IRsensor_HB;
-	private: System::Windows::Forms::TextBox^  IRsensor_Front;
+	public: System::Windows::Forms::TextBox^  IRsensor_VF;
+	private:
+	public: System::Windows::Forms::TextBox^  IRsensor_VB;
+	public: System::Windows::Forms::TextBox^  IRsensor_HF;
+	public: System::Windows::Forms::TextBox^  IRsensor_HB;
+	public: System::Windows::Forms::TextBox^  IRsensor_Front;
+
+
+
+
+
 	private: System::IO::Ports::SerialPort^  serialPort1;
 	private: System::Windows::Forms::Button^  button3;
 	private: System::Windows::Forms::Button^  button4;
@@ -497,19 +504,19 @@ namespace GUIronny {
 	private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
 
-// find available ports
+			 // find available ports
 	private: void findPorts(void)
 	{
-// get port names
+		// get port names
 		array<Object^>^ objectArray = SerialPort::GetPortNames();
-// add string array to combobox
+		// add string array to combobox
 		this->comboBox1->Items->AddRange(objectArray);
 	}
 
 	private: System::Void non(System::Object^  sender, System::EventArgs^  e) {
 	}
 
-// Keypressevents
+			 // Keypressevents
 	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 		switch (e->KeyCode){
 		case Keys::A:
@@ -616,18 +623,19 @@ namespace GUIronny {
 		}
 	}
 
-//DAta recieved from serialport.
+			 //Data recieved from serialport.
 	private: virtual System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-		
+
 		SerialPort^ sp = (SerialPort^)sender;
 		System::Byte byte = sp->ReadByte(); //Recieved byte
-		
+		//Console::WriteLine("recieved data");
+
 		if (write_position == 0)  //If readposition = 0 we have a header. 
 		{
 			switch (byte)
 			{
 			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
-				expected_length = 4; 
+				expected_length = 4;
 				data_recieved[write_position] = byte;
 				++write_position;
 				break;
@@ -649,6 +657,7 @@ namespace GUIronny {
 				data_recieved[write_position] = byte;
 				break;
 			case SENSOR_VALUES: //IRsensor värden 
+				Console::WriteLine("sensosrvalues");
 				expected_length = 11;
 				data_recieved[write_position] = byte;
 				++write_position;
@@ -668,6 +677,7 @@ namespace GUIronny {
 			return;
 		}
 
+		//Console::WriteLine("filling recieved data" + " " + write_position + " " + expected_length);
 		data_recieved[write_position] = byte;
 
 		if (++write_position == expected_length)
@@ -694,6 +704,7 @@ namespace GUIronny {
 
 			case SENSOR_VALUES:  //Dealing with sensorvalues
 			{
+				//Console::WriteLine("HANDLING RECIEVED DATA!!");
 				int rear_left = data_recieved[1] << 8;
 				rear_left |= data_recieved[2];
 
@@ -709,13 +720,11 @@ namespace GUIronny {
 				int front = data_recieved[9] << 8;
 				front |= data_recieved[10];
 
-
-
-				changeIR(front, front_left, front_right, rear_left, rear_right);
 				Console::WriteLine(rear_left + " " + front_left + " " + rear_right + " " + front_right + " " + front);
-				if (showing_sensor_window){
-					sensorwindow->sensorvalues(front, front_right, rear_right, rear_left, front_left);
-				}
+				//sensorwindow->sensorvalues(front, front_left, front_right, rear_left, rear_right);
+				changeIR(front, front_left, front_right, rear_left, rear_right);
+
+
 			}
 				break;
 
@@ -735,23 +744,24 @@ namespace GUIronny {
 				TODO
 				*/
 				break;
-			
+
 			default:
 				break;
 			}
 
+			//if (showing_sensor_window){
+			//this->sensorvalues(front, front_right, rear_right, rear_left, front_left);
 			write_position = 0;
 			expected_length = 0;
 		}
 	}
-
-	private: void wheelvalues(System::Byte^ byte1, System::Byte^ byte2){
+	/*private: void wheelvalues(System::Byte^ byte1, System::Byte^ byte2){
 
 		Grafer_data^ grafer = gcnew Grafer_data();
 		grafer->dataGridView1->Rows->Add(byte1, byte2);
-		//this->dataGridView1->Rows->Add(byte1, byte2);
-	}
-	/*private: void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
+		//this->dataGridView1->Rows->Add(byte1, byte2);*/
+
+	private: void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
 		Grafer_data^ grafer = gcnew Grafer_data();
 		grafer->dataGridView1->Rows[0]->Cells[2]->Value = byte1;
 		grafer->dataGridView1->Rows[0]->Cells[3]->Value = byte2;
@@ -759,8 +769,8 @@ namespace GUIronny {
 		grafer->dataGridView1->Rows[0]->Cells[5]->Value = byte4;
 		grafer->dataGridView1->Rows[0]->Cells[6]->Value = byte5;
 		grafer->dataGridView1->Rows->Add();
+	}
 
-	}*/
 
 	private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
 		auto data = gcnew array < System::Byte > { 12 };
@@ -822,7 +832,19 @@ namespace GUIronny {
 		String^ s_front = Convert::ToString(front);
 		this->IRsensor_Front->Text = s_front;
 
+		String^ s_front_left = Convert::ToString(front_left);
+		this->IRsensor_VF->Text = s_front_left;
 
+		String^ s_front_right = Convert::ToString(front_right);
+		this->IRsensor_HF->Text = s_front_right;
+
+		String^ s_rear_left = Convert::ToString(rear_left);
+		this->IRsensor_VB->Text = s_rear_left;
+
+		String^ s_rear_right = Convert::ToString(rear_left);
+		this->IRsensor_HB->Text = s_rear_right;
+
+		Console::WriteLine("changeIR");
 	}
 	
 };

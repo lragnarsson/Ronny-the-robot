@@ -1,4 +1,5 @@
 #pragma once
+//#include "MyForm.h"
 
 namespace GUIronny {
 
@@ -157,7 +158,7 @@ namespace GUIronny {
 
 	public: void sensorvalues(int front, int front_left, int front_right, int back_left, int back_right){
 
-		int rowcount = this->dataGridView1->RowCount;
+		int rowcount = dataGridView1->RowCount;
 		Console::WriteLine(rowcount);
 		this->dataGridView1->Rows->Add();
 		this->dataGridView1->Rows[rowcount - 1]->Cells[2]->Value = front;

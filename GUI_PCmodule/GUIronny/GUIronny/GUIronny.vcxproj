@@ -71,14 +71,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Reference Include="System">
-      <Private>true</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-    </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -88,11 +85,9 @@
   <ItemGroup>
     <ClInclude Include="Grafer_data.h">
       <FileType>CppForm</FileType>
-      <DeploymentContent>true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="MyForm.h">
       <FileType>CppForm</FileType>
-      <DeploymentContent>true</DeploymentContent>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
