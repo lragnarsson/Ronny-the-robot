@@ -54,47 +54,21 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 }
 
 void update_distance_and_angle(int8_t distance, int8_t angle) {
-	if(distance_remaining > 0)
-	{
-		if(distance_remaining > distance)
-			distance_remaining -= distance;
-		else
-			distance_remaining = 0;
-	} else if(distance_remaining < 0)
-	{
-		if(distance_remaining < distance)
-			distance_remaining -= distance;
-		else
-			distance_remaining = 0;
-	}
+	
+	if(abs(distance_remaining) > abs(distance))
+		distance_remaining -= distance;
+	else
+		distance_remaining = 0;
 
-	if(square_distance_remaining > 0)
-	{
-		if(square_distance_remaining > distance)
-			square_distance_remaining -= distance;
-		else
-			square_distance_remaining = 0;
-	} else if(square_distance_remaining < 0)
-	{
-		if(square_distance_remaining < distance)
-			square_distance_remaining -= distance;
-		else
-			square_distance_remaining = 0;
-	}
+	if(abs(square_distance_remaining) > abs(distance))
+		square_distance_remaining -= distance;
+	else
+		square_distance_remaining = 0;
 
-	if(angle_remaining > 0)
-	{
-		if(angle_remaining > angle)
-			angle_remaining -= angle;
-		else
-			angle_remaining = 0;
-	} else if (angle_remaining < 0)
-	{
-		if(angle_remaining < angle)
-			angle_remaining -= angle;
-		else
-			angle_remaining = 0;
-	}
+	if(angle_remaining > angle)
+		angle_remaining -= angle;
+	else
+		angle_remaining = 0;
 }
 
 void tape_found() {

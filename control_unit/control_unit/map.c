@@ -46,8 +46,13 @@ void init_map() {
 	for (int i = 0; i < MAP_SIZE; ++i)
 		for(int j = 0; j < MAP_SIZE; ++j)
 			map[i][j] = UNMAPPED;
-	*/ //While test map is used		
-	current_position = (coordinate) {START_POSITION_X, START_POSITION_Y};
+	*/ //While test map is used
+
+	for (int i = 0; i < MAP_SIZE; ++i)
+		for(int j = 0; j < MAP_SIZE; ++j)
+			ff_map[i][j] = FF_DONT_CARE;
+
+	start_position = current_position = (coordinate) {START_POSITION_X, START_POSITION_Y};
 	current_direction = NORTH;
 	current_route[0] = 10;
 }

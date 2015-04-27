@@ -95,13 +95,15 @@ void rotate_180() {
 	stop_engines();
 }
 
-uint8_t map_surroundings() {
+uint8_t map_surroundings(uint8_t turn) {
 	if(left_wall_distance < 300)
 		set_wall_left();
 	if(right_wall_distance < 300)
 		set_wall_right();
 	if(front_wall_distance < 300) {
 		set_wall_front();
+		if(!turn)
+			return 1;
 		if (!is_wall_left())
 			rotate_left_90();
 		else if(!is_wall_right())
@@ -118,7 +120,7 @@ uint8_t drive_and_map() {
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 	distance_remaining = 1000;
 	square_distance_remaining = 400;
-	if (!map_surroundings())
+	if (!map_surroundings(1))
 		return 0;
 	set_desired_speed(state_speed);
 	while (goal_found != 1) {
@@ -129,7 +131,7 @@ uint8_t drive_and_map() {
 
 		if (square_distance_remaining == 0) { // Ronny is in the middle of the next square, update map.
 			move_map_position_forward(); // Update map coordinates
-			if (!map_surroundings()) // Update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
+			if (!map_surroundings(1)) // Update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
 				return 0;
 			distance_remaining = 1000;
 			square_distance_remaining = 400;
@@ -138,11 +140,6 @@ uint8_t drive_and_map() {
 			in_corridor = 1 - in_corridor; // Exited or entered a crossroad section  (turn on/off sensor feedback temporarily)
 	}
 	return 1;
-}
-
-/* Creates and sets current_route based on map data */
-void create_route() {
-	
 }
 
 /* Contains all logic for mapping and searching through the map */
@@ -154,23 +151,49 @@ void search_state() {
 		flood_fill_to_unmapped();// calculate route to closest unmapped square
 }
 
-/* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
-void retrieve_state() {
-	know_shortest_path = 1;
-	uint8_t route_index;
-	direction next_direction;
-	while (!flood_fill_home_optimistic()) {
-		route_index = 0;
-		next_direction = current_route[route_index];
-		
-	}
-}
-
 /* Ronny is back at the start to pick up the package (in a shady way) */
 void grab_package_state() {
 	close_claw();
 	current_task = DELIVER;
 	state_speed = SUPER_SPEED;
+}
+
+/* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
+void retrieve_state() {
+	know_shortest_path = 1;
+	uint8_t route_index;
+	direction next_direction;
+	while(!(current_position.x == START_POSITION_X && current_position.y == START_POSITION_Y))
+	{
+		map_surroundings(0);
+		flood_fill_home_optimistic();
+		/* Follow optimistic path */
+		while(next_direction != ROUTE_END) {
+			map_surroundings(0);
+			flood_fill_home_optimistic();
+			distance_remaining = 400;
+			/* Decide what turn to make based on current direction and next direction in route */
+			uint8_t next_turn = (current_direction - next_direction) & 3;
+			switch (next_turn) {
+				case LEFT:
+					rotate_left_90();
+					step_forward();
+					break;
+				case RIGHT:
+					rotate_right_90();
+					step_forward();
+					break;
+				case BACKWARD:
+					rotate_180();
+					break;
+				default:
+					break;
+			}
+			drive_forward();
+			next_direction = current_route[route_index];
+		}
+	}
+	grab_package_state();
 }
 
 /* Drops the package and positions Ronny to avoid running it over later */
