@@ -10,7 +10,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = MANUAL;
+	current_mode = TEST;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -121,7 +121,7 @@ uint8_t drive_and_map() {
 	distance_remaining = 1000;
 	square_distance_remaining = 400;
 	if (!map_surroundings(1))
-		return 0;
+		return goal_found;
 	set_desired_speed(state_speed);
 	while (goal_found != 1) {
 		if (in_corridor)
@@ -132,14 +132,14 @@ uint8_t drive_and_map() {
 		if (square_distance_remaining == 0) { // Ronny is in the middle of the next square, update map.
 			move_map_position_forward(); // Update map coordinates
 			if (!map_surroundings(1)) // Update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
-				return 0;
+				return goal_found;
 			distance_remaining = 1000;
 			square_distance_remaining = 400;
 		}
 		if (corner_detected_left() || corner_detected_right())
 			in_corridor = 1 - in_corridor; // Exited or entered a crossroad section  (turn on/off sensor feedback temporarily)
 	}
-	return 1;
+	return goal_found;
 }
 
 /* Contains all logic for mapping and searching through the map */
@@ -156,43 +156,39 @@ void grab_package_state() {
 	close_claw();
 	current_task = DELIVER;
 	state_speed = SUPER_SPEED;
+	flood_fill_to_destination(goal_position);
 }
 
 /* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
 void retrieve_state() {
-	know_shortest_path = 1;
-	uint8_t route_index;
+	uint8_t route_index = 0;
 	direction next_direction;
-	while(!(current_position.x == START_POSITION_X && current_position.y == START_POSITION_Y))
+	while(!(current_position.x = START_POSITION_X && current_position.y == START_POSITION_Y)) 
 	{
 		map_surroundings(0);
 		flood_fill_home_optimistic();
-		/* Follow optimistic path */
-		while(next_direction != ROUTE_END) {
-			map_surroundings(0);
-			flood_fill_home_optimistic();
-			distance_remaining = 400;
-			/* Decide what turn to make based on current direction and next direction in route */
-			uint8_t next_turn = (current_direction - next_direction) & 3;
-			switch (next_turn) {
-				case LEFT:
-					rotate_left_90();
-					step_forward();
-					break;
-				case RIGHT:
-					rotate_right_90();
-					step_forward();
-					break;
-				case BACKWARD:
-					rotate_180();
-					break;
-				default:
-					break;
-			}
-			drive_forward();
-			next_direction = current_route[route_index];
+		distance_remaining = 400;
+		/* Decide what turn to make based on current direction and next direction in route */
+		uint8_t next_turn = (current_direction - next_direction) & 3;
+		switch (next_turn) {
+			case LEFT:
+				rotate_left_90();
+				step_forward();
+				break;
+			case RIGHT:
+				rotate_right_90();
+				step_forward();
+				break;
+			case BACKWARD:
+				rotate_180();
+				break;
+			default:
+				break;
 		}
+		drive_forward();
+		next_direction = current_route[route_index];
 	}
+	current_route[0] = ROUTE_END;
 	grab_package_state();
 }
 
@@ -201,6 +197,7 @@ void drop_package_state() {
 	open_claw();
 	current_task = RETURN;
 	state_speed = SUPER_SPEED;
+	flood_fill_to_destination(start_position);
 }
 
 /* Ronny has reached the goal and does a victory dance */
@@ -240,6 +237,7 @@ state_function navigate() {
 		drive_forward();
 		next_direction = current_route[route_index];
 	}
+	current_route[0] = ROUTE_END;
 	/* Figure out the correct state transition*/
 	state_function state_transition;
 	switch (current_task) {
@@ -247,10 +245,7 @@ state_function navigate() {
 			state_transition = &search_state; // Navigated to a un-mapped area, keep searching.
 			break;
 		case RETRIEVE:
-			if (know_shortest_path)
-				state_transition = &grab_package_state;  // The last route was the shortest path to the start - grab package.
-			else
-				state_transition = &retrieve_state;  // The shortest path between the goal and start is not yet known, the last route was to an unmapped area - keep looking for shortest path.
+			state_transition = &retrieve_state;  // Find the shortest path home
 			break;
 		case DELIVER:
 			state_transition = &drop_package_state; // The last route was from start to the goal - drop the package.
@@ -347,12 +342,12 @@ void test_mode()
 {
 	//drive_forward();
 	//open_claw();
-	_delay_ms(2000);
+	//_delay_ms(2000);
 	//close_claw();
-	//flood_fill_to_destination((coordinate){10, 17});
-	//navigate();
-	distance_remaining = 10000;
-	drive_forward();
+	flood_fill_to_destination((coordinate){11, 20});
+	navigate();
+	//distance_remaining = 10000;
+	//drive_forward();
 	//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 }
 

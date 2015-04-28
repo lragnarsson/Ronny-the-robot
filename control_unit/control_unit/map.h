@@ -14,7 +14,7 @@
 #define NOT_WALL 253
 #define UNMAPPED 254
 #define WALL 255
-#define FF_DONT_CARE 255
+#define FF_DEFAULT 255
 #define START_POSITION_X 15
 #define START_POSITION_Y 15
 

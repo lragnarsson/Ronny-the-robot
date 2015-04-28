@@ -25,7 +25,7 @@ void reset_flood_fill_values()
 {
 	for (int i = 0; i < MAP_SIZE; ++i)
 		for(int j = 0; j < MAP_SIZE; ++j)
-			ff_map[i][j] = FF_DONT_CARE;
+			ff_map[i][j] = FF_DEFAULT;
 }
 
 void calculate_route(coordinate destination)
@@ -103,31 +103,33 @@ void flood_fill_to_destination(coordinate destination) {
 		new_wavefront_size = 0;
 		for(int i = 0; i < current_wavefront_size; ++i)
 		{
-			ff_map[(current_wavefront + i)->x][(current_wavefront + i)->y] = distance;
-			if((current_wavefront + i)->x == destination.x && (current_wavefront + i)->y == destination.y)
+			uint8_t x_coord = (current_wavefront + i)->x;
+			uint8_t y_coord = (current_wavefront + i)->y;
+			ff_map[x_coord][y_coord] = distance;
+			if(x_coord == destination.x && y_coord == destination.y)
 			{
 				calculate_route(destination);
 				return;
 			}
 			
-			if(map[(current_wavefront + i)->x - 1][(current_wavefront + i)->y] == NOT_WALL) // NORTH
+			if(map[x_coord - 1][y_coord] == NOT_WALL && ff_map[x_coord - 1][y_coord] == FF_DEFAULT) // NORTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x - 1, (current_wavefront + i)->y};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord - 1, y_coord};
 				++new_wavefront_size;		
 			}
-			if(map[(current_wavefront + i)->x][(current_wavefront + i)->y + 1] == NOT_WALL) // EAST
+			if(map[x_coord][y_coord + 1] == NOT_WALL && ff_map[x_coord][y_coord + 1] == FF_DEFAULT) // EAST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x, (current_wavefront + i)->y + 1};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord + 1};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x + 1][(current_wavefront + i)->y] == NOT_WALL) // SOUTH
+			if(map[x_coord + 1][y_coord] == NOT_WALL && ff_map[x_coord + 1][y_coord] == FF_DEFAULT) // SOUTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x + 1, (current_wavefront + i)->y};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord + 1, y_coord};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x][(current_wavefront + i)->y - 1] == NOT_WALL) // WEST
+			if(map[x_coord][y_coord - 1] == NOT_WALL && ff_map[x_coord][y_coord - 1] == FF_DEFAULT) // WEST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x, (current_wavefront + i)->y - 1};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord - 1};
 				++new_wavefront_size;
 			}
 		}
@@ -153,32 +155,35 @@ void flood_fill_to_unmapped() {
 		new_wavefront_size = 0;
 		for(int i = 0; i < current_wavefront_size; ++i)
 		{
-			if(map[(current_wavefront + i)->x][(current_wavefront + i)->y] == UNMAPPED)
+			uint8_t x_coord = (current_wavefront + i)->x;
+			uint8_t y_coord = (current_wavefront + i)->y;
+			if(map[x_coord][y_coord] == UNMAPPED)
 			{
-				ff_map[(current_wavefront + i)->x][(current_wavefront + i)->y] = distance;
-				calculate_route((coordinate){ (current_wavefront + i)->x, (current_wavefront + i)->y });
+				ff_map[x_coord][y_coord] = distance;
+				calculate_route((coordinate){ x_coord, y_coord });
 				return;
 			}
-			ff_map[(current_wavefront + i)->x][(current_wavefront + i)->y] = distance;
 			
-			if(map[(current_wavefront + i)->x - 1][(current_wavefront + i)->y] == NOT_WALL || map[(current_wavefront + i)->x - 1][(current_wavefront + i)->y] == UNMAPPED) // NORTH
+			ff_map[x_coord][y_coord] = distance;
+			
+			if((map[x_coord - 1][y_coord] == NOT_WALL || map[x_coord - 1][y_coord] == UNMAPPED) && ff_map[x_coord - 1][y_coord] == FF_DEFAULT) // NORTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x - 1, (current_wavefront + i)->y};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord - 1, y_coord};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x][(current_wavefront + i)->y + 1] == NOT_WALL || map[(current_wavefront + i)->x][(current_wavefront + i)->y + 1] == UNMAPPED) // EAST
+			if((map[x_coord][y_coord + 1] == NOT_WALL || map[x_coord][y_coord + 1] == UNMAPPED) && ff_map[x_coord][y_coord + 1] == FF_DEFAULT) // EAST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x, (current_wavefront + i)->y + 1};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord + 1};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x + 1][(current_wavefront + i)->y] == NOT_WALL || map[(current_wavefront + i)->x + 1][(current_wavefront + i)->y] == UNMAPPED) // SOUTH
+			if((map[x_coord + 1][y_coord] == NOT_WALL || map[x_coord + 1][y_coord] == UNMAPPED) && ff_map[x_coord + 1][y_coord] == FF_DEFAULT) // SOUTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x + 1, (current_wavefront + i)->y};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord + 1, y_coord};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x][(current_wavefront + i)->y - 1] == NOT_WALL || map[(current_wavefront + i)->x][(current_wavefront + i)->y - 1] == UNMAPPED) // WEST
+			if((map[x_coord][y_coord - 1] == NOT_WALL || map[x_coord][y_coord - 1] == UNMAPPED) && ff_map[x_coord][y_coord - 1] == FF_DEFAULT) // WEST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x, (current_wavefront + i)->y - 1};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord - 1};
 				++new_wavefront_size;
 			}
 		}
@@ -204,31 +209,34 @@ void flood_fill_home_optimistic() {
 		new_wavefront_size = 0;
 		for(int i = 0; i < current_wavefront_size; ++i)
 		{
-			ff_map[(current_wavefront + i)->x][(current_wavefront + i)->y] = distance;
-			if((current_wavefront + i)->x == destination.x && (current_wavefront + i)->y == destination.y)
+			uint8_t x_coord = (current_wavefront + i)->x;
+			uint8_t y_coord = (current_wavefront + i)->y;
+			ff_map[x_coord][y_coord] = distance;
+			
+			if(x_coord == destination.x && y_coord == destination.y)
 			{
 				calculate_route(destination);
 				return;
 			}
-			
-			if(map[(current_wavefront + i)->x - 1][(current_wavefront + i)->y] == NOT_WALL || map[(current_wavefront + i)->x - 1][(current_wavefront + i)->y] == UNMAPPED) // NORTH
+						
+			if((map[x_coord - 1][y_coord] == NOT_WALL || map[x_coord - 1][y_coord] == UNMAPPED) && ff_map[x_coord - 1][y_coord] == FF_DEFAULT) // NORTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x - 1, (current_wavefront + i)->y};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord - 1, y_coord};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x][(current_wavefront + i)->y + 1] == NOT_WALL || map[(current_wavefront + i)->x][(current_wavefront + i)->y + 1] == UNMAPPED) // EAST
+			if((map[x_coord][y_coord + 1] == NOT_WALL || map[x_coord][y_coord + 1] == UNMAPPED) && ff_map[x_coord][y_coord + 1] == FF_DEFAULT) // EAST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x, (current_wavefront + i)->y + 1};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord + 1};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x + 1][(current_wavefront + i)->y] == NOT_WALL || map[(current_wavefront + i)->x + 1][(current_wavefront + i)->y] == UNMAPPED) // SOUTH
+			if((map[x_coord + 1][y_coord] == NOT_WALL || map[x_coord + 1][y_coord] == UNMAPPED) && ff_map[x_coord + 1][y_coord] == FF_DEFAULT) // SOUTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x + 1, (current_wavefront + i)->y};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord + 1, y_coord};
 				++new_wavefront_size;
 			}
-			if(map[(current_wavefront + i)->x][(current_wavefront + i)->y - 1] == NOT_WALL || map[(current_wavefront + i)->x][(current_wavefront + i)->y - 1] == UNMAPPED) // WEST
+			if((map[x_coord][y_coord - 1] == NOT_WALL || map[x_coord][y_coord - 1] == UNMAPPED) && ff_map[x_coord][y_coord - 1] == FF_DEFAULT) // WEST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){(current_wavefront + i)->x, (current_wavefront + i)->y - 1};
+				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord - 1};
 				++new_wavefront_size;
 			}
 		}
