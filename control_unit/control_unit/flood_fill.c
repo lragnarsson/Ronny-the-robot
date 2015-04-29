@@ -9,8 +9,8 @@
 
 uint8_t current_wavefront_size;
 uint8_t new_wavefront_size;
-coordinate wavefront_1[100];
-coordinate wavefront_2[100];
+coordinate wavefront_1[128];
+coordinate wavefront_2[128];
 coordinate* current_wavefront = &wavefront_1[0];
 coordinate* new_wavefront = &wavefront_2[0];
 
@@ -202,8 +202,8 @@ void flood_fill_home_optimistic() {
 	reset_flood_fill_values();
 	*current_wavefront = current_position;
 	current_wavefront_size = 1;
-	coordinate destination = start_position;
 	uint8_t distance = 0;
+	uint8_t duplicate = 0;
 	while(1)
 	{
 		new_wavefront_size = 0;
@@ -213,31 +213,71 @@ void flood_fill_home_optimistic() {
 			uint8_t y_coord = (current_wavefront + i)->y;
 			ff_map[x_coord][y_coord] = distance;
 			
-			if(x_coord == destination.x && y_coord == destination.y)
+			if(x_coord == start_position.x && y_coord == start_position.y)
 			{
-				calculate_route(destination);
+				calculate_route(start_position);
 				return;
 			}
 						
-			if((map[x_coord - 1][y_coord] == NOT_WALL || map[x_coord - 1][y_coord] == UNMAPPED) && ff_map[x_coord - 1][y_coord] == FF_DEFAULT) // NORTH
+			if(map[x_coord - 1][y_coord] != WALL && ff_map[x_coord - 1][y_coord] == FF_DEFAULT) // NORTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord - 1, y_coord};
-				++new_wavefront_size;
+				duplicate = 0;
+				for (uint8_t j = 1; j <= new_wavefront_size; ++j)
+					if ((new_wavefront + new_wavefront_size - j)->x == x_coord - 1 && (new_wavefront + new_wavefront_size - j)->y == y_coord)
+					{
+						duplicate = 1;
+						break;
+					}
+				if (!duplicate)
+				{
+					*(new_wavefront + new_wavefront_size) = (coordinate){x_coord - 1, y_coord};
+					++new_wavefront_size;
+				}
 			}
-			if((map[x_coord][y_coord + 1] == NOT_WALL || map[x_coord][y_coord + 1] == UNMAPPED) && ff_map[x_coord][y_coord + 1] == FF_DEFAULT) // EAST
+			if(map[x_coord][y_coord + 1] != WALL && ff_map[x_coord][y_coord + 1] == FF_DEFAULT) // EAST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord + 1};
-				++new_wavefront_size;
+				duplicate = 0;
+				for (uint8_t j = 1; j <= new_wavefront_size; ++j)
+					if ((new_wavefront + new_wavefront_size - j)->x == x_coord && (new_wavefront + new_wavefront_size - j)->y == y_coord + 1)
+					{
+						duplicate = 1;
+						break;
+					}
+					if (!duplicate)
+					{
+						*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord + 1};
+						++new_wavefront_size;
+					}
 			}
-			if((map[x_coord + 1][y_coord] == NOT_WALL || map[x_coord + 1][y_coord] == UNMAPPED) && ff_map[x_coord + 1][y_coord] == FF_DEFAULT) // SOUTH
+			if(map[x_coord + 1][y_coord] != WALL && ff_map[x_coord + 1][y_coord] == FF_DEFAULT) // SOUTH
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord + 1, y_coord};
-				++new_wavefront_size;
+				duplicate = 0;
+				for (uint8_t j = 1; j <= new_wavefront_size; ++j)
+					if ((new_wavefront + new_wavefront_size - j)->x == x_coord + 1 && (new_wavefront + new_wavefront_size - j)->y == y_coord)
+					{
+						duplicate = 1;
+						break;
+					}
+				if (!duplicate)
+				{
+					*(new_wavefront + new_wavefront_size) = (coordinate){x_coord + 1, y_coord};
+					++new_wavefront_size;
+				}
 			}
-			if((map[x_coord][y_coord - 1] == NOT_WALL || map[x_coord][y_coord - 1] == UNMAPPED) && ff_map[x_coord][y_coord - 1] == FF_DEFAULT) // WEST
+			if(map[x_coord][y_coord - 1] != WALL && ff_map[x_coord][y_coord - 1] == FF_DEFAULT) // WEST
 			{
-				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord - 1};
-				++new_wavefront_size;
+				duplicate = 0;
+				for (uint8_t j = 1; j <= new_wavefront_size; ++j)
+					if ((new_wavefront + new_wavefront_size - j)->x == x_coord && (new_wavefront + new_wavefront_size - j)->y == y_coord - 1)
+					{
+						duplicate = 1;
+						break;
+					}
+				if (!duplicate)
+				{
+					*(new_wavefront + new_wavefront_size) = (coordinate){x_coord, y_coord - 1};
+					++new_wavefront_size;
+				}
 			}
 		}
 		if(new_wavefront_size == 0) // Route to destination not found

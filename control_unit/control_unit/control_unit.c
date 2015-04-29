@@ -344,7 +344,8 @@ void test_mode()
 	//open_claw();
 	//_delay_ms(2000);
 	//close_claw();
-	flood_fill_to_destination((coordinate){11, 20});
+	current_position = (coordinate) {7, 15};
+	flood_fill_home_optimistic();
 	navigate();
 	//distance_remaining = 10000;
 	//drive_forward();
