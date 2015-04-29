@@ -5,7 +5,7 @@
 #include "control_system.h"
 #include "mult16x16.h"
 
-const uint8_t ANGLE_CHANGE_THRESHOLD = 20;
+const int16_t ANGLE_CHANGE_THRESHOLD = 10000;
 //volatile uint8_t P_COEFFICIENT = 20;
 //volatile uint8_t D_COEFFICIENT = 20;
 
@@ -111,26 +111,13 @@ void set_manual_forward_right_engine_speed() {
 	ENGINE_RIGHT_SPEED = current_speed - (current_speed >> 3) ;
 }
 
-/* Absolute value of linear approximation of left "angle" derivative */
-uint8_t get_angle_change_left() {
-	if (current_angle_left > last_tick_angle_left)
-		return inverse_sampling_speed * (current_angle_left - last_tick_angle_left);
-	return inverse_sampling_speed * (last_tick_angle_left - current_angle_left);
-}
-
-/* Absolute value of linear approximation of right "angle" derivative */
-uint8_t get_angle_change_right() {
-	if (current_angle_right > last_tick_angle_right)
-		return inverse_sampling_speed * (current_angle_right - last_tick_angle_right);
-	return inverse_sampling_speed * (last_tick_angle_right - current_angle_right);
-}
 
 uint8_t corner_detected_left() {
-	return (uint8_t)(get_angle_change_left() > ANGLE_CHANGE_THRESHOLD);
+	return (uint8_t)(abs(current_angle_error) > ANGLE_CHANGE_THRESHOLD);
 }
 
 uint8_t corner_detected_right() {
-	return (uint8_t)(get_angle_change_right() > ANGLE_CHANGE_THRESHOLD);	
+	return (uint8_t)(abs(current_angle_error) > ANGLE_CHANGE_THRESHOLD);	
 }
 
 void open_claw() {

@@ -15,8 +15,8 @@
 #include "control_system.h"
 #include "map.h"
 
-static const uint8_t MAPPING_SPEED = 145;
-static const uint8_t SUPER_SPEED = 255;
+static const uint8_t MAPPING_SPEED = 75;
+static const uint8_t SUPER_SPEED = 155;
 static const uint8_t TURN_SPEED = 50;
 uint8_t state_speed;
 typedef void (*state_function)();

@@ -42,11 +42,11 @@ extern uint8_t map[MAP_SIZE][MAP_SIZE] = { {254, 254, 254, 254, 254, 254, 254, 2
 											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254} }; // 32
 
 void init_map() {
-	/*
+	
 	for (int i = 0; i < MAP_SIZE; ++i)
 		for(int j = 0; j < MAP_SIZE; ++j)
 			map[i][j] = UNMAPPED;
-	*/ //While test map is used
+
 	for (int i = 0; i < MAP_SIZE; ++i)
 	{
 		map[0][i] = WALL;

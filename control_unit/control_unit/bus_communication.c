@@ -39,9 +39,9 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	uint16_t front_right = front_right_h;
 	front_right = front_right << 8;
 	front_right |= front_right_l;
-	uint16_t front = front_h;
-	front = front << 8;
-	front |= front_l;	
+	front_wall_distance = front_h;
+	front_wall_distance = front_wall_distance << 8;
+	front_wall_distance |= front_l;	
 	
 	left_wall_distance = (front_left + rear_left) / 2;
 	right_wall_distance = (front_right + rear_right) / 2;
@@ -54,6 +54,8 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	current_angle_right = rear_right - front_right;
 	//current_angle_error = current_angle_left + current_angle_right;
 	current_angle_error = (current_distance_error - previous_distance_error) * 25;
+	uint8_t msg[2] = {0xFF, (uint8_t)(abs(current_angle_error)>>3)};
+	i2c_write(COMMUNICATION_UNIT, msg, 2);
 }
 
 void update_distance_and_angle(int8_t distance, int8_t angle) {

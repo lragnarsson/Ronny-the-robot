@@ -10,7 +10,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = TEST;
+	current_mode = AUTONOMOUS;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -50,8 +50,8 @@ void drive_forward() {
 			move_map_position_forward();
 			square_distance_remaining = 400;
 		}
-		//if (corner_detected_left() || corner_detected_right())
-			//step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
+		if (corner_detected_left() || corner_detected_right())
+			step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
 	}
 	stop_engines();
 }
@@ -96,11 +96,11 @@ void rotate_180() {
 }
 
 uint8_t map_surroundings(uint8_t turn) {
-	if(left_wall_distance < 300)
+	if(left_wall_distance < 250)
 		set_wall_left();
-	if(right_wall_distance < 300)
+	if(right_wall_distance < 250)
 		set_wall_right();
-	if(front_wall_distance < 300) {
+	if(front_wall_distance < 150) {
 		set_wall_front();
 		if(!turn)
 			return 1;
@@ -162,7 +162,7 @@ void grab_package_state() {
 /* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
 void retrieve_state() {
 	uint8_t route_index = 0;
-	direction next_direction;
+	direction next_direction = current_route[route_index];
 	while(!(current_position.x = START_POSITION_X && current_position.y == START_POSITION_Y)) 
 	{
 		map_surroundings(0);
