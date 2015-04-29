@@ -50,8 +50,8 @@ void drive_forward() {
 			move_map_position_forward();
 			square_distance_remaining = 400;
 		}
-		if (corner_detected_left() || corner_detected_right())
-			step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
+		//if (corner_detected_left() || corner_detected_right())
+			//step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
 	}
 	stop_engines();
 }
@@ -84,7 +84,7 @@ void rotate_right_90() {
 
 /* Rotate 180 degrees based on wheel encoder feedback */
 void rotate_180() {
-	angle_remaining = 180;
+	angle_remaining = -180;
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
 	set_desired_speed(TURN_SPEED);
 	while(angle_remaining != 0) {
@@ -343,11 +343,6 @@ void test_mode()
 	//drive_forward();
 	//open_claw();
 	//_delay_ms(2000);
-	//close_claw();
-	current_position = (coordinate) {7, 15};
-	flood_fill_home_optimistic();
-	navigate();
-	//distance_remaining = 10000;
 	//drive_forward();
 	//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 }
@@ -355,7 +350,7 @@ void test_mode()
 int main(void) {
 	initialize_control_unit();
 	sei();
-
+	_delay_ms(1000);
 	while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();

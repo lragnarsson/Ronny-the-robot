@@ -33,13 +33,14 @@ void init_control_system() {
 	DDRD = (0<<DDD0) | (1<<DDD7); // Button input and claw output
 	//CLAW_POSITION = CLAW_CLOSED;
 	
-	P_COEFFICIENT = 0x0500;
-	D_COEFFICIENT = 0x0000;
-	sei();
+	P_COEFFICIENT = 0x0A00;
+	D_COEFFICIENT = 0x0F00;
 }
 
 /* Service routine for handling acceleration */
 ISR(TIMER1_COMPA_vect) {
+	/*if(distance_remaining < 100)
+		desired_speed = 10; //Speed from witch instant stop is OK*/
 	if(desired_speed > current_speed)
 		++current_speed;
 	else if(desired_speed < current_speed)
@@ -90,8 +91,8 @@ void calculate_control_speed() {
 		control_speed_left = 0;
 	}
 	
-	uint8_t msg[2] = {0xFF, control_speed_left};
-	i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+	//uint8_t msg[2] = {0xFF, control_speed_left};
+	//i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
 }
 
 void set_controlled_engine_speed() {

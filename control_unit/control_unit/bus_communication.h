@@ -28,6 +28,7 @@ volatile int16_t current_angle_error;
 volatile int16_t current_angle_left;
 volatile int16_t current_angle_right;
 volatile int16_t current_distance_error;
+volatile int16_t previous_distance_error;
 volatile int16_t last_tick_angle_left;
 volatile int16_t last_tick_angle_right;
 volatile int16_t distance_remaining;

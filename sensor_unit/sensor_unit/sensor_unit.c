@@ -76,20 +76,17 @@ ISR(INT0_vect)
 {
 	if (PINB & (1<<ENC_L_B))
 	{
-		if (--encoder_left < -10)
+		if (--encoder_left < -1)
 		{
-
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
 	else
 	{
-		if (++encoder_left > 10)
+		if (++encoder_left > 1)
 		{
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -99,22 +96,17 @@ ISR(INT1_vect)
 {	
 	if (PINB & (1<<ENC_R_B))
 	{
-		if (++encoder_right > 10)
+		if (++encoder_right > 1)
 		{
-
-
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
 	else
 	{
-		if (--encoder_right < -10)
+		if (--encoder_right < -1)
 		{
-
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
