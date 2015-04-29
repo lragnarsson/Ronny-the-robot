@@ -49,12 +49,13 @@
 #define IR_LONG_MAX 550
 #define IR_NUM_SAMPLES 4
 
-#define ENCODER_DISTANCE_SCALE 1
+#define ENCODER_DISTANCE_SCALE 85
 #define ENCODER_ROTATION_SCALE 1
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <util/atomic.h>
 #include <avr/pgmspace.h>
 
 volatile uint16_t ir_sensors[5][IR_NUM_SAMPLES];
