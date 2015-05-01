@@ -94,6 +94,11 @@ namespace GUIronny {
 		static unsigned int current_angle = 0;
 		static unsigned int drivablesquare_xpos = 0;
 		static unsigned int drivablesquare_ypos = 0;
+		static unsigned int distressedfound_xpos = 0;
+		static unsigned int distressedfound_ypos = 0;
+		static unsigned int
+		static unsigned int wall_xpos = 0;
+		static unsigned int wall_ypos = 0;
 		static unsigned int tejp_ref_value = 0;
 		static unsigned int rear_left = 0;
 		static unsigned int front_left = 0;
