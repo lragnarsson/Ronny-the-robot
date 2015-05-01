@@ -79,12 +79,12 @@ namespace GUIronny {
 
 	protected:
 	protected:
-		Bitmap^ image1 = gcnew Bitmap(744, 480);
+		Bitmap^ image1 = gcnew Bitmap(600, 600);
 		int prevx = 450;
 		int prevy = 480;
 		static array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
-		array <int, 2 >^ Karta = gcnew array < int, 2 >(33, 33);
+		array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
 		static int write_position = 0;
 		static int expected_length = 0;
 		static bool automode = false;
@@ -108,7 +108,7 @@ namespace GUIronny {
 		static unsigned int front_right = 0;
 		static unsigned int front = 0;
 
-		int squaresize = 6;
+		int squaresize = 35;
 
 		int stracka = 0;
 		int vinkel = 0;
@@ -313,7 +313,6 @@ namespace GUIronny {
 			this->IRsensor_VF->Size = System::Drawing::Size(37, 13);
 			this->IRsensor_VF->TabIndex = 11;
 			this->IRsensor_VF->Text = L"20";
-			//this->IRsensor_VF->TextChanged += gcnew System::EventHandler(this, &MyForm::IRsensor_VF_TextChanged);
 			// 
 			// IRsensor_VB
 			// 
@@ -382,7 +381,6 @@ namespace GUIronny {
 			this->button3->TabIndex = 15;
 			this->button3->Text = L"Open";
 			this->button3->UseVisualStyleBackColor = true;
-			//this->button3->Click += gcnew System::EventHandler(this, &MyForm::button3_Click);
 			// 
 			// button4
 			// 
@@ -392,7 +390,6 @@ namespace GUIronny {
 			this->button4->TabIndex = 16;
 			this->button4->Text = L"Close";
 			this->button4->UseVisualStyleBackColor = true;
-			//this->button4->Click += gcnew System::EventHandler(this, &MyForm::button4_Click);
 			// 
 			// Kommandon
 			// 
@@ -414,7 +411,6 @@ namespace GUIronny {
 			this->Sensordata->TabIndex = 18;
 			this->Sensordata->Text = L"Sensordata";
 			this->Sensordata->UseVisualStyleBackColor = true;
-			//this->Sensordata->Click += gcnew System::EventHandler(this, &MyForm::Sensordata_Click);
 			// 
 			// label1
 			// 
@@ -463,9 +459,9 @@ namespace GUIronny {
 			// 
 			// pictureBox1
 			// 
-			this->pictureBox1->Location = System::Drawing::Point(440, 110);
+			this->pictureBox1->Location = System::Drawing::Point(321, 38);
 			this->pictureBox1->Name = L"pictureBox1";
-			this->pictureBox1->Size = System::Drawing::Size(744, 480);
+			this->pictureBox1->Size = System::Drawing::Size(600, 600);
 			this->pictureBox1->TabIndex = 23;
 			this->pictureBox1->TabStop = false;
 			// 
@@ -939,9 +935,9 @@ private: void createarray(Bitmap^ image1){
 	//array < int >^ KartaX = gcnew array < int >(32);
 	
 
-	for (int y = 0; y < 33; y++)
+	for (int y = 0; y < 16; y++)
 	{
-		for (int x = 0; x < 33; x++)
+		for (int x = 0; x < 16; x++)
 		{
 			/*Karta[x, y][0] = x* xmin;
 			Karta[x, y][1] = x* xmax;
@@ -956,7 +952,19 @@ private: void createarray(Bitmap^ image1){
 	{
 		for (int xp = 0; xp < this->pictureBox1->Width; xp++)
 		{
-			image1->SetPixel(xp, yp, Color::Gray);
+			if (xp % squaresize == 0)
+			{
+				image1->SetPixel(xp, yp, Color::Black);
+			}
+			else if (yp % squaresize == 0)
+			{
+				image1->SetPixel(xp, yp, Color::Black);
+			}
+			else
+			{
+				image1->SetPixel(xp, yp, Color::Gray);
+			}
+			
 		}
 	}
 	this->pictureBox1->Image = image1;
@@ -972,15 +980,24 @@ private: void createarray(Bitmap^ image1){
 			{
 				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
 				{
-					//Color pixelColor = image1->GetPixel(x, y);
-					//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
-					image1->SetPixel(x, y, Color::Gray);
+					if (x % squaresize == 0)
+					{
+						image1->SetPixel(x, y, Color::Black);
+					}
+					else if (y % squaresize == 0)
+					{
+						image1->SetPixel(x, y, Color::Black);
+					}
+					else
+					{
+						image1->SetPixel(x, y, Color::Gray);
+					}
 				}
 			}
 		case 255:
 			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 			{
-				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
+				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
 				{
 					//Color pixelColor = image1->GetPixel(x, y);
 					//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
@@ -992,9 +1009,18 @@ private: void createarray(Bitmap^ image1){
 			{
 				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
 				{
-					//Color pixelColor = image1->GetPixel(x, y);
-					//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
-					image1->SetPixel(x, y, Color::White);
+					if (x % squaresize == 0)
+					{
+						image1->SetPixel(x, y, Color::Black);
+					}
+					else if (y % squaresize == 0)
+					{
+						image1->SetPixel(x, y, Color::Black);
+					}
+					else
+					{
+						image1->SetPixel(x, y, Color::White);
+					}
 				}
 			}
 			break;
