@@ -50,22 +50,23 @@ namespace GUIronny {
 	public:
 		MyForm(void)
 		{
-			CheckForIllegalCrossThreadCalls = false;
+			//CheckForIllegalCrossThreadCalls = false;
 			InitializeComponent();
 			findPorts();
+			Console::WriteLine("in MyForm");
 			//serialPort1->DataReceived += gcnew SerialDataReceivedEventHandler(DataReceivedHandler);
 
-			testbitmap(image1, prevx, prevy, Color::White);
+			/*testbitmap(image1, prevx, prevy, Color::White);
 			testbitmap(image1, prevx, prevy - 15, Color::White);
 			testbitmap(image1, prevx, prevy - 30, Color::White);
 			testbitmap(image1, prevx, prevy - 45, Color::White);
 			testbitmap(image1, prevx, prevy - 60, Color::White);
-			testbitmap(image1, prevx, prevy - 75, Color::White);
+			testbitmap(image1, prevx, prevy - 75, Color::White);*/
 
 			//changeIR(10, 2, 23, 6, 2);
 
-			sensorwindow->sensorvalues(10, 10, 10, 10, 10);
-			sensorwindow->sensorvalues(11, 11, 11, 11, 11);
+			/*sensorwindow->sensorvalues(10, 10, 10, 10, 10);
+			sensorwindow->sensorvalues(11, 11, 11, 11, 11);*/
 
 			//
 			//TODO: Add the constructor code here
@@ -78,6 +79,7 @@ namespace GUIronny {
 		int prevx = 450;
 		int prevy = 480;
 		static array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
+		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
 		static int write_position = 0;
 		static int expected_length = 0;
 		static bool automode = false;
@@ -106,38 +108,34 @@ namespace GUIronny {
 				delete components;
 			}
 		}
-	private: static System::Windows::Forms::PictureBox^  Ronny_robot;
-	private: static System::Windows::Forms::Label^  Sensorvärden;
-	private: static System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Leftarrow_pressed;
-	private: static System::Windows::Forms::PictureBox^  Uparrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Downarrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Uparrow_pressed;
-	private: static System::Windows::Forms::PictureBox^  Downarrow_pressed;
-	private: static System::Windows::Forms::PictureBox^  Rightarrow_pressed;
-	public: static System::Windows::Forms::TextBox^  IRsensor_VF;
-	private:
-	public: static System::Windows::Forms::TextBox^  IRsensor_VB;
-	public: static System::Windows::Forms::TextBox^  IRsensor_HF;
-	public: static System::Windows::Forms::TextBox^  IRsensor_HB;
-	public: static System::Windows::Forms::TextBox^  IRsensor_Front;
+	private: System::Windows::Forms::PictureBox^  Ronny_robot;
+	private: System::Windows::Forms::Label^  Sensorvärden;
+	private: System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Leftarrow_pressed;
+	private: System::Windows::Forms::PictureBox^  Uparrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Downarrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Uparrow_pressed;
+	private: System::Windows::Forms::PictureBox^  Downarrow_pressed;
+	private: System::Windows::Forms::PictureBox^  Rightarrow_pressed;
+	public: System::Windows::Forms::TextBox^  IRsensor_VF;
 
+	public: System::Windows::Forms::TextBox^  IRsensor_VB;
+	public: System::Windows::Forms::TextBox^  IRsensor_HF;
+	public: System::Windows::Forms::TextBox^  IRsensor_HB;
+	public: System::Windows::Forms::TextBox^  IRsensor_Front;
 
-
-
-
-	private: static System::IO::Ports::SerialPort^  serialPort1;
-	private: static System::Windows::Forms::Button^  button3;
-	private: static System::Windows::Forms::Button^  button4;
-	private: static System::Windows::Forms::TextBox^  Kommandon;
-	private: static System::Windows::Forms::Button^  Sensordata;
-	private: static System::Windows::Forms::Label^  label1;
-	private: static System::Windows::Forms::ComboBox^  comboBox1;
-	private: static System::Windows::Forms::Label^  label2;
-	private: static System::Windows::Forms::TextBox^  open_closed;
-	private: static System::Windows::Forms::PictureBox^  pictureBox1;
-	private: static System::ComponentModel::IContainer^  components;
+	private: System::IO::Ports::SerialPort^  serialPort1;
+	private: System::Windows::Forms::Button^  button3;
+	private: System::Windows::Forms::Button^  button4;
+	private: System::Windows::Forms::TextBox^  Kommandon;
+	private: System::Windows::Forms::Button^  Sensordata;
+	private: System::Windows::Forms::Label^  label1;
+	private: System::Windows::Forms::ComboBox^  comboBox1;
+	private: System::Windows::Forms::Label^  label2;
+	private: System::Windows::Forms::TextBox^  open_closed;
+	private: System::Windows::Forms::PictureBox^  pictureBox1;
+	private: System::ComponentModel::IContainer^  components;
 
 	private:
 		/// <summary>
@@ -355,6 +353,8 @@ namespace GUIronny {
 			// 
 			this->serialPort1->BaudRate = 115200;
 			this->serialPort1->PortName = L"COM3";
+			this->serialPort1->ReadTimeout = 500;
+			this->serialPort1->WriteTimeout = 500;
 			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &MyForm::serialPort1_DataReceived_1);
 			// 
 			// button3
@@ -634,22 +634,18 @@ namespace GUIronny {
 
 	private:  System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
 		//SerialPort^ sp = (SerialPort^)sender;
+		//Console::WriteLine("in datarecievedhandler");
 		System::Byte byte = this->serialPort1->ReadByte();
-		/*if (this->InvokeRequired){
-			//read_dataEvent^ d = gcnew read_dataEvent(this, &MyForm::serialPort1_DataReceived_1);
-
-			this->Invoke(gcnew read_dataEvent(&Read_data), gcnew array < Byte^ > {byte});
-
-		}
-		else
-		{
-			Read_data(byte);
-
-		}*/
-
+		//Console::WriteLine("recieving" + byte);
+		handlebyte(byte);
+	}
+	
+	private: System::Void handlebyte(Byte byte){
+		//Console::WriteLine("handlebyte");
 		if (write_position == 0)  //If readposition = 0 we have a header. 
 		{
-			switch (byte)
+			//Console::WriteLine("header" + byte);
+			switch (byte)		
 			{
 			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
 				expected_length = 4;
@@ -694,10 +690,17 @@ namespace GUIronny {
 		}
 
 		//Console::WriteLine("filling recieved data" + " " + write_position + " " + expected_length);
-		data_recieved[write_position] = byte;
+		//if (this->serialPort1->ReadBufferSize > expected_length-2){
+			this->serialPort1->Read(data_recieved_buffer, 0, expected_length-2);	
+		/*}
+			 else
+			 {
+				 return;
+			 }*/
+		//data_recieved[write_position] = byte;
 
-		if (++write_position == expected_length)
-		{
+		//if (++write_position == expected_length)
+		//{
 			switch (data_recieved[0])
 			{
 
@@ -721,22 +724,23 @@ namespace GUIronny {
 			case SENSOR_VALUES:  //Dealing with sensorvalues
 			{
 				//Console::WriteLine("HANDLING RECIEVED DATA!!");
-				rear_left = data_recieved[1];
+				rear_left = byte;
 				rear_left = rear_left << 8;
-				rear_left |= data_recieved[2];
+				rear_left |= data_recieved_buffer[0];
 
-				front_left = data_recieved[3] << 8;
-				front_left |= data_recieved[4];
+				front_left = data_recieved_buffer[1] << 8;
+				front_left |= data_recieved_buffer[2];
 
-				rear_right = data_recieved[5] << 8;
-				rear_right |= data_recieved[6];
+				rear_right = data_recieved_buffer[3] << 8;
+				rear_right |= data_recieved_buffer[4];
 
-				front_right = data_recieved[7] << 8;
-				front_right |= data_recieved[8];
+				front_right = data_recieved_buffer[5] << 8;
+				front_right |= data_recieved_buffer[6];
 
-				front = data_recieved[9] << 8;
-				front |= data_recieved[10];
+				front = data_recieved_buffer[7] << 8;
+				front |= data_recieved_buffer[8];
 
+				Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
 				Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
 				//sensorwindow->sensorvalues(front, front_left, front_right, rear_left, rear_right);
 				//changeIR(front, front_left, front_right, rear_left, rear_right);
@@ -745,7 +749,7 @@ namespace GUIronny {
 				SetText(Convert::ToString(front_right), IRsensor_HF);
 				SetText(Convert::ToString(rear_left), IRsensor_VB);
 				SetText(Convert::ToString(rear_right), IRsensor_HB);*/
-
+				//Console::
 
 			}
 				break;
@@ -775,8 +779,9 @@ namespace GUIronny {
 			//this->sensorvalues(front, front_right, rear_right, rear_left, front_left);
 			write_position = 0;
 			expected_length = 0;
-		}
+		//}
 	}
+	
 
 			 //Invoke(gcnew EventHandler(this, MyForm::Read_data));
 
@@ -877,7 +882,7 @@ namespace GUIronny {
 
 	delegate void SetTextDelegate(String^ text, TextBox^ textbox);
 
-	private: static void SetText(String^ text, TextBox^ textbox){
+	/*private: static void SetText(String^ text, TextBox^ textbox){
 		if (textbox->InvokeRequired){
 			SetTextDelegate^ d = gcnew SetTextDelegate(&MyForm::SetText);
 			textbox->Invoke(d, gcnew array < Object^ > { text, textbox });
@@ -885,7 +890,7 @@ namespace GUIronny {
 		else {
 			textbox->Text = text;
 		}
-	}
+	}*/
 	};
 }
 
