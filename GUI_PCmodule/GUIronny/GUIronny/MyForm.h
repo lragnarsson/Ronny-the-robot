@@ -83,8 +83,16 @@ namespace GUIronny {
 		static int write_position = 0;
 		static int expected_length = 0;
 		static bool automode = false;
+		static bool tejp_found = false;
+		
 		Grafer_data^ sensorwindow = (gcnew Grafer_data());
 		bool showing_sensor_window = false;
+		static unsigned int current_xpos = 0;
+		static unsigned int current_ypos = 0;
+		static unsigned int current_angle = 0;
+		static unsigned int drivablesquare_xpos = 0;
+		static unsigned int drivablesquare_ypos = 0;
+		static unsigned int tejp_ref_value = 0;
 		static unsigned int rear_left = 0;
 		static unsigned int front_left = 0;
 		static unsigned int rear_right = 0;
@@ -674,14 +682,24 @@ namespace GUIronny {
 				data_recieved[write_position] = byte;
 				++write_position;
 				break;
+			case WALL:
+				expected_length = 3;
+				data_recieved[write_position] = byte;
+				++write_postition;
+				break;
 			case WHEELENCODERS://Wheelencodervärden
 				expected_length = 3;
 				data_recieved[write_position] = byte;
 				++write_position;
 				break;
 			case TEJP_FOUND: //Tejpbit funnen.
+				write_position = 0;
+				tejp_found = true;
 				break;
 			case TEJP_REF: //Referensvärde tejp
+				expected_length = 2;
+				data_recieved[write_position] = byte;
+				++write_position;
 				break;
 			default:
 				break;
@@ -705,22 +723,23 @@ namespace GUIronny {
 			{
 
 			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
-				/*
-				TODO
-				*/
+				current_xpos = byte;
+				current_ypos = data_recieved_buffer[0];
+				current_angle = data_recieved_buffer[1];
 				break;
 
 			case DRIVABLE_SQUARE: //Körbar ruta x,y
-				/*
-				TODO
-				*/
+				drivablesquare_xpos = byte;
+				drivablesquare_ypos = data_recieved_buffer[0];
 				break;
 			case DISTRESSEDFOUND: //Nödställd funnen
-				/*
-				TODO
-				*/
+				distressedfound_xpos = byte;
+				distressedfound_ypos = data_recieved_buffer[0];
 				break;
-
+			case WALL:
+				wall_xpos = byte;
+				wall_ypos = data_recieved_buffer[0];
+				break;
 			case SENSOR_VALUES:  //Dealing with sensorvalues
 			{
 				//Console::WriteLine("HANDLING RECIEVED DATA!!");
@@ -755,20 +774,13 @@ namespace GUIronny {
 				break;
 
 			case WHEELENCODERS:
-				/*
-				TODO
-				*/
+				
 				break;
 
 			case TEJP_FOUND: //Tejpbit funnen.
-				/*
-				TODO
-				*/
 				break;
 			case TEJP_REF: //Referensvärde tejp
-				/*
-				TODO
-				*/
+				tejp_ref_value = byte; 
 				break;
 
 			default:
