@@ -1,5 +1,7 @@
 #pragma once
 #include "Grafer_data.h"
+#include <windows.h>
+
 
 /*
 TODO v17:
@@ -361,8 +363,6 @@ namespace GUIronny {
 			// 
 			this->serialPort1->BaudRate = 115200;
 			this->serialPort1->PortName = L"COM3";
-			this->serialPort1->ReadTimeout = 500;
-			this->serialPort1->WriteTimeout = 500;
 			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &MyForm::serialPort1_DataReceived_1);
 			// 
 			// button3
@@ -513,7 +513,7 @@ namespace GUIronny {
 		}
 #pragma endregion
 
-	
+
 
 	private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) {
 	}
@@ -638,46 +638,59 @@ namespace GUIronny {
 	}
 
 			 //Data recieved from serialport.
-	 delegate void read_dataEvent(System::Byte byte);
+			 delegate void read_dataEvent(System::Byte byte);
 
 	private:  System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
 		//SerialPort^ sp = (SerialPort^)sender;
-		//Console::WriteLine("in datarecievedhandler");
-		System::Byte byte = this->serialPort1->ReadByte();
-		//Console::WriteLine("recieving" + byte);
-		handlebyte(byte);
+		if (write_position == 0)
+		{
+			//Console::WriteLine("writepos = 0");
+			System::Byte byte = this->serialPort1->ReadByte();
+			//Console::WriteLine("the header is " + byte);
+			handlebyte(byte);
+		}
+		else if (this->serialPort1->BytesToRead > expected_length - 1)
+		{
+			//Console::WriteLine("writeposition o expected legnth statement");
+			System::Byte byte = this->serialPort1->ReadByte();
+			handlebyte(byte);
+		}
+		else{
+			//Console::WriteLine("else statement");
+			//Console::WriteLine("writeposition = " + write_position + " bytes to read vs expected length " + this->serialPort1->BytesToRead + " " + expected_length);
+			return;
+		}
 	}
-	
+
 	private: System::Void handlebyte(Byte byte){
-		//Console::WriteLine("handlebyte");
+
 		if (write_position == 0)  //If readposition = 0 we have a header. 
 		{
-			//Console::WriteLine("header" + byte);
-			switch (byte)		
+			switch (byte)
 			{
-			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
+			case ABSOLUTEVALUE: //Absolutevalue x,y (position)
 				expected_length = 4;
 				data_recieved[write_position] = byte;
 				++write_position;
 				break;
-			case AUTOMODE: //Autonomt läge
+			case AUTOMODE: //Auto mode
 				write_position = 0;
 				automode = true;
 				break;
-			case MANUALMODE: //Manuellt läge
+			case MANUALMODE: //Manual mode
 				write_position = 0;
 				automode = false;
 				break;
-			case DRIVABLE_SQUARE: //Körbar ruta x,y
+			case DRIVABLE_SQUARE: //drivalbe square
 				expected_length = 3;
 				data_recieved[write_position] = byte;
 				++write_position;
 				break;
-			case DISTRESSEDFOUND: //Nödställd funnen
+			case DISTRESSEDFOUND: //Distressed found
 				expected_length = 3;
 				data_recieved[write_position] = byte;
 				break;
-			case SENSOR_VALUES: //IRsensor värden 
+			case SENSOR_VALUES: //Sensorvalues
 				expected_length = 11;
 				data_recieved[write_position] = byte;
 				++write_position;
@@ -707,21 +720,25 @@ namespace GUIronny {
 			return;
 		}
 
-		//Console::WriteLine("filling recieved data" + " " + write_position + " " + expected_length);
-		//if (this->serialPort1->ReadBufferSize > expected_length-2){
-			this->serialPort1->Read(data_recieved_buffer, 0, expected_length-2);	
-		/*}
-			 else
-			 {
-				 return;
-			 }*/
+		/*while (this->serialPort1->BytesToRead < expected_length - 1)
+		{
+		Console::WriteLine("buffer in while" + this->serialPort1->BytesToRead);
+		Sleep(50);
+		}*/
+
+		this->serialPort1->Read(data_recieved_buffer, 0, expected_length - 2);
+
+
+		//Console::WriteLine("the bytes to read" + this->serialPort1->BytesToRead);
+
 		//data_recieved[write_position] = byte;
 
 		//if (++write_position == expected_length)
 		//{
-			switch (data_recieved[0])
-			{
+		switch (data_recieved[0])
+		{
 
+<<<<<<< HEAD
 			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
 				current_xpos = byte;
 				current_ypos = data_recieved_buffer[0];
@@ -769,10 +786,60 @@ namespace GUIronny {
 				SetText(Convert::ToString(rear_left), IRsensor_VB);
 				SetText(Convert::ToString(rear_right), IRsensor_HB);*/
 				//Console::
+=======
+		case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
+			/*
+			TODO
+			*/
+			break;
 
-			}
-				break;
+		case DRIVABLE_SQUARE: //Körbar ruta x,y
+			/*
+			TODO
+			*/
+			break;
+		case DISTRESSEDFOUND: //Nödställd funnen
+			/*
+			TODO
+			*/
+			break;
 
+		case SENSOR_VALUES:  //Dealing with sensorvalues
+		{
+			//Console::WriteLine("HANDLING RECIEVED DATA!!");
+			rear_left = byte;  //Function was called after header was handled and 
+			//this is the new collected byte.
+			rear_left = rear_left << 8;
+			rear_left |= data_recieved_buffer[0];
+
+			front_left = data_recieved_buffer[1] << 8;
+			front_left |= data_recieved_buffer[2];
+
+			rear_right = data_recieved_buffer[3] << 8;
+			rear_right |= data_recieved_buffer[4];
+
+			front_right = data_recieved_buffer[5] << 8;
+			front_right |= data_recieved_buffer[6];
+
+			front = data_recieved_buffer[7] << 8;
+			front |= data_recieved_buffer[8];
+
+			// Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
+			Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
+			//sensorwindow->sensorvalues(front, front_left, front_right, rear_left, rear_right);
+			//changeIR(front, front_left, front_right, rear_left, rear_right);
+			SetText(Convert::ToString(front), IRsensor_Front);
+			SetText(Convert::ToString(front_left), IRsensor_VF);
+			SetText(Convert::ToString(front_right), IRsensor_HF);
+			SetText(Convert::ToString(rear_left), IRsensor_VB);
+			SetText(Convert::ToString(rear_right), IRsensor_HB);
+			//Console::
+>>>>>>> b068a04431c888934a6a55b3fcac35601d9770f7
+
+		}
+			break;
+
+<<<<<<< HEAD
 			case WHEELENCODERS:
 				
 				break;
@@ -782,18 +849,41 @@ namespace GUIronny {
 			case TEJP_REF: //Referensvärde tejp
 				tejp_ref_value = byte; 
 				break;
+=======
+		case WHEELENCODERS:
+			/*
+			TODO
+			*/
+			break;
 
-			default:
-				break;
-			}
+		case TEJP_FOUND: //Tejpbit funnen.
+			/*
+			TODO
+			*/
+			break;
+		case TEJP_REF: //Referensvärde tejp
+			/*
+			TODO
+			*/
+			break;
+>>>>>>> b068a04431c888934a6a55b3fcac35601d9770f7
 
-			//if (showing_sensor_window){
-			//this->sensorvalues(front, front_right, rear_right, rear_left, front_left);
-			write_position = 0;
-			expected_length = 0;
-		//}
+		default:
+			break;
+		}
+
+		//if (showing_sensor_window){
+		//this->sensorvalues(front, front_right, rear_right, rear_left, front_left);
+
+		if (this->serialPort1->BytesToRead > 15)
+		{
+			this->serialPort1->DiscardInBuffer();
+		}
+		write_position = 0;
+		expected_length = 0;
+
 	}
-	
+
 
 			 //Invoke(gcnew EventHandler(this, MyForm::Read_data));
 
@@ -894,7 +984,7 @@ namespace GUIronny {
 
 	delegate void SetTextDelegate(String^ text, TextBox^ textbox);
 
-	/*private: static void SetText(String^ text, TextBox^ textbox){
+	private: static void SetText(String^ text, TextBox^ textbox){
 		if (textbox->InvokeRequired){
 			SetTextDelegate^ d = gcnew SetTextDelegate(&MyForm::SetText);
 			textbox->Invoke(d, gcnew array < Object^ > { text, textbox });
@@ -902,7 +992,9 @@ namespace GUIronny {
 		else {
 			textbox->Text = text;
 		}
-	}*/
+	}
+
+
 	};
 }
 
