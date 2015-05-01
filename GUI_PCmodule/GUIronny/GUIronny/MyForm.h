@@ -70,6 +70,8 @@ namespace GUIronny {
 			/*sensorwindow->sensorvalues(10, 10, 10, 10, 10);
 			sensorwindow->sensorvalues(11, 11, 11, 11, 11);*/
 
+			createarray(image1);
+
 			//
 			//TODO: Add the constructor code here
 			//
@@ -82,6 +84,7 @@ namespace GUIronny {
 		int prevy = 480;
 		static array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
+		array <int, 2 >^ Karta = gcnew array < int, 2 >(33, 33);
 		static int write_position = 0;
 		static int expected_length = 0;
 		static bool automode = false;
@@ -96,7 +99,6 @@ namespace GUIronny {
 		static unsigned int drivablesquare_ypos = 0;
 		static unsigned int distressedfound_xpos = 0;
 		static unsigned int distressedfound_ypos = 0;
-		static unsigned int
 		static unsigned int wall_xpos = 0;
 		static unsigned int wall_ypos = 0;
 		static unsigned int tejp_ref_value = 0;
@@ -105,6 +107,8 @@ namespace GUIronny {
 		static unsigned int rear_right = 0;
 		static unsigned int front_right = 0;
 		static unsigned int front = 0;
+
+		int squaresize = 6;
 
 		int stracka = 0;
 		int vinkel = 0;
@@ -309,7 +313,7 @@ namespace GUIronny {
 			this->IRsensor_VF->Size = System::Drawing::Size(37, 13);
 			this->IRsensor_VF->TabIndex = 11;
 			this->IRsensor_VF->Text = L"20";
-			this->IRsensor_VF->TextChanged += gcnew System::EventHandler(this, &MyForm::IRsensor_VF_TextChanged);
+			//this->IRsensor_VF->TextChanged += gcnew System::EventHandler(this, &MyForm::IRsensor_VF_TextChanged);
 			// 
 			// IRsensor_VB
 			// 
@@ -378,7 +382,7 @@ namespace GUIronny {
 			this->button3->TabIndex = 15;
 			this->button3->Text = L"Open";
 			this->button3->UseVisualStyleBackColor = true;
-			this->button3->Click += gcnew System::EventHandler(this, &MyForm::button3_Click);
+			//this->button3->Click += gcnew System::EventHandler(this, &MyForm::button3_Click);
 			// 
 			// button4
 			// 
@@ -388,7 +392,7 @@ namespace GUIronny {
 			this->button4->TabIndex = 16;
 			this->button4->Text = L"Close";
 			this->button4->UseVisualStyleBackColor = true;
-			this->button4->Click += gcnew System::EventHandler(this, &MyForm::button4_Click);
+			//this->button4->Click += gcnew System::EventHandler(this, &MyForm::button4_Click);
 			// 
 			// Kommandon
 			// 
@@ -410,7 +414,7 @@ namespace GUIronny {
 			this->Sensordata->TabIndex = 18;
 			this->Sensordata->Text = L"Sensordata";
 			this->Sensordata->UseVisualStyleBackColor = true;
-			this->Sensordata->Click += gcnew System::EventHandler(this, &MyForm::Sensordata_Click);
+			//this->Sensordata->Click += gcnew System::EventHandler(this, &MyForm::Sensordata_Click);
 			// 
 			// label1
 			// 
@@ -703,7 +707,7 @@ namespace GUIronny {
 			case WALL:
 				expected_length = 3;
 				data_recieved[write_position] = byte;
-				++write_postition;
+				++write_position;
 				break;
 			case WHEELENCODERS://Wheelencodervärden
 				expected_length = 3;
@@ -742,8 +746,6 @@ namespace GUIronny {
 		//{
 		switch (data_recieved[0])
 		{
-
-<<<<<<< HEAD
 			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
 				current_xpos = byte;
 				current_ypos = data_recieved_buffer[0];
@@ -791,60 +793,10 @@ namespace GUIronny {
 				SetText(Convert::ToString(rear_left), IRsensor_VB);
 				SetText(Convert::ToString(rear_right), IRsensor_HB);*/
 				//Console::
-=======
-		case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
-			/*
-			TODO
-			*/
+			}
 			break;
 
-		case DRIVABLE_SQUARE: //Körbar ruta x,y
-			/*
-			TODO
-			*/
-			break;
-		case DISTRESSEDFOUND: //Nödställd funnen
-			/*
-			TODO
-			*/
-			break;
 
-		case SENSOR_VALUES:  //Dealing with sensorvalues
-		{
-			//Console::WriteLine("HANDLING RECIEVED DATA!!");
-			rear_left = byte;  //Function was called after header was handled and 
-			//this is the new collected byte.
-			rear_left = rear_left << 8;
-			rear_left |= data_recieved_buffer[0];
-
-			front_left = data_recieved_buffer[1] << 8;
-			front_left |= data_recieved_buffer[2];
-
-			rear_right = data_recieved_buffer[3] << 8;
-			rear_right |= data_recieved_buffer[4];
-
-			front_right = data_recieved_buffer[5] << 8;
-			front_right |= data_recieved_buffer[6];
-
-			front = data_recieved_buffer[7] << 8;
-			front |= data_recieved_buffer[8];
-
-			// Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
-			Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
-			//sensorwindow->sensorvalues(front, front_left, front_right, rear_left, rear_right);
-			//changeIR(front, front_left, front_right, rear_left, rear_right);
-			SetText(Convert::ToString(front), IRsensor_Front);
-			SetText(Convert::ToString(front_left), IRsensor_VF);
-			SetText(Convert::ToString(front_right), IRsensor_HF);
-			SetText(Convert::ToString(rear_left), IRsensor_VB);
-			SetText(Convert::ToString(rear_right), IRsensor_HB);
-			//Console::
->>>>>>> b068a04431c888934a6a55b3fcac35601d9770f7
-
-		}
-			break;
-
-<<<<<<< HEAD
 			case WHEELENCODERS:
 				
 				break;
@@ -854,24 +806,6 @@ namespace GUIronny {
 			case TEJP_REF: //Referensvärde tejp
 				tejp_ref_value = byte; 
 				break;
-=======
-		case WHEELENCODERS:
-			/*
-			TODO
-			*/
-			break;
-
-		case TEJP_FOUND: //Tejpbit funnen.
-			/*
-			TODO
-			*/
-			break;
-		case TEJP_REF: //Referensvärde tejp
-			/*
-			TODO
-			*/
-			break;
->>>>>>> b068a04431c888934a6a55b3fcac35601d9770f7
 
 		default:
 			break;
@@ -999,7 +933,74 @@ namespace GUIronny {
 		}
 	}
 
+private: void createarray(Bitmap^ image1){
 
+	//array < array<int, 1>^, 2 >^ Karta = gcnew array < array<int, 1>^, 2 >(32, 32);
+	//array < int >^ KartaX = gcnew array < int >(32);
+	
+
+	for (int y = 0; y < 33; y++)
+	{
+		for (int x = 0; x < 33; x++)
+		{
+			/*Karta[x, y][0] = x* xmin;
+			Karta[x, y][1] = x* xmax;
+			Karta[x, y][2] = x* ymin;
+			Karta[x, y][3] = x* ymax;*/
+			Karta[x, y] = 254;
+		}
+	}
+
+
+	for ( int yp = 0; yp < this->pictureBox1->Height;  yp++)
+	{
+		for (int xp = 0; xp < this->pictureBox1->Width; xp++)
+		{
+			image1->SetPixel(xp, yp, Color::Gray);
+		}
+	}
+	this->pictureBox1->Image = image1;
+}
+
+
+	private: void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
+
+		switch (status)
+		{
+		case 254:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
+				{
+					//Color pixelColor = image1->GetPixel(x, y);
+					//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
+					image1->SetPixel(x, y, Color::Gray);
+				}
+			}
+		case 255:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
+				{
+					//Color pixelColor = image1->GetPixel(x, y);
+					//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
+					image1->SetPixel(x, y, Color::Black);
+				}
+			}
+		default:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
+				{
+					//Color pixelColor = image1->GetPixel(x, y);
+					//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
+					image1->SetPixel(x, y, Color::White);
+				}
+			}
+			break;
+		}
+		this->pictureBox1->Image = image1;
+	}
 	};
 }
 
