@@ -13,6 +13,7 @@ void init_bus_communication() {
 	current_angle_left = 0;
 	current_angle_right = 0;
 	current_distance_error = 0;
+	previous_distance_error = 0;
 	left_wall_distance = 0;
 	right_wall_distance = 0;
 	front_wall_distance = 0;
@@ -38,63 +39,41 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	uint16_t front_right = front_right_h;
 	front_right = front_right << 8;
 	front_right |= front_right_l;
-	uint16_t front = front_h;
-	front = front << 8;
-	front |= front_l;	
+	front_wall_distance = front_h;
+	front_wall_distance = front_wall_distance << 8;
+	front_wall_distance |= front_l;	
 	
 	left_wall_distance = (front_left + rear_left) / 2;
 	right_wall_distance = (front_right + rear_right) / 2;
+	previous_distance_error = current_distance_error;
 	current_distance_error = left_wall_distance - right_wall_distance;
 
 	last_tick_angle_left = current_angle_left;
 	last_tick_angle_right = current_angle_right;
 	current_angle_left = front_left - rear_left;
 	current_angle_right = rear_right - front_right;
-	current_angle_error = current_angle_left + current_angle_right;
+	//current_angle_error = current_angle_left + current_angle_right;
+	current_angle_error = (current_distance_error - previous_distance_error) * 25;
+	uint8_t msg[2] = {0xFF, (uint8_t)(abs(current_angle_error)>>3)};
+	i2c_write(COMMUNICATION_UNIT, msg, 2);
 }
 
 void update_distance_and_angle(int8_t distance, int8_t angle) {
-	if(distance_remaining > 0)
-	{
-		if(distance_remaining > distance)
-			distance_remaining -= distance;
-		else
-			distance_remaining = 0;
-	} else if(distance_remaining < 0)
-	{
-		if(distance_remaining < distance)
-			distance_remaining -= distance;
-		else
-			distance_remaining = 0;
-	}
+	
+	if(abs(distance_remaining) > abs(distance))
+		distance_remaining -= distance;
+	else
+		distance_remaining = 0;
 
-	if(square_distance_remaining > 0)
-	{
-		if(square_distance_remaining > distance)
-			square_distance_remaining -= distance;
-		else
-			square_distance_remaining = 0;
-	} else if(square_distance_remaining < 0)
-	{
-		if(square_distance_remaining < distance)
-			square_distance_remaining -= distance;
-		else
-			square_distance_remaining = 0;
-	}
+	if(abs(square_distance_remaining) > abs(distance))
+		square_distance_remaining -= distance;
+	else
+		square_distance_remaining = 0;
 
-	if(angle_remaining > 0)
-	{
-		if(angle_remaining > angle)
-			angle_remaining -= angle;
-		else
-			angle_remaining = 0;
-	} else if (angle_remaining < 0)
-	{
-		if(angle_remaining < angle)
-			angle_remaining -= angle;
-		else
-			angle_remaining = 0;
-	}
+	if(abs(angle_remaining) > abs(angle))
+		angle_remaining -= angle;
+	else
+		angle_remaining = 0;
 }
 
 void tape_found() {
@@ -102,39 +81,39 @@ void tape_found() {
 }
 
 void manual_drive_forward() {
-	//P_COEFFICIENT += 0x0500;
-	last_manual_command = M_FORWARD;
-	distance_remaining = 100;
+	P_COEFFICIENT += 0x0100;
+	//last_manual_command = M_FORWARD;
+	//distance_remaining = 100;
 }
 
 void manual_turn_right() {
-	//D_COEFFICIENT += 0x0500;
-	last_manual_command = M_RIGHT;
-	angle_remaining = -20;
+	D_COEFFICIENT += 0x0100;
+	//last_manual_command = M_RIGHT;
+	//angle_remaining = -20;
 }
 
 void manual_turn_left() {
-	//D_COEFFICIENT -= 0x0500;
-	last_manual_command = M_LEFT;
-	angle_remaining = 20;
+	D_COEFFICIENT -= 0x0100;
+	//last_manual_command = M_LEFT;
+	//angle_remaining = 20;
 }
 
 void manual_drive_forward_right() {
-	//state_speed += 5;
-	last_manual_command = M_FORWARD_RIGHT;
-	distance_remaining = 100;
+	state_speed += 5;
+	//last_manual_command = M_FORWARD_RIGHT;
+	//distance_remaining = 100;
 }
 
 void manual_drive_forward_left() {
-	//state_speed -= 5;
-	last_manual_command = M_FORWARD_LEFT;
-	distance_remaining = 100;
+	state_speed -= 5;
+	//last_manual_command = M_FORWARD_LEFT;
+	//distance_remaining = 100;
 }
 
 void manual_drive_backward() {
-	//P_COEFFICIENT -= 0x0500;
-	last_manual_command = M_BACKWARD;
-	distance_remaining = -100;
+	P_COEFFICIENT -= 0x0100;
+	//last_manual_command = M_BACKWARD;
+	//distance_remaining = -100;
 }
 
 void handle_received_message() {

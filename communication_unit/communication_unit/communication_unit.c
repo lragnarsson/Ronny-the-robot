@@ -34,33 +34,42 @@ void init_personality() {
 }
 
 void handle_received_message() {
+	static uint8_t sensor_count = 0;
 	switch(busbuffer[0]) {
-		case 0xFF:
+		/*case 0xFF:
 			Send_to_PC(busbuffer[1]);
-			break;
+			break;*/
 		case ABSOLUTE_X_Y:
 		case AUTONOMOUS_MODE:
 		case MANUAL_MODE:
 		case TAPE_FOUND:
-			Send_to_PC(busbuffer[0]);
+			//Send_to_PC(busbuffer[0]);
 			break;
 		case MAPPED_SQUARE:
 		case MAPPED_WALL:
 		case MAPPED_GOAL:
 		case MOVED_DISTANCE_AND_ANGLE:
-			for(uint8_t j=0; j<3; j++) {
+			/*for(uint8_t j=0; j<3; j++) {
 				Send_to_PC(busbuffer[j]);
-			}
+			}*/
 			break;
 		case SENSOR_READINGS:
-			for(uint8_t j=0; j<11; j++) {
-				Send_to_PC(busbuffer[j]);
+			if (sensor_count == 25) {
+				for(uint8_t j=0; j<11; j++) {
+					Send_to_PC(busbuffer[j]);
+					
+				}
+				sensor_count = 0;
+			}
+			else {
+				++sensor_count;
 			}
 			break;
 		default:
-			Send_to_PC('F');
+			/*Send_to_PC('F');
 			Send_to_PC('E');
 			Send_to_PC('L');
+			Send_to_PC(busbuffer[0]);*/
 			break;
 	}
 }

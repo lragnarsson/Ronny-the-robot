@@ -78,9 +78,7 @@ ISR(INT0_vect)
 	{
 		if (--encoder_left < -10)
 		{
-
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -89,7 +87,6 @@ ISR(INT0_vect)
 		if (++encoder_left > 10)
 		{
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -101,10 +98,7 @@ ISR(INT1_vect)
 	{
 		if (++encoder_right > 10)
 		{
-
-
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -112,9 +106,7 @@ ISR(INT1_vect)
 	{
 		if (--encoder_right < -10)
 		{
-
 			send_odometry_readings();
-
 			encoder_left = encoder_right = 0;
 		}
 	}
@@ -143,19 +135,20 @@ ISR(ANALOG_COMP_vect)
 // Reflectance sensor calibration routine
 uint8_t calibrate_reflectance_sensor()
 {
-	cli();
+	uint8_t inv_reflectance;
 	
-	ADMUX = (1<<ADLAR) | REFL_ADC;
-	ADCSRA |= (1<<ADSC);	// Start conversion
-	
-	while (ADC_NOT_COMPLETE) { }
-	
-	uint8_t inv_reflectance = ADCH;
-	uint8_t threshold = ((0xFF - inv_reflectance) >> 1) + inv_reflectance;
-	
-	OCR0B = threshold;		// Set PWM
-	
-	sei();
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		ADMUX = (1<<ADLAR) | REFL_ADC;
+		ADCSRA |= (1<<ADSC);	// Start conversion
+		
+		while (ADC_NOT_COMPLETE) { }
+		
+		inv_reflectance = ADCH;
+		uint8_t threshold = ((0xFF - inv_reflectance) >> 1) + inv_reflectance;
+		
+		OCR0B = threshold;		// Set PWM
+	}
 	
 	return inv_reflectance;
 }
@@ -240,9 +233,16 @@ uint8_t send_distance_readings()
 
 uint8_t send_odometry_readings()
 {
-	int8_t distance = (encoder_left + encoder_right) * ENCODER_DISTANCE_SCALE;
-	int8_t rotation = (encoder_left - encoder_right) * ENCODER_ROTATION_SCALE;
+	static uint8_t distance_trunc = 0;
+	int16_t scaled_distance = (encoder_left + encoder_right) * ENCODER_DISTANCE_SCALE + distance_trunc;
+	distance_trunc = (uint8_t)scaled_distance;
+	int8_t distance = (int8_t)(scaled_distance>>8);
+	
+	static uint8_t rotation_trunc = 0;
+	int16_t scaled_rotation = (encoder_left - encoder_right) * ENCODER_ROTATION_SCALE + rotation_trunc;
+	rotation_trunc = (uint8_t)scaled_rotation;
+	int8_t rotation = (int8_t)(scaled_rotation>>8);
 	
 	int8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
-	return i2c_write(CONTROL_UNIT, msg, sizeof(msg));
+	return 1;//i2c_write(CONTROL_UNIT, msg, sizeof(msg));
 }

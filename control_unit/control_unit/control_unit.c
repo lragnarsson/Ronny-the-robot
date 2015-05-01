@@ -10,7 +10,7 @@ uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
-	current_mode = MANUAL;
+	current_mode = AUTONOMOUS;
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
@@ -84,7 +84,7 @@ void rotate_right_90() {
 
 /* Rotate 180 degrees based on wheel encoder feedback */
 void rotate_180() {
-	angle_remaining = 180;
+	angle_remaining = -180;
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
 	set_desired_speed(TURN_SPEED);
 	while(angle_remaining != 0) {
@@ -95,13 +95,15 @@ void rotate_180() {
 	stop_engines();
 }
 
-uint8_t map_surroundings() {
-	if(left_wall_distance < 300)
+uint8_t map_surroundings(uint8_t turn) {
+	if(left_wall_distance < 250)
 		set_wall_left();
-	if(right_wall_distance < 300)
+	if(right_wall_distance < 250)
 		set_wall_right();
-	if(front_wall_distance < 300) {
+	if(front_wall_distance < 150) {
 		set_wall_front();
+		if(!turn)
+			return 1;
 		if (!is_wall_left())
 			rotate_left_90();
 		else if(!is_wall_right())
@@ -118,8 +120,8 @@ uint8_t drive_and_map() {
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 	distance_remaining = 1000;
 	square_distance_remaining = 400;
-	if (!map_surroundings())
-		return 0;
+	if (!map_surroundings(1))
+		return goal_found;
 	set_desired_speed(state_speed);
 	while (goal_found != 1) {
 		if (in_corridor)
@@ -129,20 +131,15 @@ uint8_t drive_and_map() {
 
 		if (square_distance_remaining == 0) { // Ronny is in the middle of the next square, update map.
 			move_map_position_forward(); // Update map coordinates
-			if (!map_surroundings()) // Update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
-				return 0;
+			if (!map_surroundings(1)) // Update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
+				return goal_found;
 			distance_remaining = 1000;
 			square_distance_remaining = 400;
 		}
 		if (corner_detected_left() || corner_detected_right())
 			in_corridor = 1 - in_corridor; // Exited or entered a crossroad section  (turn on/off sensor feedback temporarily)
 	}
-	return 1;
-}
-
-/* Creates and sets current_route based on map data */
-void create_route() {
-	
+	return goal_found;
 }
 
 /* Contains all logic for mapping and searching through the map */
@@ -154,23 +151,45 @@ void search_state() {
 		flood_fill_to_unmapped();// calculate route to closest unmapped square
 }
 
-/* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
-void retrieve_state() {
-	know_shortest_path = 1;
-	uint8_t route_index;
-	direction next_direction;
-	while (!flood_fill_home_optimistic()) {
-		route_index = 0;
-		next_direction = current_route[route_index];
-		
-	}
-}
-
 /* Ronny is back at the start to pick up the package (in a shady way) */
 void grab_package_state() {
 	close_claw();
 	current_task = DELIVER;
 	state_speed = SUPER_SPEED;
+	flood_fill_to_destination(goal_position);
+}
+
+/* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
+void retrieve_state() {
+	uint8_t route_index = 0;
+	direction next_direction = current_route[route_index];
+	while(!(current_position.x = START_POSITION_X && current_position.y == START_POSITION_Y)) 
+	{
+		map_surroundings(0);
+		flood_fill_home_optimistic();
+		distance_remaining = 400;
+		/* Decide what turn to make based on current direction and next direction in route */
+		uint8_t next_turn = (current_direction - next_direction) & 3;
+		switch (next_turn) {
+			case LEFT:
+				rotate_left_90();
+				step_forward();
+				break;
+			case RIGHT:
+				rotate_right_90();
+				step_forward();
+				break;
+			case BACKWARD:
+				rotate_180();
+				break;
+			default:
+				break;
+		}
+		drive_forward();
+		next_direction = current_route[route_index];
+	}
+	current_route[0] = ROUTE_END;
+	grab_package_state();
 }
 
 /* Drops the package and positions Ronny to avoid running it over later */
@@ -178,6 +197,7 @@ void drop_package_state() {
 	open_claw();
 	current_task = RETURN;
 	state_speed = SUPER_SPEED;
+	flood_fill_to_destination(start_position);
 }
 
 /* Ronny has reached the goal and does a victory dance */
@@ -217,6 +237,7 @@ state_function navigate() {
 		drive_forward();
 		next_direction = current_route[route_index];
 	}
+	current_route[0] = ROUTE_END;
 	/* Figure out the correct state transition*/
 	state_function state_transition;
 	switch (current_task) {
@@ -224,10 +245,7 @@ state_function navigate() {
 			state_transition = &search_state; // Navigated to a un-mapped area, keep searching.
 			break;
 		case RETRIEVE:
-			if (know_shortest_path)
-				state_transition = &grab_package_state;  // The last route was the shortest path to the start - grab package.
-			else
-				state_transition = &retrieve_state;  // The shortest path between the goal and start is not yet known, the last route was to an unmapped area - keep looking for shortest path.
+			state_transition = &retrieve_state;  // Find the shortest path home
 			break;
 		case DELIVER:
 			state_transition = &drop_package_state; // The last route was from start to the goal - drop the package.
@@ -324,19 +342,15 @@ void test_mode()
 {
 	//drive_forward();
 	//open_claw();
-	_delay_ms(2000);
-	//close_claw();
-	//flood_fill_to_destination((coordinate){10, 17});
-	//navigate();
-	distance_remaining = 10000;
-	drive_forward();
+	//_delay_ms(2000);
+	//drive_forward();
 	//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 }
 
 int main(void) {
 	initialize_control_unit();
 	sei();
-
+	_delay_ms(1000);
 	while (1) {
 		if(current_mode == MANUAL)
 			manual_drive();
