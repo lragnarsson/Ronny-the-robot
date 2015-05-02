@@ -71,9 +71,9 @@ namespace GUIronny {
 			sensorwindow->sensorvalues(11, 11, 11, 11, 11);*/
 
 			createarray(image1);
-			fillkarta(image1, 8, 16, DRIVABLE_SQUARE);
-			fillkarta(image1, 9, 16, WALL);
-			fillkarta(image1, 7, 16, WALL);
+			fillkarta(image1, 16, 8, DRIVABLE_SQUARE);
+			fillkarta(image1, 16, 9, WALL);
+			fillkarta(image1, 16, 7, WALL);
 
 			//
 			//TODO: Add the constructor code here
@@ -535,8 +535,7 @@ namespace GUIronny {
 		this->comboBox1->Items->AddRange(objectArray);
 	}
 
-	private: System::Void non(System::Object^  sender, System::EventArgs^  e) {
-	}
+	
 
 			 // Keypressevents
 	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
@@ -646,26 +645,19 @@ namespace GUIronny {
 	}
 
 			 //Data recieved from serialport.
-			 delegate void read_dataEvent(System::Byte byte);
 
 	private:  System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-		//SerialPort^ sp = (SerialPort^)sender;
 		if (write_position == 0)
 		{
-			//Console::WriteLine("writepos = 0");
 			System::Byte byte = this->serialPort1->ReadByte();
-			//Console::WriteLine("the header is " + byte);
 			handlebyte(byte);
 		}
 		else if (this->serialPort1->BytesToRead > expected_length - 1)
 		{
-			//Console::WriteLine("writeposition o expected legnth statement");
 			System::Byte byte = this->serialPort1->ReadByte();
 			handlebyte(byte);
 		}
 		else{
-			//Console::WriteLine("else statement");
-			//Console::WriteLine("writeposition = " + write_position + " bytes to read vs expected length " + this->serialPort1->BytesToRead + " " + expected_length);
 			return;
 		}
 	}
@@ -728,21 +720,9 @@ namespace GUIronny {
 			return;
 		}
 
-		/*while (this->serialPort1->BytesToRead < expected_length - 1)
-		{
-		Console::WriteLine("buffer in while" + this->serialPort1->BytesToRead);
-		Sleep(50);
-		}*/
 
 		this->serialPort1->Read(data_recieved_buffer, 0, expected_length - 2);
 
-
-		//Console::WriteLine("the bytes to read" + this->serialPort1->BytesToRead);
-
-		//data_recieved[write_position] = byte;
-
-		//if (++write_position == expected_length)
-		//{
 		switch (data_recieved[0])
 		{
 		case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
@@ -754,7 +734,7 @@ namespace GUIronny {
 		case DRIVABLE_SQUARE: //Körbar ruta x,y
 			drivablesquare_xpos = byte;
 			drivablesquare_ypos = data_recieved_buffer[0];
-			fillkarta(image1, drivablesquare_xpos, drivablesquare_ypos, DRIVABLE_SQUARE);
+			
 			break;
 		case DISTRESSEDFOUND: //Nödställd funnen
 			distressedfound_xpos = byte;
@@ -785,13 +765,11 @@ namespace GUIronny {
 
 			Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
 			Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
-			//sensorwindow->sensorvalues(front, front_left, front_right, rear_left, rear_right);
-			//changeIR(front, front_left, front_right, rear_left, rear_right);
-			/*SetText(Convert::ToString(front), IRsensor_Front);
+			SetText(Convert::ToString(front), IRsensor_Front);
 			SetText(Convert::ToString(front_left), IRsensor_VF);
 			SetText(Convert::ToString(front_right), IRsensor_HF);
 			SetText(Convert::ToString(rear_left), IRsensor_VB);
-			SetText(Convert::ToString(rear_right), IRsensor_HB);*/
+			SetText(Convert::ToString(rear_right), IRsensor_HB);
 			//Console::
 		}
 			break;
@@ -921,7 +899,7 @@ namespace GUIronny {
 
 	}
 
-			 delegate void SetTextDelegate(String^ text, TextBox^ textbox);
+	private: delegate void SetTextDelegate(String^ text, TextBox^ textbox);
 
 	private: static void SetText(String^ text, TextBox^ textbox){
 		if (textbox->InvokeRequired){
@@ -969,8 +947,6 @@ namespace GUIronny {
 		}
 		this->pictureBox1->Image = image1;
 	}
-
-
 	private: void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, unsigned int status){
 
 		switch (status)
@@ -982,15 +958,15 @@ namespace GUIronny {
 				{
 					if (x % squaresize == 0)
 					{
-						image1->SetPixel(x, y, Color::Black);
+						image1->SetPixel(y, x, Color::Black);
 					}
 					else if (y % squaresize == 0)
 					{
-						image1->SetPixel(x, y, Color::Black);
+						image1->SetPixel(y, x, Color::Black);
 					}
 					else
 					{
-						image1->SetPixel(x, y, Color::White);
+						image1->SetPixel(y, x, Color::White);
 					}
 				}
 			}
@@ -1000,7 +976,7 @@ namespace GUIronny {
 			{
 				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
 				{
-					image1->SetPixel(x, y, Color::Black);
+					image1->SetPixel(y, x, Color::Black);
 				}
 			}
 			break;
@@ -1011,15 +987,15 @@ namespace GUIronny {
 				{
 					if (x % squaresize == 0)
 					{
-						image1->SetPixel(x, y, Color::Black);
+						image1->SetPixel(y, x, Color::Black);
 					}
 					else if (y % squaresize == 0)
 					{
-						image1->SetPixel(x, y, Color::Black);
+						image1->SetPixel(y, x, Color::Black);
 					}
 					else
 					{
-						image1->SetPixel(x, y, Color::Gray);
+						image1->SetPixel(y, x, Color::Gray);
 					}
 				}
 			}
