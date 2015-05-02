@@ -71,6 +71,9 @@ namespace GUIronny {
 			sensorwindow->sensorvalues(11, 11, 11, 11, 11);*/
 
 			createarray(image1);
+			fillkarta(image1, 8, 16, DRIVABLE_SQUARE);
+			fillkarta(image1, 9, 16, WALL);
+			fillkarta(image1, 7, 16, WALL);
 
 			//
 			//TODO: Add the constructor code here
@@ -89,7 +92,7 @@ namespace GUIronny {
 		static int expected_length = 0;
 		static bool automode = false;
 		static bool tejp_found = false;
-		
+
 		Grafer_data^ sensorwindow = (gcnew Grafer_data());
 		bool showing_sensor_window = false;
 		static unsigned int current_xpos = 0;
@@ -742,66 +745,67 @@ namespace GUIronny {
 		//{
 		switch (data_recieved[0])
 		{
-			case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
-				current_xpos = byte;
-				current_ypos = data_recieved_buffer[0];
-				current_angle = data_recieved_buffer[1];
-				break;
+		case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
+			current_xpos = byte;
+			current_ypos = data_recieved_buffer[0];
+			current_angle = data_recieved_buffer[1];
+			break;
 
-			case DRIVABLE_SQUARE: //Körbar ruta x,y
-				drivablesquare_xpos = byte;
-				drivablesquare_ypos = data_recieved_buffer[0];
-				break;
-			case DISTRESSEDFOUND: //Nödställd funnen
-				distressedfound_xpos = byte;
-				distressedfound_ypos = data_recieved_buffer[0];
-				break;
-			case WALL:
-				wall_xpos = byte;
-				wall_ypos = data_recieved_buffer[0];
-				break;
-			case SENSOR_VALUES:  //Dealing with sensorvalues
-			{
-				//Console::WriteLine("HANDLING RECIEVED DATA!!");
-				rear_left = byte;
-				rear_left = rear_left << 8;
-				rear_left |= data_recieved_buffer[0];
+		case DRIVABLE_SQUARE: //Körbar ruta x,y
+			drivablesquare_xpos = byte;
+			drivablesquare_ypos = data_recieved_buffer[0];
+			fillkarta(image1, drivablesquare_xpos, drivablesquare_ypos, DRIVABLE_SQUARE);
+			break;
+		case DISTRESSEDFOUND: //Nödställd funnen
+			distressedfound_xpos = byte;
+			distressedfound_ypos = data_recieved_buffer[0];
+			break;
+		case WALL:
+			wall_xpos = byte;
+			wall_ypos = data_recieved_buffer[0];
+			break;
+		case SENSOR_VALUES:  //Dealing with sensorvalues
+		{
+			//Console::WriteLine("HANDLING RECIEVED DATA!!");
+			rear_left = byte;
+			rear_left = rear_left << 8;
+			rear_left |= data_recieved_buffer[0];
 
-				front_left = data_recieved_buffer[1] << 8;
-				front_left |= data_recieved_buffer[2];
+			front_left = data_recieved_buffer[1] << 8;
+			front_left |= data_recieved_buffer[2];
 
-				rear_right = data_recieved_buffer[3] << 8;
-				rear_right |= data_recieved_buffer[4];
+			rear_right = data_recieved_buffer[3] << 8;
+			rear_right |= data_recieved_buffer[4];
 
-				front_right = data_recieved_buffer[5] << 8;
-				front_right |= data_recieved_buffer[6];
+			front_right = data_recieved_buffer[5] << 8;
+			front_right |= data_recieved_buffer[6];
 
-				front = data_recieved_buffer[7] << 8;
-				front |= data_recieved_buffer[8];
+			front = data_recieved_buffer[7] << 8;
+			front |= data_recieved_buffer[8];
 
-				Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
-				Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
-				//sensorwindow->sensorvalues(front, front_left, front_right, rear_left, rear_right);
-				//changeIR(front, front_left, front_right, rear_left, rear_right);
-				/*SetText(Convert::ToString(front), IRsensor_Front);
-				SetText(Convert::ToString(front_left), IRsensor_VF);
-				SetText(Convert::ToString(front_right), IRsensor_HF);
-				SetText(Convert::ToString(rear_left), IRsensor_VB);
-				SetText(Convert::ToString(rear_right), IRsensor_HB);*/
-				//Console::
-			}
+			Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
+			Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
+			//sensorwindow->sensorvalues(front, front_left, front_right, rear_left, rear_right);
+			//changeIR(front, front_left, front_right, rear_left, rear_right);
+			/*SetText(Convert::ToString(front), IRsensor_Front);
+			SetText(Convert::ToString(front_left), IRsensor_VF);
+			SetText(Convert::ToString(front_right), IRsensor_HF);
+			SetText(Convert::ToString(rear_left), IRsensor_VB);
+			SetText(Convert::ToString(rear_right), IRsensor_HB);*/
+			//Console::
+		}
 			break;
 
 
-			case WHEELENCODERS:
-				
-				break;
+		case WHEELENCODERS:
 
-			case TEJP_FOUND: //Tejpbit funnen.
-				break;
-			case TEJP_REF: //Referensvärde tejp
-				tejp_ref_value = byte; 
-				break;
+			break;
+
+		case TEJP_FOUND: //Tejpbit funnen.
+			break;
+		case TEJP_REF: //Referensvärde tejp
+			tejp_ref_value = byte;
+			break;
 
 		default:
 			break;
@@ -917,7 +921,7 @@ namespace GUIronny {
 
 	}
 
-	delegate void SetTextDelegate(String^ text, TextBox^ textbox);
+			 delegate void SetTextDelegate(String^ text, TextBox^ textbox);
 
 	private: static void SetText(String^ text, TextBox^ textbox){
 		if (textbox->InvokeRequired){
@@ -929,85 +933,52 @@ namespace GUIronny {
 		}
 	}
 
-private: void createarray(Bitmap^ image1){
+	private: void createarray(Bitmap^ image1){
 
-	//array < array<int, 1>^, 2 >^ Karta = gcnew array < array<int, 1>^, 2 >(32, 32);
-	//array < int >^ KartaX = gcnew array < int >(32);
-	
+		//array < array<int, 1>^, 2 >^ Karta = gcnew array < array<int, 1>^, 2 >(32, 32);
+		//array < int >^ KartaX = gcnew array < int >(32);
 
-	for (int y = 0; y < 16; y++)
-	{
-		for (int x = 0; x < 16; x++)
+
+		for (int y = 0; y < 17; y++)
 		{
-			/*Karta[x, y][0] = x* xmin;
-			Karta[x, y][1] = x* xmax;
-			Karta[x, y][2] = x* ymin;
-			Karta[x, y][3] = x* ymax;*/
-			Karta[x, y] = 254;
+			for (int x = 0; x < 17; x++)
+			{
+				Karta[x, y] = 254;
+			}
 		}
+
+
+		for (int yp = 0; yp < this->pictureBox1->Height; yp++)
+		{
+			for (int xp = 0; xp < this->pictureBox1->Width; xp++)
+			{
+				if (xp % squaresize == 0)
+				{
+					image1->SetPixel(xp, yp, Color::Black);
+				}
+				else if (yp % squaresize == 0)
+				{
+					image1->SetPixel(xp, yp, Color::Black);
+				}
+				else
+				{
+					image1->SetPixel(xp, yp, Color::Gray);
+				}
+
+			}
+		}
+		this->pictureBox1->Image = image1;
 	}
 
 
-	for ( int yp = 0; yp < this->pictureBox1->Height;  yp++)
-	{
-		for (int xp = 0; xp < this->pictureBox1->Width; xp++)
-		{
-			if (xp % squaresize == 0)
-			{
-				image1->SetPixel(xp, yp, Color::Black);
-			}
-			else if (yp % squaresize == 0)
-			{
-				image1->SetPixel(xp, yp, Color::Black);
-			}
-			else
-			{
-				image1->SetPixel(xp, yp, Color::Gray);
-			}
-			
-		}
-	}
-	this->pictureBox1->Image = image1;
-}
-
-
-	private: void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
+	private: void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, unsigned int status){
 
 		switch (status)
 		{
-		case 254:
-			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
-			{
-				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
-				{
-					if (x % squaresize == 0)
-					{
-						image1->SetPixel(x, y, Color::Black);
-					}
-					else if (y % squaresize == 0)
-					{
-						image1->SetPixel(x, y, Color::Black);
-					}
-					else
-					{
-						image1->SetPixel(x, y, Color::Gray);
-					}
-				}
-			}
-		case 255:
+		case DRIVABLE_SQUARE:
 			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 			{
 				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
-				{
-					//Color pixelColor = image1->GetPixel(x, y);
-					//Color newColor = Color::FromArgb(pixelColor.R, 250, 60);
-					image1->SetPixel(x, y, Color::Black);
-				}
-			}
-		default:
-			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
-			{
-				for (int y = squaresize * y_ny; y < 15 * y_ny + squaresize; y++)
 				{
 					if (x % squaresize == 0)
 					{
@@ -1024,9 +995,37 @@ private: void createarray(Bitmap^ image1){
 				}
 			}
 			break;
+		case WALL:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
+				{
+					image1->SetPixel(x, y, Color::Black);
+				}
+			}
+			break;
+		default:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
+				{
+					if (x % squaresize == 0)
+					{
+						image1->SetPixel(x, y, Color::Black);
+					}
+					else if (y % squaresize == 0)
+					{
+						image1->SetPixel(x, y, Color::Black);
+					}
+					else
+					{
+						image1->SetPixel(x, y, Color::Gray);
+					}
+				}
+			}
+			break;
 		}
 		this->pictureBox1->Image = image1;
 	}
 	};
 }
-
