@@ -84,6 +84,7 @@ namespace GUIronny {
 		int prevy = 480;
 		static array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
+		array <int, 2 >^ driveblesquares = gcnew array < int, 2 >()
 		array <int, 2 >^ Karta = gcnew array < int, 2 >(33, 33);
 		static int write_position = 0;
 		static int expected_length = 0;
@@ -107,6 +108,10 @@ namespace GUIronny {
 		static unsigned int rear_right = 0;
 		static unsigned int front_right = 0;
 		static unsigned int front = 0;
+		static unsigned int x_recieved_prev = 16;
+		static unsigned int y_recieved_prev = 16;
+		static unsigned int x_prev = 16;
+		static unsigned int y_prev = 8;
 
 		int squaresize = 6;
 
@@ -755,6 +760,7 @@ namespace GUIronny {
 			case DRIVABLE_SQUARE: //Körbar ruta x,y
 				drivablesquare_xpos = byte;
 				drivablesquare_ypos = data_recieved_buffer[0];
+
 				break;
 			case DISTRESSEDFOUND: //Nödställd funnen
 				distressedfound_xpos = byte;
@@ -798,7 +804,8 @@ namespace GUIronny {
 
 
 			case WHEELENCODERS:
-				
+				stracka = byte;
+				vinkel = data_recieved_buffer[0];
 				break;
 
 			case TEJP_FOUND: //Tejpbit funnen.
@@ -962,11 +969,31 @@ private: void createarray(Bitmap^ image1){
 	this->pictureBox1->Image = image1;
 }
 
+		 private: void change_coordinates(int unsigned recieved_x , unsigned int recieved_y){
+			 if (recieved_x == x_recieved_prev && recieved_y < y_recieved_prev){
+				 --y_recieved_prev;
+				 --y_prev;
+			 }
+			 else if (recieved_x == x_recieved_prev && recieved_y > y_recieved_prev) {
+				 ++y_recieved_prev;
+				 ++y_prev;
+			 }
+			 else if (recieved_y == y_recieved_prev && recieved_x < x_recieved_prev){
+				 --x_recieved_prev;
+				 --x_prev;
+			 }
+			 else {
+				 ++x_recieved_prev;
+				 ++x_prev; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
+			 }
+		 }
 
 	private: void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
 
 		switch (status)
 		{
+		case DRIVABLE_SQUARE:
+			if (drivablesquare_xpos )
 		case 254:
 			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 			{
