@@ -116,36 +116,59 @@ void manual_drive_backward() {
 	//distance_remaining = -100;
 }
 
-void handle_received_message() {
-	switch(busbuffer[0]) {
-		case SENSOR_READINGS:
-			update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
-			break;
-		case MOVED_DISTANCE_AND_ANGLE:
-			update_distance_and_angle(busbuffer[1], busbuffer[2]);
-			break;
-		case TAPE_FOUND:
-			tape_found();
-			break;
-		case DRIVE_FORWARD:
-			manual_drive_forward();
-			break;
-		case TURN_RIGHT:
-			manual_turn_right();
-			break;
-		case TURN_LEFT:
-			manual_turn_left();
-			break;
-		case DRIVE_FORWARD_RIGHT:
-			manual_drive_forward_right();		
-			break;
-		case DRIVE_FORWARD_LEFT:
-			manual_drive_forward_left();
-			break;
-		case DRIVE_BACKWARD:
-			manual_drive_backward();
-			break;
-		default:
-			break;
+void handle_received_messages() {
+	while (read_start != read_end)
+	{
+		switch (read_buffer[read_start]) {
+			case SENSOR_READINGS:
+				update_sensor_readings(read_buffer[(read_start + 1) % BUFFER_SIZE],
+					read_buffer[(read_start + 2) % BUFFER_SIZE],
+					read_buffer[(read_start + 3) % BUFFER_SIZE],
+					read_buffer[(read_start + 4) % BUFFER_SIZE],
+					read_buffer[(read_start + 5) % BUFFER_SIZE],
+					read_buffer[(read_start + 6) % BUFFER_SIZE],
+					read_buffer[(read_start + 7) % BUFFER_SIZE],
+					read_buffer[(read_start + 8) % BUFFER_SIZE],
+					read_buffer[(read_start + 9) % BUFFER_SIZE],
+					read_buffer[(read_start + 10) % BUFFER_SIZE]);
+					
+					read_start = (read_start + 11) % BUFFER_SIZE;
+				break;
+			case MOVED_DISTANCE_AND_ANGLE:
+				update_distance_and_angle(read_buffer[(read_start + 1) % BUFFER_SIZE], read_buffer[(read_start + 2) % BUFFER_SIZE]);
+				
+				read_start = (read_start + 3) % BUFFER_SIZE;
+				break;
+			case TAPE_FOUND:
+				tape_found();
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			case DRIVE_FORWARD:
+				manual_drive_forward();
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			case TURN_RIGHT:
+				manual_turn_right();
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			case TURN_LEFT:
+				manual_turn_left();
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			case DRIVE_FORWARD_RIGHT:
+				manual_drive_forward_right();
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			case DRIVE_FORWARD_LEFT:
+				manual_drive_forward_left();
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			case DRIVE_BACKWARD:
+				manual_drive_backward();
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			default:
+				break;
+		}
 	}
 }

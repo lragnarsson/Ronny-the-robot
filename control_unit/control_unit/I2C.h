@@ -13,14 +13,14 @@
 #define atmega20pc 0 // prescaler atmega 20kHz clock 1
 #define atmega18pc 0 // prescaler atmega 18.432kHz clock
 
-
+/* I2C adresses */
 #define GENERAL_CALL 0x00
 #define CONTROL_UNIT 0x12
 #define SENSOR_UNIT 0x14
 #define COMMUNICATION_UNIT 0x16
 
 /* Headers */
-#define ABSOLUTE_X_Y 0x30
+#define ABSOLUTE_X_Y 0x30	// 3 bytes
 #define AUTONOMOUS_MODE 0x31
 #define MANUAL_MODE 0x32
 #define MAPPED_SQUARE 0x33 // 3 bytes
@@ -40,33 +40,32 @@
 #define D_PARAMETER 0xC8 // 2 bytes
 #define CALIBRATE_TAPE_SENSOR 0xD0
 
+/* TWCR definitions */
+#define SEND 0xc5 // 1   1  0   0   0  1  0   1
+#define STOP 0xd5 // 1   1  0   1   0  1  0   1
+#define START 0xe5// 1   1  1   0   0  1  0   1
+#define ACK 0xc5  // 1   1  0   0   0  1  0   1
+#define NACK 0x85 // 1   0  0   0   0  1  0   1
+#define RESET 0xc5// 1   1  0   0   0  1  0   1
 
+/* Read and write buffers */
+#define BUFFER_SIZE 64
 
-volatile uint8_t busbuffer[16];
-volatile uint8_t receiverstart;
-volatile uint8_t receiverstop;
+volatile uint8_t write_buffer[BUFFER_SIZE];
+volatile uint8_t write_start;
+volatile uint8_t write_end;
+volatile uint8_t write_address[BUFFER_SIZE];
 
-//Init
-void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t adress);
+volatile uint8_t read_buffer[BUFFER_SIZE];
+volatile uint8_t read_start;
+volatile uint8_t read_end;
 
-//START condition
+void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t address);
 void i2c_start();
-
-//STOP condition
 void i2c_stop();
+void i2c_write(uint8_t address, uint8_t* data, uint8_t length);
+void i2c_write_byte(uint8_t adress, uint8_t data);
 
-//Getter for bussbuffer
-uint8_t i2c_get_buffer(uint8_t*);
+void handle_received_messages();
 
-void i2c_clear_buffer(void);
-
-//Write to I2C
-uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length);
-uint8_t i2c_write_byte(uint8_t adress, uint8_t data);
-
-void handle_received_message();
-
-
-//Send by bus
-//uint8_t i2c_send(uint8_t adress, uint8_t data);
 #endif /* I2C_H_ */

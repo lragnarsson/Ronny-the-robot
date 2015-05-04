@@ -2,7 +2,7 @@
  * sensor_unit.c
  *
  * Created: 2015-03-24 09:43:41
- *  Author: Jesper
+ *  Author: Jesper Otterholm
  */ 
 
 #include "sensor_unit.h"
@@ -12,16 +12,13 @@ int main(void)
 {
 	init_ir();
 	init_reflectance();
-	init_wheel_encoder();
+	init_wheel_encoders();
 	i2c_init(atmega20br, atmega20pc, SENSOR_UNIT);
 	
 	sei();
 	
     while(1)
     {
-		//uint8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, 0x42 };
-		//i2c_write(communication_unit, msg, sizeof(msg));
-		//_delay_ms(100);
         //TODO:: Please write your application code
     }
 }
@@ -125,7 +122,7 @@ ISR(ANALOG_COMP_vect)
 	{
 		tape_found = 1;
 
-		i2c_write_byte(COMMUNICATION_UNIT, TAPE_FOUND);
+		i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 
 		_delay_us(500);
 		ACSR |= (1<<ACI); // Avoid double interrupt, requires delay	
@@ -181,7 +178,7 @@ void init_reflectance()
 }
 
 // Initialize wheel encoders
-void init_wheel_encoder()
+void init_wheel_encoders()
 {
 	EIMSK = INTERRUPT_INT0_INT1;
 	EICRA = INTERRUPT_INT0_INT1_RISING_EDGE;
@@ -189,21 +186,28 @@ void init_wheel_encoder()
 	DDRB &= ~( (1<<ENC_L_B) | (1<<ENC_R_B) );
 }
 
-void handle_received_message()
+// Handle incoming I2C messages
+void handle_received_messages()
 {
-	switch (busbuffer[0])
+	while (read_start != read_end)
 	{
-		case CALIBRATE_TAPE_SENSOR:
+		switch (read_buffer[read_start])
 		{
-			uint8_t val = calibrate_reflectance_sensor();
-			uint8_t msg[] = {TAPE_SENSOR_VALUE, val};
-			i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
-			break;
+			case CALIBRATE_TAPE_SENSOR:
+			{
+				uint8_t val = calibrate_reflectance_sensor();
+				uint8_t msg[] = {TAPE_SENSOR_VALUE, val};
+				i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+				
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			}
 		}
 	}
 }
 
-uint8_t send_distance_readings()
+// Calculate and send IR distance measurements
+void send_distance_readings()
 {
 	uint16_t distances[] = {0, 0, 0, 0, 0};
 		
@@ -228,21 +232,22 @@ uint8_t send_distance_readings()
 		(uint8_t)(distances[4]>>8),
 		(uint8_t) distances[4] };
 
-	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
+	i2c_write(GENERAL_CALL, msg, sizeof(msg));
 }
 
-uint8_t send_odometry_readings()
+// Calculate and send odometry data
+void send_odometry_readings()
 {
 	static uint8_t distance_trunc = 0;
 	int16_t scaled_distance = (encoder_left + encoder_right) * ENCODER_DISTANCE_SCALE + distance_trunc;
-	distance_trunc = (uint8_t)scaled_distance;
-	int8_t distance = (int8_t)(scaled_distance>>8);
+	distance_trunc = (uint8_t)(scaled_distance & 0x00FF);
+	int8_t distance = (int8_t)(scaled_distance >> 8);
 	
 	static uint8_t rotation_trunc = 0;
 	int16_t scaled_rotation = (encoder_left - encoder_right) * ENCODER_ROTATION_SCALE + rotation_trunc;
-	rotation_trunc = (uint8_t)scaled_rotation;
-	int8_t rotation = (int8_t)(scaled_rotation>>8);
+	rotation_trunc = (uint8_t)(scaled_rotation & 0x00FF);
+	int8_t rotation = (int8_t)(scaled_rotation >> 8);
 	
 	int8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
-	return 1;//i2c_write(CONTROL_UNIT, msg, sizeof(msg));
+	i2c_write(CONTROL_UNIT, msg, sizeof(msg));
 }
