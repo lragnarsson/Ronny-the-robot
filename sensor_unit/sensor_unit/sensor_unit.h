@@ -2,7 +2,7 @@
  * sensor_unit.h
  *
  * Created: 4/13/2015 12:09:10 PM
- *  Author: erisk214
+ *  Author: Jesper Otterholm
  */ 
 
 
@@ -71,12 +71,12 @@ const uint16_t ir_long_lut[IR_LONG_MAX - IR_LONG_MIN + 1] PROGMEM = { 891, 884, 
 const uint16_t ir_long_lut_index_offset = IR_LONG_MIN;
 
 uint8_t calibrate_reflectance_sensor();
-void handle_recieved_message();
-uint8_t send_distance_readings();
-uint8_t send_odometry_readings();
+void handle_recieved_messages();
+void send_distance_readings();
+void send_odometry_readings();
 void init_ir();
 void init_reflectance();
-void init_wheel_encoder();
+void init_wheel_encoders();
 
 
 #endif /* SENSOR_UNIT_H_ */

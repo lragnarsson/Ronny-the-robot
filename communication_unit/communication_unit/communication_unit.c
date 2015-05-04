@@ -33,44 +33,48 @@ void init_personality() {
 	}
 }
 
-void handle_received_message() {
-	static uint8_t sensor_count = 0;
-	switch(busbuffer[0]) {
-		/*case 0xFF:
-			Send_to_PC(busbuffer[1]);
-			break;*/
-		case ABSOLUTE_X_Y:
-		case AUTONOMOUS_MODE:
-		case MANUAL_MODE:
-		case TAPE_FOUND:
-			//Send_to_PC(busbuffer[0]);
-			break;
-		case MAPPED_SQUARE:
-		case MAPPED_WALL:
-		case MAPPED_GOAL:
-		case MOVED_DISTANCE_AND_ANGLE:
-			/*for(uint8_t j=0; j<3; j++) {
-				Send_to_PC(busbuffer[j]);
-			}*/
-			break;
-		case SENSOR_READINGS:
-			if (sensor_count == 25) {
-				for(uint8_t j=0; j<11; j++) {
-					Send_to_PC(busbuffer[j]);
+void handle_received_messages() {
+	while (read_start != read_end)
+	{
+		static uint8_t sensor_count = 0;
+		switch(read_buffer[read_start]) {
+			case AUTONOMOUS_MODE:
+			case MANUAL_MODE:
+			case TAPE_FOUND:
+				//Send_to_PC(read_buffer[read_start]);
+				//read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+			case ABSOLUTE_X_Y:
+			case MAPPED_SQUARE:
+			case MAPPED_WALL:
+			case MAPPED_GOAL:
+			case MOVED_DISTANCE_AND_ANGLE:
+				/*for(uint8_t j=0; j<3; j++) {
+					Send_to_PC(read_buffer[read_start + j]);
+				}*/
+				//read_start = (read_start + 3) % BUFFER_SIZE;
+				break;
+			case SENSOR_READINGS:
+				if (sensor_count == 25) {
+					for(uint8_t j=0; j<11; j++) {
+						Send_to_PC(read_buffer[read_start + j]);
 					
+					}
+					sensor_count = 0;
 				}
-				sensor_count = 0;
-			}
-			else {
-				++sensor_count;
-			}
-			break;
-		default:
-			/*Send_to_PC('F');
-			Send_to_PC('E');
-			Send_to_PC('L');
-			Send_to_PC(busbuffer[0]);*/
-			break;
+				else {
+					++sensor_count;
+				}
+				read_start = (read_start + 11) % BUFFER_SIZE;
+				break;
+			default:
+				/*Send_to_PC('F');
+				Send_to_PC('E');
+				Send_to_PC('L');
+				Send_to_PC(read_buffer[read_start]);*/
+				//read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
+		}	
 	}
 }
 
