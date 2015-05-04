@@ -88,9 +88,9 @@ namespace GUIronny {
 		static array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
 
-		array <int, 2 >^ driveblesquares = gcnew array < int, 2 >(33,33);
-		array <int, 2 >^ Karta = gcnew array < int, 2 >(33, 33);
+		array <int, 2 >^ driveblesquares = gcnew array < int, 2 >(150, 2);
 
+		array <int, 2 >^ walls = gcnew array < int, 2 >(150, 2);
 		array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
 
 		static int write_position = 0;
@@ -115,10 +115,12 @@ namespace GUIronny {
 		static unsigned int rear_right = 0;
 		static unsigned int front_right = 0;
 		static unsigned int front = 0;
-		static unsigned int x_recieved_prev = 16;
-		static unsigned int y_recieved_prev = 16;
-		static unsigned int x_prev = 16;
-		static unsigned int y_prev = 8;
+		static unsigned int x_recieved_current = 16;
+		static unsigned int y_recieved_current = 16;
+		static unsigned int x_GUIcurrent = 16;
+		static unsigned int y_GUIcurrent = 8;
+		int drivable_cell = 0;
+		int wall_cell = 0;
 
 		int squaresize = 35;
 
@@ -324,7 +326,7 @@ namespace GUIronny {
 			this->IRsensor_VF->Name = L"IRsensor_VF";
 			this->IRsensor_VF->Size = System::Drawing::Size(37, 13);
 			this->IRsensor_VF->TabIndex = 11;
-			this->IRsensor_VF->Text = L"20";
+			this->IRsensor_VF->Text = L"0";
 			// 
 			// IRsensor_VB
 			// 
@@ -338,7 +340,7 @@ namespace GUIronny {
 			this->IRsensor_VB->Name = L"IRsensor_VB";
 			this->IRsensor_VB->Size = System::Drawing::Size(37, 13);
 			this->IRsensor_VB->TabIndex = 12;
-			this->IRsensor_VB->Text = L"12";
+			this->IRsensor_VB->Text = L"0";
 			// 
 			// IRsensor_HF
 			// 
@@ -351,7 +353,7 @@ namespace GUIronny {
 			this->IRsensor_HF->Name = L"IRsensor_HF";
 			this->IRsensor_HF->Size = System::Drawing::Size(37, 13);
 			this->IRsensor_HF->TabIndex = 11;
-			this->IRsensor_HF->Text = L"20";
+			this->IRsensor_HF->Text = L"0";
 			// 
 			// IRsensor_HB
 			// 
@@ -364,7 +366,7 @@ namespace GUIronny {
 			this->IRsensor_HB->Name = L"IRsensor_HB";
 			this->IRsensor_HB->Size = System::Drawing::Size(37, 13);
 			this->IRsensor_HB->TabIndex = 13;
-			this->IRsensor_HB->Text = L"20";
+			this->IRsensor_HB->Text = L"0";
 			// 
 			// IRsensor_Front
 			// 
@@ -377,7 +379,7 @@ namespace GUIronny {
 			this->IRsensor_Front->Name = L"IRsensor_Front";
 			this->IRsensor_Front->Size = System::Drawing::Size(37, 13);
 			this->IRsensor_Front->TabIndex = 14;
-			this->IRsensor_Front->Text = L"20";
+			this->IRsensor_Front->Text = L"0";
 			// 
 			// serialPort1
 			// 
@@ -393,6 +395,7 @@ namespace GUIronny {
 			this->button3->TabIndex = 15;
 			this->button3->Text = L"Open";
 			this->button3->UseVisualStyleBackColor = true;
+			this->button3->Click += gcnew System::EventHandler(this, &MyForm::button3_Click_1);
 			// 
 			// button4
 			// 
@@ -402,6 +405,7 @@ namespace GUIronny {
 			this->button4->TabIndex = 16;
 			this->button4->Text = L"Close";
 			this->button4->UseVisualStyleBackColor = true;
+			this->button4->Click += gcnew System::EventHandler(this, &MyForm::button4_Click_1);
 			// 
 			// Kommandon
 			// 
@@ -423,6 +427,7 @@ namespace GUIronny {
 			this->Sensordata->TabIndex = 18;
 			this->Sensordata->Text = L"Sensordata";
 			this->Sensordata->UseVisualStyleBackColor = true;
+			this->Sensordata->Click += gcnew System::EventHandler(this, &MyForm::Sensordata_Click_1);
 			// 
 			// label1
 			// 
@@ -544,7 +549,7 @@ namespace GUIronny {
 		this->comboBox1->Items->AddRange(objectArray);
 	}
 
-	
+
 
 			 // Keypressevents
 	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
@@ -741,19 +746,28 @@ namespace GUIronny {
 			break;
 
 
-			case DRIVABLE_SQUARE: //Körbar ruta x,y
-				drivablesquare_xpos = byte;
-				drivablesquare_ypos = data_recieved_buffer[0];
-
-				break;
-			case DISTRESSEDFOUND: //Nödställd funnen
-				distressedfound_xpos = byte;
-				distressedfound_ypos = data_recieved_buffer[0];
-				break;
-			case WALL:
-				wall_xpos = byte;
-				wall_ypos = data_recieved_buffer[0];
-				break;
+		case DRIVABLE_SQUARE: //Körbar ruta x,y
+			drivablesquare_xpos = byte;
+			drivablesquare_ypos = data_recieved_buffer[0];
+			change_coordinates(drivablesquare_xpos, drivablesquare_ypos);
+			driveblesquares[drivable_cell, 0] = x_GUIcurrent; // Vi hade ju tänkt helt fel, det är ju våra koord på våran grid som ska sparas
+			driveblesquares[drivable_cell, 1] = y_GUIcurrent;
+			move_squares(x_GUIcurrent, y_GUIcurrent); // ändrar 
+			fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
+			++drivable_cell;
+			break;
+		case DISTRESSEDFOUND: //Nödställd funnen
+			distressedfound_xpos = byte;
+			distressedfound_ypos = data_recieved_buffer[0];
+			break;
+		case WALL:
+			wall_xpos = byte;
+			wall_ypos = data_recieved_buffer[0];
+			change_coordinates(wall_xpos, wall_ypos);// måste tänka om med walls!! walls dyker ju på sidan av körbarruta! på båda sidor
+			walls[wall_cell, 0] = wall_xpos; //kom ihåg att ändra vilka koord som ska läggas in, inte den mottagna positionen utan våra koord!! 
+			walls[wall_cell, 1] = wall_ypos;
+			++wall_cell;
+			break;
 		case SENSOR_VALUES:  //Dealing with sensorvalues
 		{
 			//Console::WriteLine("HANDLING RECIEVED DATA!!");
@@ -827,25 +841,6 @@ namespace GUIronny {
 		grafer->dataGridView1->Rows->Add();
 	}
 
-
-	private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
-		auto data = gcnew array < System::Byte > { 12 };
-		if (!this->serialPort1->IsOpen){
-
-			this->serialPort1->PortName = this->comboBox1->Text;
-			this->open_closed->Text = "port openeing, waiting";
-			this->serialPort1->Open();
-			this->open_closed->Text = "port open";
-		}
-	}
-
-	private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
-		if (this->serialPort1->IsOpen){
-			this->serialPort1->Close();
-			this->open_closed->Text = "connection closed";
-		}
-	}
-
 	private: void testbitmap(Bitmap^ image1, int prevx, int prevy, Color color){
 
 
@@ -874,7 +869,7 @@ namespace GUIronny {
 	private: System::Void IRsensor_VF_TextChanged(System::Object^  sender, System::EventArgs^  e) {
 	}
 
-	private: System::Void Sensordata_Click(System::Object^  sender, System::EventArgs^  e) {
+	private: System::Void Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e) {
 		showing_sensor_window = true;
 		sensorwindow->Show();
 		//iform->sensorvalues(front, front_left, front_right, rear_left, rear_right);
@@ -956,24 +951,60 @@ namespace GUIronny {
 	}
 
 
-		 private: void change_coordinates(int unsigned recieved_x , unsigned int recieved_y){
-			 if (recieved_x == x_recieved_prev && recieved_y < y_recieved_prev){
-				 --y_recieved_prev;
-				 --y_prev;
-			 }
-			 else if (recieved_x == x_recieved_prev && recieved_y > y_recieved_prev) {
-				 ++y_recieved_prev;
-				 ++y_prev;
-			 }
-			 else if (recieved_y == y_recieved_prev && recieved_x < x_recieved_prev){
-				 --x_recieved_prev;
-				 --x_prev;
-			 }
-			 else {
-				 ++x_recieved_prev;
-				 ++x_prev; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
-			 }
-		 }
+	private: void change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y){
+		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+			--y_recieved_current;
+			--y_GUIcurrent;
+		}
+		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
+			++y_recieved_current;
+			++y_GUIcurrent;
+		}
+		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
+			--x_recieved_current;
+			--x_GUIcurrent;
+		}
+		else {
+			++x_recieved_current;
+			++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
+		}
+	}
+	private: void move_squares(int unsigned x_new, unsigned int y_new){
+		if (y_new < 1){
+			for (int i = 0; i != drivable_cell; i++){
+				++driveblesquares[i, 1]; // vill räkna upp alla y-värden i arrayen vilket ligger på [0,1], [1,1] osv gör jag rätt?
+			}
+			for (int i = 0; i != wall_cell; i++){
+				++walls[i, 1]; // samma som ovan
+			}
+			++y_new;
+			++y_recieved_current;
+		}
+		else if (y_new > 15){
+			for (int i = 0; i != drivable_cell; i++){
+				--driveblesquares[i, 1]; // om vi hamnar utanför på höger sida vill vi flytta alla rutor åt vänster.
+			}
+			for (int i = 0; i != wall_cell; i++){
+				--walls[i, 1];
+			}
+			--y_new;
+			--y_recieved_current;
+		}
+		else if (x_new > 15){
+			for (int i = 0; i != drivable_cell; i++){
+				--driveblesquares[i, 0];
+			}
+			for (int i = 0; i != wall_cell; i++){
+				--walls[i, 1];
+			}
+			--x_new;
+			--x_recieved_current;
+		}
+		else{
+			return;
+		}
+	}
+
 
 	private: void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
 
@@ -981,8 +1012,8 @@ namespace GUIronny {
 		{
 		case DRIVABLE_SQUARE:
 
-			if (drivablesquare_xpos )
-		case 254:
+			//if (drivablesquare_xpos )
+
 
 			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 			{
@@ -1035,5 +1066,22 @@ namespace GUIronny {
 		}
 		this->pictureBox1->Image = image1;
 	}
+	private: System::Void button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
+		auto data = gcnew array < System::Byte > { 12 };
+		if (!this->serialPort1->IsOpen){
+
+			this->serialPort1->PortName = this->comboBox1->Text;
+			this->open_closed->Text = "port openeing, waiting";
+			this->serialPort1->Open();
+			this->open_closed->Text = "port open";
+		}
+	}
+	private: System::Void button4_Click_1(System::Object^  sender, System::EventArgs^  e) {
+		if (this->serialPort1->IsOpen){
+			this->serialPort1->Close();
+			this->open_closed->Text = "connection closed";
+		}
+	}
+
 	};
 }
