@@ -2,6 +2,7 @@
 
 using namespace System;
 using namespace System::Windows::Forms;
+using namespace GUIronny;
 [STAThread]
 void main(array<String^>^args)
 {
@@ -9,6 +10,7 @@ void main(array<String^>^args)
 	Application::SetCompatibleTextRenderingDefault(false);
 	GUIronny::MyForm form;
 	Application::Run(%form);
+	
 	
 
 }

@@ -82,24 +82,25 @@ namespace GUIronny {
 
 	protected:
 	protected:
-		Bitmap^ image1 = gcnew Bitmap(600, 600);
-		int prevx = 450;
-		int prevy = 480;
-		static array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
+		static Bitmap^ image1 = gcnew Bitmap(600, 600);
+		static int prevx = 450;
+		static int prevy = 480;
+		//static array < System::Byte >^ data_recieved = gcnew array < System::Byte >(16);
 		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
 
-		array <int, 2 >^ driveblesquares = gcnew array < int, 2 >(150, 2);
+		static array <int, 2 >^ driveblesquares = gcnew array < int, 2 >(150, 2);
 
-		array <int, 2 >^ walls = gcnew array < int, 2 >(150, 2);
-		array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
+		static array <int, 2 >^ walls = gcnew array < int, 2 >(150, 2);
+		static array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
 
 		static int write_position = 0;
 		static int expected_length = 0;
 		static bool automode = false;
 		static bool tejp_found = false;
 
-		Grafer_data^ sensorwindow = (gcnew Grafer_data());
-		bool showing_sensor_window = false;
+		static Grafer_data^ sensorwindow = (gcnew Grafer_data());
+		static bool showing_sensor_window = false;
+		static Byte header = 0x00;
 		static unsigned int current_xpos = 0;
 		static unsigned int current_ypos = 0;
 		static unsigned int current_angle = 0;
@@ -119,13 +120,13 @@ namespace GUIronny {
 		static unsigned int y_recieved_current = 16;
 		static unsigned int x_GUIcurrent = 16;
 		static unsigned int y_GUIcurrent = 8;
-		int drivable_cell = 0;
-		int wall_cell = 0;
+		static int drivable_cell = 0;
+		static int wall_cell = 0;
 
-		int squaresize = 35;
+		static int squaresize = 35;
 
-		int stracka = 0;
-		int vinkel = 0;
+		static int stracka = 0;
+		static int vinkel = 0;
 
 		int w = 0;
 		int d = 0;
@@ -141,34 +142,34 @@ namespace GUIronny {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::PictureBox^  Ronny_robot;
-	private: System::Windows::Forms::Label^  Sensorvärden;
-	private: System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
-	private: System::Windows::Forms::PictureBox^  Leftarrow_pressed;
-	private: System::Windows::Forms::PictureBox^  Uparrow_unpressed;
-	private: System::Windows::Forms::PictureBox^  Downarrow_unpressed;
-	private: System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
-	private: System::Windows::Forms::PictureBox^  Uparrow_pressed;
-	private: System::Windows::Forms::PictureBox^  Downarrow_pressed;
-	private: System::Windows::Forms::PictureBox^  Rightarrow_pressed;
-	public: System::Windows::Forms::TextBox^  IRsensor_VF;
+	private: static System::Windows::Forms::PictureBox^  Ronny_robot;
+	private: static System::Windows::Forms::Label^  Sensorvärden;
+	private: static System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
+	private: static System::Windows::Forms::PictureBox^  Leftarrow_pressed;
+	private: static System::Windows::Forms::PictureBox^  Uparrow_unpressed;
+	private: static System::Windows::Forms::PictureBox^  Downarrow_unpressed;
+	private: static System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
+	private: static System::Windows::Forms::PictureBox^  Uparrow_pressed;
+	private: static System::Windows::Forms::PictureBox^  Downarrow_pressed;
+	private: static System::Windows::Forms::PictureBox^  Rightarrow_pressed;
+	
+	public: static System::Windows::Forms::TextBox^  IRsensor_VF;
+	public: static System::Windows::Forms::TextBox^  IRsensor_VB;
+	public: static System::Windows::Forms::TextBox^  IRsensor_HF;
+	public: static System::Windows::Forms::TextBox^  IRsensor_HB;
+	public: static System::Windows::Forms::TextBox^  IRsensor_Front;
 
-	public: System::Windows::Forms::TextBox^  IRsensor_VB;
-	public: System::Windows::Forms::TextBox^  IRsensor_HF;
-	public: System::Windows::Forms::TextBox^  IRsensor_HB;
-	public: System::Windows::Forms::TextBox^  IRsensor_Front;
-
-	private: System::IO::Ports::SerialPort^  serialPort1;
-	private: System::Windows::Forms::Button^  button3;
-	private: System::Windows::Forms::Button^  button4;
-	private: System::Windows::Forms::TextBox^  Kommandon;
-	private: System::Windows::Forms::Button^  Sensordata;
-	private: System::Windows::Forms::Label^  label1;
-	private: System::Windows::Forms::ComboBox^  comboBox1;
-	private: System::Windows::Forms::Label^  label2;
-	private: System::Windows::Forms::TextBox^  open_closed;
-	private: System::Windows::Forms::PictureBox^  pictureBox1;
-	private: System::ComponentModel::IContainer^  components;
+	private: static System::IO::Ports::SerialPort^  serialPort1;
+	private: static System::Windows::Forms::Button^  button3;
+	private: static System::Windows::Forms::Button^  button4;
+	private: static System::Windows::Forms::TextBox^  Kommandon;
+	private: static System::Windows::Forms::Button^  Sensordata;
+	private: static System::Windows::Forms::Label^  label1;
+	private: static System::Windows::Forms::ComboBox^  comboBox1;
+	private: static System::Windows::Forms::Label^  label2;
+	private: static System::Windows::Forms::TextBox^  open_closed;
+	private: static System::Windows::Forms::PictureBox^  pictureBox1;
+	private: static System::ComponentModel::IContainer^  components;
 
 	private:
 		/// <summary>
@@ -661,22 +662,37 @@ namespace GUIronny {
 			 //Data recieved from serialport.
 
 	private:  System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-		if (write_position == 0)
-		{
-			System::Byte byte = this->serialPort1->ReadByte();
-			handlebyte(byte);
+		Console::WriteLine("TOTAL BUFFER " + this->serialPort1->BytesToRead);
+		if (write_position == 0){
+		
+			myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
+			this->Invoke(d, gcnew array < Object^ > {serialPort1, 'h'});
 		}
 		else if (this->serialPort1->BytesToRead > expected_length - 1)
 		{
-			System::Byte byte = this->serialPort1->ReadByte();
-			handlebyte(byte);
+			myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
+			this->Invoke(d, gcnew array < Object^ > {serialPort1, 'b'});
 		}
 		else{
 			return;
 		}
 	}
 
-	private: System::Void handlebyte(Byte byte){
+	private: delegate void myrecievedata_delegate(SerialPort^ sender, char status);
+	private: static void myrecievedata(SerialPort^ sender, char status){
+		if (status == 'h'){
+			sender->BaseStream->ReadAsync(data_recieved_buffer, 0, 1);
+			handleheader(data_recieved_buffer[0]);
+		}
+		else if (status == 'b'){
+			sender->BaseStream->ReadAsync(data_recieved_buffer, 0, 1);
+			handlebyte();
+		}
+	}
+
+	private: delegate void hanldebyte(unsigned char byte);
+
+	private: static void handleheader(unsigned char byte){
 
 		if (write_position == 0)  //If readposition = 0 we have a header. 
 		{
@@ -684,7 +700,7 @@ namespace GUIronny {
 			{
 			case ABSOLUTEVALUE: //Absolutevalue x,y (position)
 				expected_length = 4;
-				data_recieved[write_position] = byte;
+				header = byte;
 				++write_position;
 				break;
 			case AUTOMODE: //Auto mode
@@ -697,26 +713,26 @@ namespace GUIronny {
 				break;
 			case DRIVABLE_SQUARE: //drivalbe square
 				expected_length = 3;
-				data_recieved[write_position] = byte;
+				header = byte;
 				++write_position;
 				break;
 			case DISTRESSEDFOUND: //Distressed found
 				expected_length = 3;
-				data_recieved[write_position] = byte;
+				header = byte;
 				break;
 			case SENSOR_VALUES: //Sensorvalues
 				expected_length = 11;
-				data_recieved[write_position] = byte;
+				header = byte;
 				++write_position;
 				break;
 			case WALL:
 				expected_length = 3;
-				data_recieved[write_position] = byte;
+				header = byte;
 				++write_position;
 				break;
 			case WHEELENCODERS://Wheelencodervärden
 				expected_length = 3;
-				data_recieved[write_position] = byte;
+				header = byte;
 				++write_position;
 				break;
 			case TEJP_FOUND: //Tejpbit funnen.
@@ -725,7 +741,7 @@ namespace GUIronny {
 				break;
 			case TEJP_REF: //Referensvärde tejp
 				expected_length = 2;
-				data_recieved[write_position] = byte;
+				header = byte;
 				++write_position;
 				break;
 			default:
@@ -733,22 +749,25 @@ namespace GUIronny {
 			}
 			return;
 		}
+	}
 
+	private: static void handlebyte(){
 
-		this->serialPort1->Read(data_recieved_buffer, 0, expected_length - 2);
+		//this->serialPort1->Read(data_recieved_buffer, 0, expected_length - 2);
 
-		switch (data_recieved[0])
+		switch (header)
+
 		{
 		case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
-			current_xpos = byte;
-			current_ypos = data_recieved_buffer[0];
-			current_angle = data_recieved_buffer[1];
+			current_xpos = data_recieved_buffer[0];
+			current_ypos = data_recieved_buffer[1];
+			current_angle = data_recieved_buffer[2];
+			fillkarta(image1, current_xpos, current_ypos, ABSOLUTEVALUE);
 			break;
 
-
 		case DRIVABLE_SQUARE: //Körbar ruta x,y
-			drivablesquare_xpos = byte;
-			drivablesquare_ypos = data_recieved_buffer[0];
+			drivablesquare_xpos = data_recieved_buffer[0];
+			drivablesquare_ypos = data_recieved_buffer[1];
 			change_coordinates(drivablesquare_xpos, drivablesquare_ypos);
 			driveblesquares[drivable_cell, 0] = x_GUIcurrent; // Vi hade ju tänkt helt fel, det är ju våra koord på våran grid som ska sparas
 			driveblesquares[drivable_cell, 1] = y_GUIcurrent;
@@ -757,38 +776,42 @@ namespace GUIronny {
 			++drivable_cell;
 			break;
 		case DISTRESSEDFOUND: //Nödställd funnen
-			distressedfound_xpos = byte;
-			distressedfound_ypos = data_recieved_buffer[0];
+			distressedfound_xpos = data_recieved_buffer[0];
+			distressedfound_ypos = data_recieved_buffer[1];
+			fillkarta(image1, distressedfound_xpos, distressedfound_ypos, DISTRESSEDFOUND);
 			break;
+
 		case WALL:
-			wall_xpos = byte;
-			wall_ypos = data_recieved_buffer[0];
+			wall_xpos = data_recieved_buffer[0];
+			wall_ypos = data_recieved_buffer[1];
 			change_coordinates(wall_xpos, wall_ypos);// måste tänka om med walls!! walls dyker ju på sidan av körbarruta! på båda sidor
 			walls[wall_cell, 0] = wall_xpos; //kom ihåg att ändra vilka koord som ska läggas in, inte den mottagna positionen utan våra koord!! 
 			walls[wall_cell, 1] = wall_ypos;
+			move_squares(x_GUIcurrent, y_GUIcurrent);
+			fillkarta(image1, x_GUIcurrent, y_GUIcurrent, WALL);
 			++wall_cell;
 			break;
 		case SENSOR_VALUES:  //Dealing with sensorvalues
 		{
 			//Console::WriteLine("HANDLING RECIEVED DATA!!");
-			rear_left = byte;
+			rear_left = data_recieved_buffer[0];
 			rear_left = rear_left << 8;
-			rear_left |= data_recieved_buffer[0];
+			rear_left |= data_recieved_buffer[1];
 
-			front_left = data_recieved_buffer[1] << 8;
-			front_left |= data_recieved_buffer[2];
+			front_left = data_recieved_buffer[2] << 8;
+			front_left |= data_recieved_buffer[3];
 
-			rear_right = data_recieved_buffer[3] << 8;
-			rear_right |= data_recieved_buffer[4];
+			rear_right = data_recieved_buffer[4] << 8;
+			rear_right |= data_recieved_buffer[5];
 
-			front_right = data_recieved_buffer[5] << 8;
-			front_right |= data_recieved_buffer[6];
+			front_right = data_recieved_buffer[6] << 8;
+			front_right |= data_recieved_buffer[7];
 
-			front = data_recieved_buffer[7] << 8;
-			front |= data_recieved_buffer[8];
+			front = data_recieved_buffer[8] << 8;
+			front |= data_recieved_buffer[9];
 
-			Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
-			Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
+			//Console::WriteLine("buffer" + this->serialPort1->BytesToRead);
+			//Console::WriteLine("Leftside: " + rear_left + ", " + front_left + " " + "right side: " + rear_right + ", " + front_right + " front" + front);
 			SetText(Convert::ToString(front), IRsensor_Front);
 			SetText(Convert::ToString(front_left), IRsensor_VF);
 			SetText(Convert::ToString(front_right), IRsensor_HF);
@@ -803,7 +826,7 @@ namespace GUIronny {
 		case TEJP_FOUND: //Tejpbit funnen.
 			break;
 		case TEJP_REF: //Referensvärde tejp
-			tejp_ref_value = byte;
+			tejp_ref_value = data_recieved_buffer[0];
 			break;
 
 		default:
@@ -813,10 +836,10 @@ namespace GUIronny {
 		//if (showing_sensor_window){
 		//this->sensorvalues(front, front_right, rear_right, rear_left, front_left);
 
-		if (this->serialPort1->BytesToRead > 15)
+		/*if (this->serialPort1->BytesToRead > 15)
 		{
-			this->serialPort1->DiscardInBuffer();
-		}
+		this->serialPort1->DiscardInBuffer();
+		}*/
 		write_position = 0;
 		expected_length = 0;
 
@@ -913,7 +936,7 @@ namespace GUIronny {
 		}
 	}
 
-	private: void createarray(Bitmap^ image1){
+	private: static void createarray(Bitmap^ image1){
 
 		//array < array<int, 1>^, 2 >^ Karta = gcnew array < array<int, 1>^, 2 >(32, 32);
 		//array < int >^ KartaX = gcnew array < int >(32);
@@ -928,9 +951,9 @@ namespace GUIronny {
 		}
 
 
-		for (int yp = 0; yp < this->pictureBox1->Height; yp++)
+		for (int yp = 0; yp < pictureBox1->Height; yp++)
 		{
-			for (int xp = 0; xp < this->pictureBox1->Width; xp++)
+			for (int xp = 0; xp < pictureBox1->Width; xp++)
 			{
 				if (xp % squaresize == 0)
 				{
@@ -947,11 +970,11 @@ namespace GUIronny {
 
 			}
 		}
-		this->pictureBox1->Image = image1;
+		pictureBox1->Image = image1;
 	}
 
 
-	private: void change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y){
+	private: static void change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y){
 		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
 			--y_recieved_current;
 			--y_GUIcurrent;
@@ -969,36 +992,46 @@ namespace GUIronny {
 			++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
 		}
 	}
-	private: void move_squares(int unsigned x_new, unsigned int y_new){
+	private: static void move_squares(int unsigned x_new, unsigned int y_new){
 		if (y_new < 1){
-			for (int i = 0; i != drivable_cell; i++){
+			for (int i = 0; i < drivable_cell; i++){
 				++driveblesquares[i, 1]; // vill räkna upp alla y-värden i arrayen vilket ligger på [0,1], [1,1] osv gör jag rätt?
 			}
-			for (int i = 0; i != wall_cell; i++){
+			for (int i = 0; i < wall_cell; i++){
 				++walls[i, 1]; // samma som ovan
 			}
 			++y_new;
 			++y_recieved_current;
 		}
 		else if (y_new > 15){
-			for (int i = 0; i != drivable_cell; i++){
+			for (int i = 0; i < drivable_cell; i++){
 				--driveblesquares[i, 1]; // om vi hamnar utanför på höger sida vill vi flytta alla rutor åt vänster.
 			}
-			for (int i = 0; i != wall_cell; i++){
+			for (int i = 0; i < wall_cell; i++){
 				--walls[i, 1];
 			}
 			--y_new;
 			--y_recieved_current;
 		}
 		else if (x_new > 15){
-			for (int i = 0; i != drivable_cell; i++){
+			for (int i = 0; i < drivable_cell; i++){
 				--driveblesquares[i, 0];
 			}
-			for (int i = 0; i != wall_cell; i++){
-				--walls[i, 1];
+			for (int i = 0; i < wall_cell; i++){
+				--walls[i, 0];
 			}
 			--x_new;
 			--x_recieved_current;
+		}
+		else if (x_new < 1){
+			for (int i = 0; i < drivable_cell; i++){
+				++driveblesquares[i, 0];
+			}
+			for (int i = 0; i < wall_cell; i++){
+				++walls[i, 0];
+			}
+			++x_new;
+			++x_recieved_current;
 		}
 		else{
 			return;
@@ -1006,7 +1039,7 @@ namespace GUIronny {
 	}
 
 
-	private: void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
+	public: static void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
 
 		switch (status)
 		{
@@ -1034,6 +1067,7 @@ namespace GUIronny {
 				}
 			}
 			break;
+
 		case WALL:
 			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 			{
@@ -1043,6 +1077,13 @@ namespace GUIronny {
 				}
 			}
 			break;
+
+		case DISTRESSEDFOUND:
+			break;
+
+		case ABSOLUTEVALUE:
+			break;
+
 		default:
 			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 			{
@@ -1064,7 +1105,7 @@ namespace GUIronny {
 			}
 			break;
 		}
-		this->pictureBox1->Image = image1;
+		pictureBox1->Image = image1;
 	}
 	private: System::Void button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
 		auto data = gcnew array < System::Byte > { 12 };
@@ -1082,6 +1123,29 @@ namespace GUIronny {
 			this->open_closed->Text = "connection closed";
 		}
 	}
+
+			/* byte[] buffer = new byte[blockLimit];
+			 Action kickoffRead = delegate { port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate(IAsyncResult ar) {
+				 try {
+					 int actualLength = port.BaseStream.EndRead(ar);
+					 byte[] received = new byte[actualLength];
+					 Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
+					 raiseAppSerialDataEvent(received);
+				 }
+				 catch (IOException exc) {
+					 handleAppSerialError(exc);
+				 }
+				 kickoffRead();
+			 }, null);
+			 }
+			 kickoffRead();
+			 */
+
+
+
+
+
+			 
 
 	};
 }
