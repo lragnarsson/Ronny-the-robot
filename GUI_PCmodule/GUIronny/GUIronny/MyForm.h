@@ -994,44 +994,34 @@ namespace GUIronny {
 	}
 	private: static void move_squares(int unsigned x_new, unsigned int y_new){
 		if (y_new < 1){
-			for (int i = 0; i < drivable_cell; i++){
+			for (int i = 0; i != ++drivable_cell; i++){
 				++driveblesquares[i, 1]; // vill räkna upp alla y-värden i arrayen vilket ligger på [0,1], [1,1] osv gör jag rätt?
 			}
-			for (int i = 0; i < wall_cell; i++){
+			for (int i = 0; i != ++wall_cell; i++){
 				++walls[i, 1]; // samma som ovan
 			}
 			++y_new;
 			++y_recieved_current;
 		}
 		else if (y_new > 15){
-			for (int i = 0; i < drivable_cell; i++){
+			for (int i = 0; i != ++drivable_cell; i++){
 				--driveblesquares[i, 1]; // om vi hamnar utanför på höger sida vill vi flytta alla rutor åt vänster.
 			}
-			for (int i = 0; i < wall_cell; i++){
+			for (int i = 0; i != ++wall_cell; i++){
 				--walls[i, 1];
 			}
 			--y_new;
 			--y_recieved_current;
 		}
 		else if (x_new > 15){
-			for (int i = 0; i < drivable_cell; i++){
+			for (int i = 0; i != ++drivable_cell; i++){
 				--driveblesquares[i, 0];
 			}
-			for (int i = 0; i < wall_cell; i++){
+			for (int i = 0; i != ++wall_cell; i++){
 				--walls[i, 0];
 			}
 			--x_new;
 			--x_recieved_current;
-		}
-		else if (x_new < 1){
-			for (int i = 0; i < drivable_cell; i++){
-				++driveblesquares[i, 0];
-			}
-			for (int i = 0; i < wall_cell; i++){
-				++walls[i, 0];
-			}
-			++x_new;
-			++x_recieved_current;
 		}
 		else{
 			return;
