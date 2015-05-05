@@ -60,6 +60,7 @@ namespace GUIronny {
 			fillkarta(image1, 16, 8, DRIVABLE_SQUARE);
 			fillkarta(image1, 16, 9, WALL);
 			fillkarta(image1, 16, 7, WALL);
+			fillkarta(image1, 15, 8, DISTRESSEDFOUND);
 
 			//
 			//TODO: Add the constructor code here
@@ -74,6 +75,7 @@ namespace GUIronny {
 		static int prevy = 480;
 		static array <int, 2 >^ driveblesquares = gcnew array < int, 2 >(150, 2);
 		static array <int, 2 >^ walls = gcnew array < int, 2 >(150, 2);
+		static array <int, 2 >^ distressed = gcnew array < int, 2 >(2, 2); // egentligen finns det bara en men vi vill ju flytta denna ruta också precis som walls o drivebles. bör gå att göra med bara variabler ty bara ett (x,y).
 		static array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
 		static unsigned int current_xpos = 0;
 		static unsigned int current_ypos = 0;
@@ -94,6 +96,8 @@ namespace GUIronny {
 		static unsigned int y_recieved_current = 16;
 		static unsigned int x_GUIcurrent = 16;
 		static unsigned int y_GUIcurrent = 8;
+		static unsigned int xpos_wall = 0;
+		static unsigned int ypos_wall = 0;
 		static int drivable_cell = 0;
 		static int wall_cell = 0;
 		static int squaresize = 35;
@@ -546,7 +550,7 @@ namespace GUIronny {
 
 			 //Map
 	private: static void createarray(Bitmap^ image1);
-	private: static void change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y);
+	private: static void change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y, int status);
 	private: static void move_squares(int unsigned x_new, unsigned int y_new);
 	private: static void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status);
 

@@ -249,7 +249,7 @@ System::Void MyForm::handlebyte(){
 	case DRIVABLE_SQUARE: //Körbar ruta x,y
 		drivablesquare_xpos = data_recieved_buffer[0];
 		drivablesquare_ypos = data_recieved_buffer[1];
-		change_coordinates(drivablesquare_xpos, drivablesquare_ypos);
+		change_coordinates(drivablesquare_xpos, drivablesquare_ypos, DRIVABLE_SQUARE);
 		driveblesquares[drivable_cell, 0] = x_GUIcurrent; // Vi hade ju tänkt helt fel, det är ju våra koord på våran grid som ska sparas
 		driveblesquares[drivable_cell, 1] = y_GUIcurrent;
 		move_squares(x_GUIcurrent, y_GUIcurrent); // ändrar 
@@ -259,17 +259,20 @@ System::Void MyForm::handlebyte(){
 	case DISTRESSEDFOUND: //Nödställd funnen
 		distressedfound_xpos = data_recieved_buffer[0];
 		distressedfound_ypos = data_recieved_buffer[1];
-		fillkarta(image1, distressedfound_xpos, distressedfound_ypos, DISTRESSEDFOUND);
+		change_coordinates(distressedfound_xpos, distressedfound_ypos, DISTRESSEDFOUND);
+		distressed[0, 0] = x_GUIcurrent;
+		distressed[0, 1] = y_GUIcurrent; // antar att vi bara kan få information om en nödställd (ett mål)
+		move_squares(x_GUIcurrent, y_GUIcurrent); // behöver inte göra ett case för distressed då de ska funka lika som drivables ( kolla banspec)
+		fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DISTRESSEDFOUND);
 		break;
 
 	case WALL:
 		wall_xpos = data_recieved_buffer[0];
 		wall_ypos = data_recieved_buffer[1];
-		change_coordinates(wall_xpos, wall_ypos);// måste tänka om med walls!! walls dyker ju på sidan av körbarruta! på båda sidor
-		walls[wall_cell, 0] = wall_xpos; //kom ihåg att ändra vilka koord som ska läggas in, inte den mottagna positionen utan våra koord!! 
-		walls[wall_cell, 1] = wall_ypos;
-		move_squares(x_GUIcurrent, y_GUIcurrent);
-		fillkarta(image1, x_GUIcurrent, y_GUIcurrent, WALL);
+		change_coordinates(wall_xpos, wall_ypos, WALL);
+		walls[wall_cell, 0] = xpos_wall; 
+		walls[wall_cell, 1] = ypos_wall;
+		fillkarta(image1, xpos_wall, ypos_wall, WALL);
 		++wall_cell;
 		break;
 	case SENSOR_VALUES:  //Dealing with sensorvalues
@@ -376,132 +379,203 @@ System::Void MyForm::createarray(Bitmap^ image1){
 	}
 	pictureBox1->Image = image1;
 }
-System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y){
-	if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
-		--y_recieved_current;
-		--y_GUIcurrent;
-	}
-	else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
-		++y_recieved_current;
-		++y_GUIcurrent;
-	}
-	else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
-		--x_recieved_current;
-		--x_GUIcurrent;
-	}
-	else {
-		++x_recieved_current;
-		++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
-	}
-}
-System::Void MyForm::move_squares(int unsigned x_new, unsigned int y_new){
-	if (y_new < 1){
-		for (int i = 0; i != ++drivable_cell; i++){
-			++driveblesquares[i, 1]; // vill räkna upp alla y-värden i arrayen vilket ligger på [0,1], [1,1] osv gör jag rätt?
-		}
-		for (int i = 0; i != ++wall_cell; i++){
-			++walls[i, 1]; // samma som ovan
-		}
-		++y_new;
-		++y_recieved_current;
-	}
-	else if (y_new > 15){
-		for (int i = 0; i != ++drivable_cell; i++){
-			--driveblesquares[i, 1]; // om vi hamnar utanför på höger sida vill vi flytta alla rutor åt vänster.
-		}
-		for (int i = 0; i != ++wall_cell; i++){
-			--walls[i, 1];
-		}
-		--y_new;
-		--y_recieved_current;
-	}
-	else if (x_new > 15){
-		for (int i = 0; i != ++drivable_cell; i++){
-			--driveblesquares[i, 0];
-		}
-		for (int i = 0; i != ++wall_cell; i++){
-			--walls[i, 0];
-		}
-		--x_new;
-		--x_recieved_current;
-	}
-	else{
-		return;
-	}
-}
-System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
-
+System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y, int status){
 	switch (status)
 	{
 	case DRIVABLE_SQUARE:
 
-		for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
-		{
-			for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
-			{
-				if (x % squaresize == 0)
-				{
-					image1->SetPixel(y, x, Color::Black);
-				}
-				else if (y % squaresize == 0)
-				{
-					image1->SetPixel(y, x, Color::Black);
-				}
-				else
-				{
-					image1->SetPixel(y, x, Color::White);
-				}
-			}
+		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+			--y_recieved_current;
+			--y_GUIcurrent;
+		}
+		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
+			++y_recieved_current;
+			++y_GUIcurrent;
+		}
+		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
+			--x_recieved_current;
+			--x_GUIcurrent;
+		}
+		else {
+			++x_recieved_current;
+			++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
 		}
 		break;
 
 	case WALL:
-		for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
-		{
-			for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
-			{
-				image1->SetPixel(y, x, Color::Black);
-			}
+		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+			
+			ypos_wall = --y_GUIcurrent;
+			xpos_wall = x_GUIcurrent;
+		}
+		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
+		
+			ypos_wall = ++y_GUIcurrent;
+			xpos_wall = x_GUIcurrent;
+		}
+		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
+			
+			ypos_wall = y_GUIcurrent;
+			xpos_wall = --x_GUIcurrent;
+		}
+		else {
+			
+			ypos_wall = y_GUIcurrent;
+			xpos_wall = ++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
 		}
 		break;
-
 	case DISTRESSEDFOUND:
-		break;
-
-	case ABSOLUTEVALUE:
-		break;
-
-	default:
-		for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
-		{
-			for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
-			{
-				if (x % squaresize == 0)
-				{
-					image1->SetPixel(y, x, Color::Black);
-				}
-				else if (y % squaresize == 0)
-				{
-					image1->SetPixel(y, x, Color::Black);
-				}
-				else
-				{
-					image1->SetPixel(y, x, Color::Gray);
-				}
-			}
+		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+			--y_recieved_current;
+			--y_GUIcurrent;
 		}
+		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
+			++y_recieved_current;
+			++y_GUIcurrent;
+		}
+		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
+			--x_recieved_current;
+			--x_GUIcurrent;
+		}
+		else {
+			++x_recieved_current;
+			++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
+		}
+		break;
+	default:
 		break;
 	}
-	pictureBox1->Image = image1;
 }
 
-//Grafer_data
-System::Void MyForm::sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
-	Grafer_data^ grafer = gcnew Grafer_data();
-	grafer->dataGridView1->Rows[0]->Cells[2]->Value = byte1;
-	grafer->dataGridView1->Rows[0]->Cells[3]->Value = byte2;
-	grafer->dataGridView1->Rows[0]->Cells[4]->Value = byte3;
-	grafer->dataGridView1->Rows[0]->Cells[5]->Value = byte4;
-	grafer->dataGridView1->Rows[0]->Cells[6]->Value = byte5;
-	grafer->dataGridView1->Rows->Add();
-}
+	System::Void MyForm::move_squares(int unsigned x_new, unsigned int y_new){
+			if (y_new < 1){
+			for (int i = 0; i != ++drivable_cell; i++){
+				++driveblesquares[i, 1]; // vill räkna upp alla y-värden i arrayen vilket ligger på [0,1], [1,1] osv gör jag rätt?
+			}
+			for (int i = 0; i != ++wall_cell; i++){
+				++walls[i, 1]; // samma som ovan
+			}
+			++distressed[0, 1];
+			++y_new;
+			++y_recieved_current;
+		}
+		else if (y_new > 15){
+			for (int i = 0; i != ++drivable_cell; i++){
+				--driveblesquares[i, 1]; // om vi hamnar utanför på höger sida vill vi flytta alla rutor åt vänster.
+			}
+			for (int i = 0; i != ++wall_cell; i++){
+				--walls[i, 1];
+			}
+			--distressed[0, 1]; //räkna ned y-värdet för den nödställde (vill ju flytta den också)
+			--y_new;
+			--y_recieved_current;
+		}
+		else if (x_new > 15){
+			for (int i = 0; i != ++drivable_cell; i++){
+				--driveblesquares[i, 0];
+			}
+			for (int i = 0; i != ++wall_cell; i++){
+				--walls[i, 0];
+			}
+			--distressed[0, 0];
+			--x_new;
+			--x_recieved_current;
+		}
+		else{
+			return;
+		}
+	}
+	System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
+
+		switch (status)
+		{
+		case DRIVABLE_SQUARE:
+
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
+				{
+					if (x % squaresize == 0)
+					{
+						image1->SetPixel(y, x, Color::Black);
+					}
+					else if (y % squaresize == 0)
+					{
+						image1->SetPixel(y, x, Color::Black);
+					}
+					else
+					{
+						image1->SetPixel(y, x, Color::White);
+					}
+				}
+			}
+			break;
+
+		case WALL:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
+				{
+					image1->SetPixel(y, x, Color::Black);
+				}
+			}
+			break;
+
+		case DISTRESSEDFOUND:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
+				{
+					if (x % squaresize == 0)
+					{
+						image1->SetPixel(y, x, Color::Black);
+					}
+					else if (y % squaresize == 0)
+					{
+						image1->SetPixel(y, x, Color::Black);
+					}
+					else
+					{
+						image1->SetPixel(y, x, Color::Red);
+					}
+				}
+			}
+			break;
+
+		case ABSOLUTEVALUE:
+			break;
+
+		default:
+			for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
+			{
+				for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
+				{
+					if (x % squaresize == 0)
+					{
+						image1->SetPixel(y, x, Color::Black);
+					}
+					else if (y % squaresize == 0)
+					{
+						image1->SetPixel(y, x, Color::Black);
+					}
+					else
+					{
+						image1->SetPixel(y, x, Color::Gray);
+					}
+				}
+			}
+			break;
+		}
+		pictureBox1->Image = image1;
+	}
+
+	//Grafer_data
+	System::Void MyForm::sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
+		Grafer_data^ grafer = gcnew Grafer_data();
+		grafer->dataGridView1->Rows[0]->Cells[2]->Value = byte1;
+		grafer->dataGridView1->Rows[0]->Cells[3]->Value = byte2;
+		grafer->dataGridView1->Rows[0]->Cells[4]->Value = byte3;
+		grafer->dataGridView1->Rows[0]->Cells[5]->Value = byte4;
+		grafer->dataGridView1->Rows[0]->Cells[6]->Value = byte5;
+		grafer->dataGridView1->Rows->Add();
+	}
