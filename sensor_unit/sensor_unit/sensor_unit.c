@@ -19,6 +19,16 @@ int main(void)
 	
     while(1)
     {
+		/*
+		uint8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, 0xF0, 0x0F };
+		i2c_write(CONTROL_UNIT, msg, sizeof(msg));
+		i2c_start();
+		i2c_write(CONTROL_UNIT, msg, sizeof(msg));
+		if (write_start == write_end)
+			i2c_start();
+		
+		_delay_ms(2);
+		*/
         //TODO:: Please write your application code
     }
 }
@@ -122,7 +132,7 @@ ISR(ANALOG_COMP_vect)
 	{
 		tape_found = 1;
 
-		i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
+		//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 
 		_delay_us(500);
 		ACSR |= (1<<ACI); // Avoid double interrupt, requires delay	
@@ -197,11 +207,14 @@ void handle_received_messages()
 			{
 				uint8_t val = calibrate_reflectance_sensor();
 				uint8_t msg[] = {TAPE_SENSOR_VALUE, val};
-				i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+				//i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
 				
 				read_start = (read_start + 1) % BUFFER_SIZE;
 				break;
 			}
+			default:
+				read_start = (read_start + 1) % BUFFER_SIZE;
+				break;
 		}
 	}
 }
@@ -232,7 +245,7 @@ void send_distance_readings()
 		(uint8_t)(distances[4]>>8),
 		(uint8_t) distances[4] };
 
-	i2c_write(GENERAL_CALL, msg, sizeof(msg));
+	i2c_write(CONTROL_UNIT, msg, sizeof(msg));
 }
 
 // Calculate and send odometry data

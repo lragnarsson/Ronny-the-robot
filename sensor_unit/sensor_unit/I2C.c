@@ -9,6 +9,9 @@
 #include <avr/interrupt.h>
 #include "I2C.h"
 #include <string.h>
+#include <util/atomic.h>
+
+volatile uint8_t current_address = 0;
 
 // Initialize I2C
 void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t address) {
@@ -36,31 +39,53 @@ void i2c_stop() {
 
 // Write multiple bytes to I2C
 void i2c_write(uint8_t address, uint8_t* data, uint8_t length) {
-	write_address[write_end] = address | 0;
-	
-	//if (write_start == write_end)
-		//write_msg_end = (write_start + length) % BUFFER_SIZE;
-	
-	//memcpy(&write_buffer[write_end], data, length);
-	
-	for (uint8_t i = 0; i < length; ++i)
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 	{
-		write_buffer[write_end] = data[i];
+		if (read_start == read_end && !(TWCR & (1<<TWINT)))
+		{
+			write_address[write_end] = address | 0;
+			uint8_t start = 0;
+			if (write_start == write_end)
+			{
+				current_address = address | 0;
+				start = 1;
+			}
 		
-		write_end = (write_end + 1) % BUFFER_SIZE;
-	}
+			for (uint8_t i = 0; i < length; ++i)
+			{
+				write_buffer[write_end] = data[i];
+		
+				write_end = (write_end + 1) % BUFFER_SIZE;
+			}
 	
-	i2c_start();
+			if (start)
+				i2c_start();
+		}
+	}
 }
 
 // Write one byte to I2C
 void i2c_write_byte(uint8_t address, uint8_t data) {
-	write_address[write_end] = address | 0;
-	write_buffer[write_end] = data;
-	
-	write_end = (write_end + 1) % BUFFER_SIZE;
-	
-	i2c_start();
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		if (read_start == read_end && !(TWCR & (1<<TWINT)))
+		{
+			write_address[write_end] = address | 0;
+			uint8_t start = 0;
+			if (write_start == write_end)
+			{
+				current_address = address | 0;
+				start = 1;
+			}
+			
+			write_buffer[write_end] = data;
+			
+			write_end = (write_end + 1) % BUFFER_SIZE;
+			
+			if (start)
+				i2c_start();
+		}
+	}
 }
 
 ISR(TWI_vect) {
@@ -68,7 +93,7 @@ ISR(TWI_vect) {
 		//status codes for master transmitter mode
 		case 0x08: // Start condition has been transmitted
 		case 0x10: // Repeated start condition has been transmitted
-			TWDR = write_address[write_start];
+			TWDR = current_address;
 			TWCR = SEND;
 			write_address[write_start] = 0xFF;
 			break;
@@ -78,13 +103,15 @@ ISR(TWI_vect) {
 			{
 				if (write_address[write_start] != 0xFF)
 				{
+					current_address = write_address[write_start];
+					TWCR = STOP;
 					TWCR = START;	// Restart
 				}
 				else
 				{
 					TWDR = write_buffer[write_start];
 					TWCR = SEND;
-					write_start = (write_start + 1) % BUFFER_SIZE;	
+					write_start = (write_start + 1) % BUFFER_SIZE;
 				}
 			}
 			else
@@ -97,6 +124,7 @@ ISR(TWI_vect) {
 			break;
 
 		case 0x30: // Data byte has been transmitted, NOT ACK has been received
+			write_start = (write_start - 1) % BUFFER_SIZE;
 			TWCR = START;
 			break;
 		case 0x38: //  Arbitration lost in SLA+W or data bytes
@@ -140,50 +168,3 @@ ISR(TWI_vect) {
 		// Master receiver mode and slave transmitter mode are not interesting
 	}
 }
-
-
-/*
-				switch(write_buffer[write_start]) {
-					case AUTONOMOUS_MODE:
-					case MANUAL_MODE:
-					case DRIVE_FORWARD:
-					case DRIVE_BACKWARD:
-					case DRIVE_FORWARD_RIGHT:
-					case DRIVE_FORWARD_LEFT:
-					case TURN_RIGHT:
-					case TURN_LEFT:
-					case TAPE_FOUND:
-						helpaddress = CONTROL_UNIT;
-						write_msg_end = (write_msg_end + 1) % BUFFER_SIZE;
-						break;
-					case CALIBRATE_TAPE_SENSOR:
-						helpaddress = SENSOR_UNIT;
-						write_msg_end = (write_msg_end + 1) % BUFFER_SIZE;
-						break;
-					case P_PARAMETER:
-					case D_PARAMETER:
-						helpaddress = CONTROL_UNIT;
-						write_msg_end = (write_msg_end + 2) % BUFFER_SIZE;
-						break;
-					case TAPE_SENSOR_VALUE:
-						helpaddress = COMMUNICATION_UNIT;
-						write_msg_end = (write_msg_end + 2) % BUFFER_SIZE;
-					case ABSOLUTE_X_Y:
-					case MAPPED_SQUARE:
-					case MAPPED_WALL:
-					case MAPPED_GOAL:
-						helpaddress = COMMUNICATION_UNIT;
-						write_msg_end = (write_msg_end + 3) % BUFFER_SIZE;
-						break;
-					case MOVED_DISTANCE_AND_ANGLE:
-						helpaddress = CONTROL_UNIT;
-						write_msg_end = (write_msg_end + 3) % BUFFER_SIZE;
-						break;
-					case SENSOR_READINGS:
-						helpaddress = GENERAL_CALL;
-						write_msg_end = (write_msg_end + 11) % BUFFER_SIZE;
-						break;
-					default:
-						// Much is f'ed up
-						break;
-				}*/

@@ -54,8 +54,6 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	current_angle_right = rear_right - front_right;
 	//current_angle_error = current_angle_left + current_angle_right;
 	current_angle_error = (current_distance_error - previous_distance_error) * 25;
-	uint8_t msg[2] = {0xFF, (uint8_t)(abs(current_angle_error)>>3)};
-	i2c_write(COMMUNICATION_UNIT, msg, 2);
 }
 
 void update_distance_and_angle(int8_t distance, int8_t angle) {
@@ -168,6 +166,7 @@ void handle_received_messages() {
 				read_start = (read_start + 1) % BUFFER_SIZE;
 				break;
 			default:
+				read_start = (read_start + 1) % BUFFER_SIZE;
 				break;
 		}
 	}

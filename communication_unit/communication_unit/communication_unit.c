@@ -38,11 +38,15 @@ void handle_received_messages() {
 	{
 		static uint8_t sensor_count = 0;
 		switch(read_buffer[read_start]) {
+			case 0xFF:
+				Send_to_PC(read_buffer[(read_start+1) % BUFFER_SIZE]);
+				read_start = (read_start + 2) % BUFFER_SIZE;
+				break;
 			case AUTONOMOUS_MODE:
 			case MANUAL_MODE:
 			case TAPE_FOUND:
 				//Send_to_PC(read_buffer[read_start]);
-				//read_start = (read_start + 1) % BUFFER_SIZE;
+				read_start = (read_start + 1) % BUFFER_SIZE;
 				break;
 			case ABSOLUTE_X_Y:
 			case MAPPED_SQUARE:
@@ -52,10 +56,10 @@ void handle_received_messages() {
 				/*for(uint8_t j=0; j<3; j++) {
 					Send_to_PC(read_buffer[read_start + j]);
 				}*/
-				//read_start = (read_start + 3) % BUFFER_SIZE;
+				read_start = (read_start + 3) % BUFFER_SIZE;
 				break;
 			case SENSOR_READINGS:
-				if (sensor_count == 25) {
+				/*if (sensor_count == 25) {
 					for(uint8_t j=0; j<11; j++) {
 						Send_to_PC(read_buffer[read_start + j]);
 					
@@ -64,7 +68,7 @@ void handle_received_messages() {
 				}
 				else {
 					++sensor_count;
-				}
+				}*/
 				read_start = (read_start + 11) % BUFFER_SIZE;
 				break;
 			default:
@@ -72,9 +76,9 @@ void handle_received_messages() {
 				Send_to_PC('E');
 				Send_to_PC('L');
 				Send_to_PC(read_buffer[read_start]);*/
-				//read_start = (read_start + 1) % BUFFER_SIZE;
+				read_start = (read_start + 1) % BUFFER_SIZE;
 				break;
-		}	
+		}
 	}
 }
 

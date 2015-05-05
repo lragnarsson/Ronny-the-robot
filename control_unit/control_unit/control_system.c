@@ -39,6 +39,14 @@ void init_control_system() {
 
 /* Service routine for handling acceleration */
 ISR(TIMER1_COMPA_vect) {
+	static uint8_t i = 0;
+	if (++i == 50)
+	{
+		uint8_t msg[2] = {0xFF, (uint8_t)(abs(current_angle_error)>>3)};
+		i2c_write(COMMUNICATION_UNIT, msg, 2);
+		i = 0;
+	}
+	
 	/*if(distance_remaining < 100)
 		desired_speed = 10; //Speed from witch instant stop is OK*/
 	if(desired_speed > current_speed)
