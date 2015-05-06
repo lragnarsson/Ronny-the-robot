@@ -70,7 +70,7 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 			helpdata[endpointer] = data[endpointer];
 			endpointer++;
 		}
-		//isSending = 0x01;
+		isSending = 0x01;
 		i2c_start();
 		return 1;
 	}
@@ -85,7 +85,7 @@ uint8_t i2c_write_byte(uint8_t adress, uint8_t data) {
 		startpointer = 0x00;
 		endpointer = 0x01;
 		helpdata[0] = data;
-		//isSending = 0x01;
+		isSending = 0x01;
 		i2c_start();
 		return 1;
 	}

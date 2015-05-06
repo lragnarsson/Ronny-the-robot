@@ -70,7 +70,7 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 			helpdata[endpointer] = data[endpointer];
 			endpointer++;
 		}
-		//isSending = 0x01;
+		isSending = 0x01;
 		i2c_start();
 		return 1;
 	}
@@ -85,7 +85,7 @@ uint8_t i2c_write_byte(uint8_t adress, uint8_t data) {
 		startpointer = 0x00;
 		endpointer = 0x01;
 		helpdata[0] = data;
-		//isSending = 0x01;
+		isSending = 0x01;
 		i2c_start();
 		return 1;
 	}
@@ -97,7 +97,7 @@ ISR(TWI_vect) {
 	switch (TWSR & 0xf8) {
 		//status codes for master transmitter mode
 		case 0x08: // Start condition has been transmitted
-		case 0x10: // Repeted start condition has been transmitted
+		case 0x10: // Repeated start condition has been transmitted
 			TWDR = helpadress;
 			TWCR = SEND;
 			//while (!(TWCR & (1<<TWINT)));
@@ -154,7 +154,7 @@ ISR(TWI_vect) {
 			break;
 		case 0x88: // Previously addressed with own SLA+W, data has been received, NOT ACK has been returned
 		case 0x98: // Previously addressed with general call, data has been received, NOT ACK has been returned
-			TWCR = NACK; // Switched to not adressed slave mode
+			TWCR = NACK; // Switched to not addressed slave mode
 			//while (!(TWCR & (1<<TWINT)));
 			break;
 		case 0xA0: // A STOP condition or repeated START condition has been received while still addressed as Slave

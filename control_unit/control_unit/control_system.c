@@ -5,7 +5,7 @@
 #include "control_system.h"
 #include "mult16x16.h"
 
-const int16_t ANGLE_CHANGE_THRESHOLD = 10000;
+const int16_t ANGLE_CHANGE_THRESHOLD = 800;
 //volatile uint8_t P_COEFFICIENT = 20;
 //volatile uint8_t D_COEFFICIENT = 20;
 
@@ -58,6 +58,7 @@ void stop_engines() {
 	set_desired_speed(0);
 	current_speed = 0;
 	ENGINE_LEFT_SPEED =	ENGINE_RIGHT_SPEED = 0;
+	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 }
 
 void set_same_engine_speed() {
@@ -69,7 +70,7 @@ void calculate_control_speed() {
 	int32_t p;
 	MultiSU16X16to32(p, current_distance_error, P_COEFFICIENT);
 	int32_t d;
-	MultiSU16X16to32(d, current_angle_error, D_COEFFICIENT);
+	MultiSU16X16to32(d, current_derivative_error, D_COEFFICIENT);
 	int16_t control_speed_raw = (p + d)>>16;
 	
 	if (control_speed_raw > 0)
@@ -109,15 +110,6 @@ void set_manual_forward_left_engine_speed() {
 void set_manual_forward_right_engine_speed() {
 	ENGINE_LEFT_SPEED = current_speed + (current_speed >> 3);
 	ENGINE_RIGHT_SPEED = current_speed - (current_speed >> 3) ;
-}
-
-
-uint8_t corner_detected_left() {
-	return (uint8_t)(abs(current_angle_error) > ANGLE_CHANGE_THRESHOLD);
-}
-
-uint8_t corner_detected_right() {
-	return (uint8_t)(abs(current_angle_error) > ANGLE_CHANGE_THRESHOLD);	
 }
 
 void open_claw() {

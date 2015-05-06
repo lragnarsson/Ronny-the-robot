@@ -61,7 +61,8 @@ void init_map() {
 
 	start_position = current_position = (coordinate) {START_POSITION_X, START_POSITION_Y};
 	current_direction = NORTH;
-	current_route[0] = 10;
+	current_route[0] = ROUTE_END;
+	goal_found = 0;
 }
 
 /* Sets the current direction (NORTH, EAST, SOUTH or WEST) */

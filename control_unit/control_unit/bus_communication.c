@@ -9,7 +9,7 @@
 
 void init_bus_communication() {
 	i2c_init(atmega20br, atmega20pc, CONTROL_UNIT);
-	current_angle_error = 0;
+	current_derivative_error = 0;
 	current_angle_left = 0;
 	current_angle_right = 0;
 	current_distance_error = 0;
@@ -30,32 +30,65 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	uint16_t rear_left = rear_left_h;
 	rear_left = rear_left << 8;
 	rear_left |= rear_left_l;
+	
 	uint16_t front_left = front_left_h;
 	front_left = front_left << 8;
 	front_left |= front_left_l;
+	
 	uint16_t rear_right = rear_right_h;
 	rear_right = rear_right << 8;
 	rear_right |= rear_right_l;
+	
 	uint16_t front_right = front_right_h;
 	front_right = front_right << 8;
 	front_right |= front_right_l;
+	
 	front_wall_distance = front_h;
 	front_wall_distance = front_wall_distance << 8;
 	front_wall_distance |= front_l;	
 	
+	previous_distance_left = left_wall_distance;
+	previous_distance_right = right_wall_distance;
 	left_wall_distance = (front_left + rear_left) / 2;
 	right_wall_distance = (front_right + rear_right) / 2;
-	previous_distance_error = current_distance_error;
+	
+	//previous_distance_error = current_distance_error;
 	current_distance_error = left_wall_distance - right_wall_distance;
-
-	last_tick_angle_left = current_angle_left;
-	last_tick_angle_right = current_angle_right;
-	current_angle_left = front_left - rear_left;
-	current_angle_right = rear_right - front_right;
+	
+	current_derivative_left = (left_wall_distance - previous_distance_left) * 25;
+	current_derivative_right = -(right_wall_distance - previous_distance_right) * 25;
+	
+	//current_derivative_error = (current_distance_error - previous_distance_error) * 25;
+	current_derivative_error = current_derivative_left + current_derivative_right;
+	
+// 	uint8_t msg[2] = {0xFF, (uint8_t)(abs(current_derivative_left)>>3)};
+// 	i2c_write(COMMUNICATION_UNIT, msg, 2);
+	
+	if (abs(current_derivative_left) > 450 || abs(current_derivative_right) > 450 || rear_left > 300 || front_left > 300 || rear_right > 300 || front_right > 300)
+	{
+		if (abs(current_derivative_left) < 450 && rear_left < 300 && front_left < 300)
+		{
+			current_distance_error = left_wall_distance - (200 - 60);
+			//current_derivative_error = (current_distance_error - previous_distance_error) * 25;
+			current_derivative_error = current_derivative_left * 2;
+		} else if (abs(current_derivative_right) < 450 && rear_right < 300 && front_right < 300)
+		{
+			current_distance_error = 200 - 60 - right_wall_distance;
+			//current_derivative_error = (current_distance_error - previous_distance_error) * 25;
+			current_derivative_error = current_derivative_right * 2;
+		} else
+		{
+			current_distance_error = 0; //Turn off control system if we get spooky values
+			current_derivative_error = 0;
+		}
+	}
+	
+	//Old stuff, can probably be deleted...
+	//last_tick_angle_left = current_angle_left;
+	//last_tick_angle_right = current_angle_right;
+	//current_angle_left = front_left - rear_left;
+	//current_angle_right = rear_right - front_right;
 	//current_angle_error = current_angle_left + current_angle_right;
-	current_angle_error = (current_distance_error - previous_distance_error) * 25;
-	uint8_t msg[2] = {0xFF, (uint8_t)(abs(current_angle_error)>>3)};
-	i2c_write(COMMUNICATION_UNIT, msg, 2);
 }
 
 void update_distance_and_angle(int8_t distance, int8_t angle) {

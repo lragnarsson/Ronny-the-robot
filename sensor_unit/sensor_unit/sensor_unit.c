@@ -76,7 +76,7 @@ ISR(INT0_vect)
 {
 	if (PINB & (1<<ENC_L_B))
 	{
-		if (--encoder_left < -10)
+		if (--encoder_left < -5)
 		{
 			send_odometry_readings();
 			encoder_left = encoder_right = 0;
@@ -84,7 +84,7 @@ ISR(INT0_vect)
 	}
 	else
 	{
-		if (++encoder_left > 10)
+		if (++encoder_left > 5)
 		{
 			send_odometry_readings();
 			encoder_left = encoder_right = 0;
@@ -96,7 +96,7 @@ ISR(INT1_vect)
 {	
 	if (PINB & (1<<ENC_R_B))
 	{
-		if (++encoder_right > 10)
+		if (++encoder_right > 5)
 		{
 			send_odometry_readings();
 			encoder_left = encoder_right = 0;
@@ -104,7 +104,7 @@ ISR(INT1_vect)
 	}
 	else
 	{
-		if (--encoder_right < -10)
+		if (--encoder_right < -5)
 		{
 			send_odometry_readings();
 			encoder_left = encoder_right = 0;
@@ -125,7 +125,7 @@ ISR(ANALOG_COMP_vect)
 	{
 		tape_found = 1;
 
-		i2c_write_byte(COMMUNICATION_UNIT, TAPE_FOUND);
+		i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 
 		_delay_us(500);
 		ACSR |= (1<<ACI); // Avoid double interrupt, requires delay	
@@ -244,5 +244,5 @@ uint8_t send_odometry_readings()
 	int8_t rotation = (int8_t)(scaled_rotation>>8);
 	
 	int8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
-	return 1;//i2c_write(CONTROL_UNIT, msg, sizeof(msg));
+	i2c_write(CONTROL_UNIT, msg, sizeof(msg));
 }

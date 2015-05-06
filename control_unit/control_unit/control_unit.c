@@ -6,7 +6,6 @@
 #include "flood_fill.h"
 
 //uint8_t state_speed = 0;
-uint8_t know_shortest_path = 0;
 
 /* Initialize starting conditions for the robot */
 void init_state() {
@@ -14,6 +13,7 @@ void init_state() {
 	current_task = SEARCH;
 	set_current_direction(NORTH);
 	state_speed = MAPPING_SPEED;
+	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 }
 
 /* Initialize all hardware ports */
@@ -24,35 +24,23 @@ void initialize_control_unit() {
 	init_state();
 }
 
-/* Drive forward until distance_remaining is 0 or until entering a corridor from a crossroad-section. */
-void step_forward() {
-	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
-	set_desired_speed(state_speed);
-	while (distance_remaining != 0) {
-		set_same_engine_speed();
-		if (square_distance_remaining == 0) {
-			move_map_position_forward();
-			square_distance_remaining = 400;
-		}
-		if (corner_detected_left() || corner_detected_right())
-			return; // Reentered the corridor
-	}
-	stop_engines();
-}
-
 /* Drive forward until distance_remaining is 0. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. */
-void drive_forward() {
-	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
-	while (distance_remaining != 0) {
+void drive_forward()
+{
+	while (distance_remaining != 0)
+	{
 		set_desired_speed(state_speed);
 		set_controlled_engine_speed();
+
+		if (front_wall_distance < 160)
+			distance_remaining = square_distance_remaining = 0;
+
 		if (square_distance_remaining == 0) {
 			move_map_position_forward();
 			square_distance_remaining = 400;
 		}
-		if (corner_detected_left() || corner_detected_right())
-			step_forward(); // Entered a crossroad section (turn off sensor feedback temporarily)
 	}
+
 	stop_engines();
 }
 
@@ -61,9 +49,11 @@ void rotate_left_90() {
 	angle_remaining = 90;
 	PORTB = (0<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
 	set_desired_speed(TURN_SPEED);
+
 	while(angle_remaining != 0) {
 		set_same_engine_speed();
 	}
+
 	--current_direction;
 	current_direction &= 3;
 	stop_engines();	
@@ -74,12 +64,13 @@ void rotate_right_90() {
 	angle_remaining = -90;
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
 	set_desired_speed(TURN_SPEED);
-	while(angle_remaining != 0) {
+
+	while(angle_remaining != 0)
 		set_same_engine_speed();
-	}
+
 	++current_direction;
 	current_direction &= 3;
-	stop_engines();	
+	stop_engines();
 }
 
 /* Rotate 180 degrees based on wheel encoder feedback */
@@ -87,9 +78,10 @@ void rotate_180() {
 	angle_remaining = -180;
 	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION);
 	set_desired_speed(TURN_SPEED);
-	while(angle_remaining != 0) {
+
+	while(angle_remaining != 0)
 		set_same_engine_speed();
-	}
+
 	current_direction += 2;
 	current_direction &= 3;
 	stop_engines();
@@ -98,47 +90,57 @@ void rotate_180() {
 uint8_t map_surroundings(uint8_t turn) {
 	if(left_wall_distance < 250)
 		set_wall_left();
+
 	if(right_wall_distance < 250)
 		set_wall_right();
-	if(front_wall_distance < 150) {
+
+	if(front_wall_distance < 250) {
 		set_wall_front();
+
 		if(!turn)
 			return 1;
+
 		if (!is_wall_left())
 			rotate_left_90();
 		else if(!is_wall_right())
 			rotate_right_90();
 		else
 			return 0;
+
+		_delay_ms(50);
 	}
+
 	return 1;
 }
 
 /* Drive forward and map surroundings until reaching a wall. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. */
 uint8_t drive_and_map() {
-	uint8_t in_corridor = 1;
-	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
-	distance_remaining = 1000;
+	distance_remaining = 10000;
 	square_distance_remaining = 400;
+	set_desired_speed(state_speed);
+
 	if (!map_surroundings(1))
 		return goal_found;
-	set_desired_speed(state_speed);
+
 	while (goal_found != 1) {
-		if (in_corridor)
-			set_controlled_engine_speed();
-		else
-			set_same_engine_speed();
+		set_desired_speed(state_speed);
+		set_controlled_engine_speed();
+
+		if (front_wall_distance < 160)
+			square_distance_remaining = 0;
 
 		if (square_distance_remaining == 0) { // Ronny is in the middle of the next square, update map.
 			move_map_position_forward(); // Update map coordinates
+
 			if (!map_surroundings(1)) // Update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
 				return goal_found;
-			distance_remaining = 1000;
+
+			distance_remaining = 10000;
 			square_distance_remaining = 400;
 		}
-		if (corner_detected_left() || corner_detected_right())
-			in_corridor = 1 - in_corridor; // Exited or entered a crossroad section  (turn on/off sensor feedback temporarily)
 	}
+
+	map_surroundings(0);
 	return goal_found;
 }
 
@@ -173,11 +175,9 @@ void retrieve_state() {
 		switch (next_turn) {
 			case LEFT:
 				rotate_left_90();
-				step_forward();
 				break;
 			case RIGHT:
 				rotate_right_90();
-				step_forward();
 				break;
 			case BACKWARD:
 				rotate_180();
@@ -222,11 +222,9 @@ state_function navigate() {
 		switch (next_turn) {
 			case LEFT:
 				rotate_left_90();
-				step_forward();
 				break;
 			case RIGHT:
 				rotate_right_90();
-				step_forward();
 				break;
 			case BACKWARD:
 				rotate_180();
@@ -340,9 +338,10 @@ void autonomous_drive() {
 
 void test_mode()
 {
-	//drive_forward();
+	distance_remaining = 400*10;
+	drive_forward();
 	//open_claw();
-	//_delay_ms(2000);
+	_delay_ms(2000);
 	//drive_forward();
 	//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 }

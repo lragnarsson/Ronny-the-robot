@@ -44,8 +44,7 @@ void set_desired_speed(uint8_t speed);
 void stop_engines(void);
 void set_same_engine_speed(void);
 void set_controlled_engine_speed(void);
-uint8_t corner_detected_left(void);
-uint8_t corner_detected_right(void);
+uint8_t corner_detected(void);
 void set_manual_forward_left_engine_speed();
 void set_manual_forward_right_engine_speed();
 
