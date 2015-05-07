@@ -156,24 +156,27 @@ System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System:
 	if (write_position == 0){
 
 		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
-		this->Invoke(d, gcnew array < Object^ > {serialPort1, 'h'});
+		this->Invoke(d, gcnew array < Object^ > {/*serialPort1,*/ 'h'});
 	}
 	else if (this->serialPort1->BytesToRead > expected_length - 1)
 	{
 		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
-		this->Invoke(d, gcnew array < Object^ > {serialPort1, 'b'});
+		this->Invoke(d, gcnew array < Object^ > {/*serialPort1,*/ 'b'});
+
 	}
 	else{
 		return;
 	}
 }
-System::Void MyForm::myrecievedata(SerialPort^ sender, char status){
+System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 	if (status == 'h'){
-		sender->BaseStream->ReadAsync(data_recieved_buffer, 0, 1);
-		handleheader(data_recieved_buffer[0]);
+		header = static_cast<System::Byte>(serialPort1->BaseStream->ReadByte()); //data_recieved_buffer, 0, 1
+		//Console::WriteLine("header " + header);
+		handleheader(header);
 	}
 	else if (status == 'b'){
-		sender->BaseStream->ReadAsync(data_recieved_buffer, 0, 1);
+		serialPort1->BaseStream->ReadAsync(data_recieved_buffer, 0, expected_length - 1);
+		//Console::WriteLine("buffer" + data_recieved_buffer[0] + data_recieved_buffer[1]);
 		handlebyte();
 	}
 }
@@ -197,6 +200,7 @@ System::Void MyForm::handleheader(unsigned char byte){
 			automode = false;
 			break;
 		case DRIVABLE_SQUARE: //drivalbe square
+			Console::WriteLine("header driveablesq");
 			expected_length = 3;
 			header = byte;
 			++write_position;
@@ -243,7 +247,8 @@ System::Void MyForm::handlebyte(){
 		current_xpos = data_recieved_buffer[0];
 		current_ypos = data_recieved_buffer[1];
 		current_angle = data_recieved_buffer[2];
-		fillkarta(image1, current_xpos, current_ypos, ABSOLUTEVALUE);
+		Console::WriteLine("Current X-pos" + current_xpos + "Y-pos " + current_ypos);
+		//fillkarta(image1, current_xpos, current_ypos, ABSOLUTEVALUE);
 		break;
 
 	case DRIVABLE_SQUARE: //Körbar ruta x,y
@@ -252,7 +257,11 @@ System::Void MyForm::handlebyte(){
 		change_coordinates(drivablesquare_xpos, drivablesquare_ypos, DRIVABLE_SQUARE);
 		driveblesquares[drivable_cell, 0] = x_GUIcurrent; // Vi hade ju tänkt helt fel, det är ju våra koord på våran grid som ska sparas
 		driveblesquares[drivable_cell, 1] = y_GUIcurrent;
-		move_squares(x_GUIcurrent, y_GUIcurrent); // ändrar 
+		Console::WriteLine("Drivable square: X-pos " + drivablesquare_xpos + "Y-pos " + drivablesquare_ypos);
+		if (drivablesquare_xpos != 16 && drivablesquare_ypos != 16) {
+			move_squares(x_GUIcurrent, y_GUIcurrent);
+		}
+		//Console::WriteLine("GUI")
 		fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
 		++drivable_cell;
 		break;
@@ -262,19 +271,20 @@ System::Void MyForm::handlebyte(){
 		change_coordinates(distressedfound_xpos, distressedfound_ypos, DISTRESSEDFOUND);
 		distressed[0, 0] = x_GUIcurrent;
 		distressed[0, 1] = y_GUIcurrent; // antar att vi bara kan få information om en nödställd (ett mål)
-		move_squares(x_GUIcurrent, y_GUIcurrent); // behöver inte göra ett case för distressed då de ska funka lika som drivables ( kolla banspec)
-		fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DISTRESSEDFOUND);
+		//move_squares(x_GUIcurrent, y_GUIcurrent); // behöver inte göra ett case för distressed då de ska funka lika som drivables ( kolla banspec)
+		//fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DISTRESSEDFOUND);
 		break;
 
-	case WALL:
+/*	case WALL:
 		wall_xpos = data_recieved_buffer[0];
 		wall_ypos = data_recieved_buffer[1];
 		change_coordinates(wall_xpos, wall_ypos, WALL);
-		walls[wall_cell, 0] = xpos_wall; 
+		walls[wall_cell, 0] = xpos_wall;
 		walls[wall_cell, 1] = ypos_wall;
 		fillkarta(image1, xpos_wall, ypos_wall, WALL);
+		Console::WriteLine("WALL: X-pos " + wall_xpos + "Y-pos " + wall_ypos);
 		++wall_cell;
-		break;
+		break;*/
 	case SENSOR_VALUES:  //Dealing with sensorvalues
 	{
 		rear_left = data_recieved_buffer[0];
@@ -293,12 +303,13 @@ System::Void MyForm::handlebyte(){
 		front = data_recieved_buffer[8] << 8;
 		front |= data_recieved_buffer[9];
 
+		Console::WriteLine(front + " " + front_left + " " + front_right + " " + rear_right + " " + rear_left);
 		SetText(Convert::ToString(front), IRsensor_Front);
 		SetText(Convert::ToString(front_left), IRsensor_VF);
 		SetText(Convert::ToString(front_right), IRsensor_HF);
 		SetText(Convert::ToString(rear_left), IRsensor_VB);
 		SetText(Convert::ToString(rear_right), IRsensor_HB);
-		//Console::
+
 	}
 		break;
 	case WHEELENCODERS:
@@ -383,8 +394,10 @@ System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int
 	switch (status)
 	{
 	case DRIVABLE_SQUARE:
-
-		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+		if (newrecieved_x == x_recieved_current && newrecieved_y == y_recieved_current){
+			return;
+		}
+		else if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
 			--y_recieved_current;
 			--y_GUIcurrent;
 		}
@@ -396,30 +409,36 @@ System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int
 			--x_recieved_current;
 			--x_GUIcurrent;
 		}
-		else {
+
+		else if (newrecieved_y == y_recieved_current && newrecieved_x > x_recieved_current)
+		{
 			++x_recieved_current;
 			++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
+		}
+		else
+		{
+			Console::WriteLine("wrong value ");
 		}
 		break;
 
 	case WALL:
 		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
-			
+
 			ypos_wall = --y_GUIcurrent;
 			xpos_wall = x_GUIcurrent;
 		}
 		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
-		
+
 			ypos_wall = ++y_GUIcurrent;
 			xpos_wall = x_GUIcurrent;
 		}
 		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
-			
+
 			ypos_wall = y_GUIcurrent;
 			xpos_wall = --x_GUIcurrent;
 		}
 		else {
-			
+
 			ypos_wall = y_GUIcurrent;
 			xpos_wall = ++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
 		}
@@ -540,8 +559,8 @@ System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int
 					}
 				}
 			}
-			break;
-
+		}
+		break;
 		case ABSOLUTEVALUE:
 			break;
 

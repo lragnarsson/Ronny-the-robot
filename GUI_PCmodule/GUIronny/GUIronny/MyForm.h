@@ -40,10 +40,6 @@ namespace GUIronny {
 	using namespace System::Windows;
 	using namespace System::Threading;
 
-
-	bool Header = false;
-	bool Recieved_all_bytes = false;
-
 	/// <summary>
 	/// Summary for MyForm
 	/// </summary>
@@ -57,10 +53,11 @@ namespace GUIronny {
 			findPorts();
 
 			createarray(image1);
-			fillkarta(image1, 16, 8, DRIVABLE_SQUARE);
-			fillkarta(image1, 16, 9, WALL);
+			//initvalues();
+			//fillkarta(image1, 16, 8, DRIVABLE_SQUARE);
+		/*	fillkarta(image1, 16, 9, WALL);
 			fillkarta(image1, 16, 7, WALL);
-			fillkarta(image1, 15, 8, DISTRESSEDFOUND);
+			fillkarta(image1, 15, 8, DISTRESSEDFOUND);*/
 
 			//
 			//TODO: Add the constructor code here
@@ -99,8 +96,13 @@ namespace GUIronny {
 		static unsigned int xpos_wall = 0;
 		static unsigned int ypos_wall = 0;
 		static int drivable_cell = 0;
+		
 		static int wall_cell = 0;
 		static int squaresize = 35;
+
+		bool Header = false;
+		bool Recieved_all_bytes = false;
+
 
 		//Data received
 		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
@@ -108,7 +110,7 @@ namespace GUIronny {
 		static int expected_length = 0;
 		static bool automode = false;
 		static bool tejp_found = false;
-		static Byte header = 0x00;
+		static unsigned char header = 0x00;
 
 		//Sensor window
 		static Grafer_data^ sensorwindow = (gcnew Grafer_data());
@@ -536,10 +538,10 @@ namespace GUIronny {
 	private: System::Void Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e);
 
 			 //Data recieved from serialport.
-	private: delegate void myrecievedata_delegate(SerialPort^ sender, char status);
+	private: delegate void myrecievedata_delegate(/*SerialPort^ sender,*/ char status);
 	private: delegate void hanldebyte(unsigned char byte);
 	private:  System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e);
-	private: static void myrecievedata(SerialPort^ sender, char status);
+	private: static void myrecievedata(/*SerialPort^ sender,*/ char status);
 	private: static void handleheader(unsigned char byte);
 	private: static void handlebyte();
 
