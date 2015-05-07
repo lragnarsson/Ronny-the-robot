@@ -78,16 +78,16 @@ ISR(INT0_vect)
 	{
 		if (--encoder_left < -5)
 		{
-			send_odometry_readings();
-			encoder_left = encoder_right = 0;
+			if (send_odometry_readings())
+				encoder_left = encoder_right = 0;
 		}
 	}
 	else
 	{
 		if (++encoder_left > 5)
 		{
-			send_odometry_readings();
-			encoder_left = encoder_right = 0;
+			if (send_odometry_readings())
+				encoder_left = encoder_right = 0;
 		}
 	}
 }
@@ -98,16 +98,16 @@ ISR(INT1_vect)
 	{
 		if (++encoder_right > 5)
 		{
-			send_odometry_readings();
-			encoder_left = encoder_right = 0;
+			if (send_odometry_readings())
+				encoder_left = encoder_right = 0;
 		}
 	}
 	else
 	{
 		if (--encoder_right < -5)
 		{
-			send_odometry_readings();
-			encoder_left = encoder_right = 0;
+			if (send_odometry_readings())
+				encoder_left = encoder_right = 0;
 		}
 	}
 }

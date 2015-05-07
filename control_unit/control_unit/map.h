@@ -15,8 +15,8 @@
 #define UNMAPPED 254
 #define WALL 255
 #define FF_DEFAULT 255
-#define START_POSITION_X 15
-#define START_POSITION_Y 15
+#define START_POSITION_X 16
+#define START_POSITION_Y 16
 
 typedef enum { NORTH, EAST, SOUTH, WEST } direction;
 typedef struct {
@@ -35,7 +35,7 @@ direction current_route[64];
 
 void init_map();
 void set_current_direction(direction dir);
-void move_map_position_forward();
+uint8_t move_map_position_forward();
 void set_wall_left();
 void set_wall_right();
 void set_wall_front();

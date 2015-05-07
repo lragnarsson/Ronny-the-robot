@@ -39,19 +39,19 @@ void handle_received_message() {
 		case 0xFF:
 			Send_to_PC(busbuffer[1]);
 			break;
-		case ABSOLUTE_X_Y:
 		case AUTONOMOUS_MODE:
 		case MANUAL_MODE:
 		case TAPE_FOUND:
-			//Send_to_PC(busbuffer[0]);
+			Send_to_PC(busbuffer[0]);
 			break;
+		case ABSOLUTE_X_Y:
 		case MAPPED_SQUARE:
 		case MAPPED_WALL:
 		case MAPPED_GOAL:
 		case MOVED_DISTANCE_AND_ANGLE:
-			/*for(uint8_t j=0; j<3; j++) {
+			for(uint8_t j=0; j<3; j++) {
 				Send_to_PC(busbuffer[j]);
-			}*/
+			}
 			break;
 		case SENSOR_READINGS:
 			/*if (sensor_count == 25) {
@@ -66,10 +66,10 @@ void handle_received_message() {
 			}*/
 			break;
 		default:
-			/*Send_to_PC('F');
+			Send_to_PC('F');
 			Send_to_PC('E');
 			Send_to_PC('L');
-			Send_to_PC(busbuffer[0]);*/
+			Send_to_PC(busbuffer[0]);
 			break;
 	}
 }

@@ -39,13 +39,14 @@ void init_control_system() {
 
 /* Service routine for handling acceleration */
 ISR(TIMER1_COMPA_vect) {
-	/*if(distance_remaining < 100)
-		desired_speed = 10; //Speed from witch instant stop is OK*/
+	if(abs(angle_remaining) < 20 && distance_remaining < 100)
+		desired_speed = 20; //Speed from witch instant stop is OK
 	if(desired_speed > current_speed)
 		++current_speed;
 	else if(desired_speed < current_speed)
 		--current_speed;
 	control_speed_max = current_speed / 2;
+	
 }
 
 /* Set desired_speed */
@@ -91,9 +92,6 @@ void calculate_control_speed() {
 		}
 		control_speed_left = 0;
 	}
-	
-	//uint8_t msg[2] = {0xFF, control_speed_left};
-	//i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
 }
 
 void set_controlled_engine_speed() {

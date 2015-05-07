@@ -60,6 +60,7 @@ void init_map() {
 			ff_map[i][j] = FF_DEFAULT;
 
 	start_position = current_position = (coordinate) {START_POSITION_X, START_POSITION_Y};
+	map[start_position.x][start_position.y] = NOT_WALL;
 	current_direction = NORTH;
 	current_route[0] = ROUTE_END;
 	goal_found = 0;
@@ -71,7 +72,8 @@ void set_current_direction(direction dir) {
 }
 
 /* Called when Ronny has moved one grid square in 'current_direction' to update position */
-void move_map_position_forward() {
+uint8_t move_map_position_forward() {
+	uint8_t already_visited = 0;
 	switch(current_direction) {
 		case NORTH:
 			--current_position.x;
@@ -94,9 +96,16 @@ void move_map_position_forward() {
 		i2c_write(COMMUNICATION_UNIT, msg, 3);
 	}
 	tape_square = 0;
+	if(map[current_position.x][current_position.y] == NOT_WALL)
+		already_visited = 1;
 	map[current_position.x][current_position.y] = NOT_WALL;
-	uint8_t msg[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
-	i2c_write(COMMUNICATION_UNIT, msg, 3);
+	uint8_t msg1[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
+	uint8_t msg2[3] = {ABSOLUTE_X_Y, current_position.x, current_position.y};
+	while (!i2c_write(COMMUNICATION_UNIT, msg1, 3))
+		_delay_ms(5);
+	while (!i2c_write(COMMUNICATION_UNIT, msg2, 3))
+		_delay_ms(5);
+	return already_visited;
 }
 
 /* Updated map with a detected wall to the left of Ronny */
@@ -118,7 +127,8 @@ void set_wall_left() {
 	}
 	map[wall_pos.x][wall_pos.y] = WALL;
 	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
-	i2c_write(COMMUNICATION_UNIT, msg, 3);
+	while(!i2c_write(COMMUNICATION_UNIT, msg, 3))
+		_delay_ms(5);
 }
 
 /* Updated map with a detected wall to the right of Ronny */
@@ -140,7 +150,8 @@ void set_wall_right() {
 	}
 	map[wall_pos.x][wall_pos.y] = WALL;
 	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
-	i2c_write(COMMUNICATION_UNIT, msg, 3);
+	while(!i2c_write(COMMUNICATION_UNIT, msg, 3))
+		_delay_ms(5);
 }
 
 /* Updated map with a detected wall in front of Ronny */
@@ -162,7 +173,8 @@ void set_wall_front() {
 	}
 	map[wall_pos.x][wall_pos.y] = WALL;
 	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
-	i2c_write(COMMUNICATION_UNIT, msg, 3);
+	while(!i2c_write(COMMUNICATION_UNIT, msg, 3))
+		_delay_ms(5);
 }
 
 uint8_t is_wall_left() {
