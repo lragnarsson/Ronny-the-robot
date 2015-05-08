@@ -121,6 +121,8 @@ namespace GUIronny {
 		//Others
 		int w = 0;
 		int d = 0;
+	private: System::Windows::Forms::Button^  Reset;
+	protected:
 		int en = 0;
 
 		/// <summary>
@@ -134,6 +136,7 @@ namespace GUIronny {
 			}
 		}
 	private: static System::Windows::Forms::PictureBox^  Ronny_robot;
+	protected:
 	private: static System::Windows::Forms::Label^  Sensorvärden;
 	private: static System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
 	private: static System::Windows::Forms::PictureBox^  Leftarrow_pressed;
@@ -143,14 +146,14 @@ namespace GUIronny {
 	private: static System::Windows::Forms::PictureBox^  Uparrow_pressed;
 	private: static System::Windows::Forms::PictureBox^  Downarrow_pressed;
 	private: static System::Windows::Forms::PictureBox^  Rightarrow_pressed;
-
 	public: static System::Windows::Forms::TextBox^  IRsensor_VF;
-	public: static System::Windows::Forms::TextBox^  IRsensor_VB;
-	public: static System::Windows::Forms::TextBox^  IRsensor_HF;
-	public: static System::Windows::Forms::TextBox^  IRsensor_HB;
+	private:
+	public: static  System::Windows::Forms::TextBox^  IRsensor_VB;
+	public: static  System::Windows::Forms::TextBox^  IRsensor_HF;
+	public: static  System::Windows::Forms::TextBox^  IRsensor_HB;
 	public: static System::Windows::Forms::TextBox^  IRsensor_Front;
-
 	private: static System::IO::Ports::SerialPort^  serialPort1;
+	public:
 	private: static System::Windows::Forms::Button^  button3;
 	private: static System::Windows::Forms::Button^  button4;
 	private: static System::Windows::Forms::TextBox^  Kommandon;
@@ -161,6 +164,34 @@ namespace GUIronny {
 	private: static System::Windows::Forms::TextBox^  open_closed;
 	private: static System::Windows::Forms::PictureBox^  pictureBox1;
 	private: static System::ComponentModel::IContainer^  components;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	private:
 		/// <summary>
@@ -202,6 +233,7 @@ namespace GUIronny {
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->open_closed = (gcnew System::Windows::Forms::TextBox());
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
+			this->Reset = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Ronny_robot))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_unpressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_pressed))->BeginInit();
@@ -474,12 +506,23 @@ namespace GUIronny {
 			this->pictureBox1->TabIndex = 23;
 			this->pictureBox1->TabStop = false;
 			// 
+			// Reset
+			// 
+			this->Reset->Location = System::Drawing::Point(1073, 71);
+			this->Reset->Name = L"Reset";
+			this->Reset->Size = System::Drawing::Size(81, 38);
+			this->Reset->TabIndex = 24;
+			this->Reset->Text = L"Reset";
+			this->Reset->UseVisualStyleBackColor = true;
+			this->Reset->Click += gcnew System::EventHandler(this, &MyForm::Reset_Click);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::White;
 			this->ClientSize = System::Drawing::Size(1300, 667);
+			this->Controls->Add(this->Reset);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->open_closed);
 			this->Controls->Add(this->label2);
@@ -536,11 +579,11 @@ namespace GUIronny {
 	private: System::Void button3_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void button4_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e);
-
+	private: System::Void Reset_Click(System::Object^  sender, System::EventArgs^  e);
 			 //Data recieved from serialport.
 	private: delegate void myrecievedata_delegate(/*SerialPort^ sender,*/ char status);
 	private: delegate void hanldebyte(unsigned char byte);
-	private:  System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e);
+	private: System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e);
 	private: static void myrecievedata(/*SerialPort^ sender,*/ char status);
 	private: static void handleheader(unsigned char byte);
 	private: static void handlebyte();
@@ -558,5 +601,6 @@ namespace GUIronny {
 
 			 //Grafer_data
 	private: void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5);
-	};
+	
+};
 }

@@ -147,7 +147,15 @@ System::Void MyForm::button4_Click_1(System::Object^  sender, System::EventArgs^
 System::Void MyForm::Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e) {
 	showing_sensor_window = true;
 	sensorwindow->Show();
-
+}
+System::Void MyForm::Reset_Click(System::Object^  sender, System::EventArgs^  e) {
+	createarray(image1);
+	x_recieved_current = 16;
+	y_recieved_current = 16;
+	x_GUIcurrent = 16;
+	y_GUIcurrent = 8;
+	xpos_wall = 0;
+	ypos_wall = 0;
 }
 
 //Serialport
@@ -557,7 +565,7 @@ System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int
 					{
 						image1->SetPixel(y, x, Color::Red);
 					}
-				}
+				
 			}
 		}
 		break;
