@@ -5,31 +5,269 @@
 #include "control_unit.h"
 #include "flood_fill.h"
 
-//uint8_t state_speed = 0;
 
-/* Initialize starting conditions for the robot */
-void init_state() {
+int main(void)
+{
 	current_mode = AUTONOMOUS;
-	current_task = SEARCH;
-	set_current_direction(NORTH);
-	state_speed = MAPPING_SPEED;
-	PORTB = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION);
-}
-
-/* Initialize all hardware ports */
-void initialize_control_unit() {
+	next_state = search_state;
 	init_map();
 	init_bus_communication();
 	init_control_system();
-	init_state();
+	
+	sei();
+	_delay_ms(1000);
+	
+	while (1) {
+		if(current_mode == MANUAL)
+			;//manual_mode();
+		else if(current_mode == AUTONOMOUS)
+			autonomous_mode();
+		else if (current_mode == TEST)
+			test_mode();
+	}
 }
 
-/* Drive forward until distance_remaining is 0. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. */
+/* Autonomous drive */
+void autonomous_mode()
+{
+	while (current_mode == AUTONOMOUS)
+	{
+		next_state();
+	}
+}
+
+void test_mode()
+{
+	follow_up_state = end_state;
+	current_route[0] = NORTH;
+	current_route[1] = NORTH;
+	current_route[2] = ROUTE_END;
+	navigate_state();
+	end_state();
+}
+
+/* Search state */
+void search_state()
+{
+	int16_t last_distance_travelled = distance_travelled;
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	
+	for (;;)
+	{
+		int16_t sqaure_diff = distance_travelled - last_distance_travelled;
+		
+		set_desired_engine_speed(MAPPING_SPEED);
+		
+		if (sqaure_diff > 395 || (sqaure_diff > 200 && front_wall_distance < 230))
+		{
+			uint8_t wall_front = (front_wall_distance < 300);
+			uint8_t wall_left = (left_wall_distance < 300);
+			uint8_t wall_right = (right_wall_distance < 300);
+			
+			/* Update map stuff */
+			move_map_position_forward();
+			set_walls(wall_front, wall_left, wall_right);
+			
+			/* Decide what to do */
+			if (tape_square)
+			{
+				set_desired_engine_speed(0);
+				
+				goal_position = current_position;
+				next_state = return_state;
+				
+				return;
+			}
+			else if (current_sqaure_not_wall())
+			{
+				set_desired_engine_speed(0);
+				
+				flood_fill_to_unmapped();
+				next_state = navigate_state;
+				follow_up_state = search_state;
+				
+				return;
+			}
+			else
+			{
+				set_current_sqaure_not_wall();
+				
+				if (wall_front)
+				{
+					if (!wall_left)
+						rotate_left_90();
+					else if (!wall_right)
+						rotate_right_90();
+					else
+					{
+						set_desired_engine_speed(0);
+						
+						flood_fill_to_unmapped();
+						next_state = navigate_state;
+						follow_up_state = search_state;
+						
+						return;
+					}
+				}
+			}
+			
+			/* Reset */
+			last_distance_travelled = distance_travelled;
+		} // end if
+	} // end for
+}
+
+void navigate_state()
+{
+	uint8_t route_index = 0;
+	direction next_direction = current_route[route_index];
+	
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	
+	while (next_direction != ROUTE_END)
+	{
+		/* Decide what turn to make based on current direction and next direction in route */
+		uint8_t next_turn = (current_direction - next_direction) % 4;
+		switch (next_turn)
+		{
+			case LEFT:
+				rotate_left_90();
+				break;
+			case RIGHT:
+				rotate_right_90();
+				break;
+			case BACKWARD:
+				rotate_180();
+				break;
+			default:
+				break;
+		}
+		
+		/* Drive one square */
+		int16_t last_distance_travelled = distance_travelled;
+		
+		set_desired_engine_speed(SUPER_SPEED);
+		
+		for (;;)
+		{
+			int16_t square_diff = distance_travelled - last_distance_travelled;
+			
+			if (square_diff > 395 || (square_diff > 200 && front_wall_distance < 230))
+			{
+				move_map_position_forward();
+				break;
+			}
+		}
+		
+		next_direction = current_route[++route_index];
+	} // end while
+	
+	current_route[0] = ROUTE_END;
+	next_state = follow_up_state;
+	set_desired_engine_speed(0);
+}
+
+/* Return state */
+void return_state()
+{
+	next_state = end_state;
+}
+
+/* Grab package state */
+void grab_package_state()
+{
+	next_state = end_state;
+}
+
+/* Drop package state */
+void drop_package_state()
+{
+	next_state = end_state;
+}
+
+/* End state */
+void end_state()
+{
+	while (1)
+	{
+		
+	}
+}
+
+/* Rotate left 90 degrees */
+void rotate_left_90()
+{
+	set_desired_engine_speed(0);
+	set_desired_engine_direction(ENGINE_DIRECTION_LEFT);
+	_delay_ms(500);
+	
+	int16_t last_absolute_rotation = absolute_rotation;
+	set_desired_engine_speed(TURN_SPEED);
+	
+	while (absolute_rotation - last_absolute_rotation < 85) { }
+	
+	current_direction = (current_direction - 1) % 4;
+	
+	set_desired_engine_speed(0);
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(500);
+}
+
+/* Rotate right 90 degrees */
+void rotate_right_90()
+{
+	set_desired_engine_speed(0);
+	set_desired_engine_direction(ENGINE_DIRECTION_RIGHT);
+	_delay_ms(500);
+	
+	int16_t last_absolute_rotation = absolute_rotation;
+	set_desired_engine_speed(TURN_SPEED);
+	
+	while (absolute_rotation - last_absolute_rotation > -85) { }
+	
+	current_direction = (current_direction + 1) % 4;
+	
+	set_desired_engine_speed(0);
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(500);
+}
+
+/* Rotate left or right 180 degrees */
+void rotate_180()
+{
+	set_desired_engine_speed(0);
+	
+	int16_t last_absolute_rotation = absolute_rotation;
+	
+	if (left_wall_distance < right_wall_distance)
+	{
+		set_desired_engine_direction(ENGINE_DIRECTION_RIGHT);
+		_delay_ms(500);
+		set_desired_engine_speed(TURN_SPEED);
+		while (absolute_rotation - last_absolute_rotation > -190) { }
+	}
+	else
+	{
+		set_desired_engine_direction(ENGINE_DIRECTION_LEFT);
+		_delay_ms(500);
+		set_desired_engine_speed(TURN_SPEED);
+		while (absolute_rotation - last_absolute_rotation < 190) { }
+	}
+	
+	current_direction = (current_direction + 2) % 4;
+	
+	set_desired_engine_speed(0);
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(500);
+}
+
+
+/* Drive forward until distance_remaining is 0. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. 
 void drive_forward()
 {
 	square_distance_remaining = 400;
 	uint8_t has_moved_map_position_forward = 0;
-	while (distance_remaining || !has_moved_map_position_forward)
+	while (distance_remaining) //|| !has_moved_map_position_forward)
 	{
 		has_moved_map_position_forward = 0;
 		
@@ -47,9 +285,9 @@ void drive_forward()
 	}
 	
 	stop_engines();
-}
+}*/
 
-/* Rotate 90 degrees to the left based on wheel encoder feedback */
+/* Rotate 90 degrees to the left based on wheel encoder feedback 
 void rotate_left_90() {
 	stop_engines();
 	_delay_ms(500);
@@ -65,9 +303,9 @@ void rotate_left_90() {
 	current_direction &= 3;
 	stop_engines();
 	_delay_ms(500);
-}
+}*/
 
-/* Rotate 90 degrees to the right based on wheel encoder feedback */
+/* Rotate 90 degrees to the right based on wheel encoder feedback
 void rotate_right_90() {
 	stop_engines();
 	_delay_ms(500);
@@ -82,9 +320,9 @@ void rotate_right_90() {
 	current_direction &= 3;
 	stop_engines();
 	_delay_ms(500);
-}
+} */
 
-/* Rotate 180 degrees based on wheel encoder feedback */
+/* Rotate 180 degrees based on wheel encoder feedback
 void rotate_180() {
 	stop_engines();
 	_delay_ms(500);
@@ -108,8 +346,8 @@ void rotate_180() {
 	current_direction &= 3;
 	stop_engines();
 	_delay_ms(500);
-}
-
+} */
+/*
 uint8_t map_surroundings(uint8_t turn) {
 	if(left_wall_distance < 250)
 		set_wall_left();
@@ -132,9 +370,9 @@ uint8_t map_surroundings(uint8_t turn) {
 	}
 
 	return 1;
-}
+}*/
 
-/* Drive forward and map surroundings until reaching a wall. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. */
+/* Drive forward and map surroundings until reaching a wall. Will temporarily switch to step_forward to turn off sensor feedback if passing a crossroad. 
 uint8_t drive_and_map() {
 	distance_remaining = 10000;
 	square_distance_remaining = 400;
@@ -158,7 +396,7 @@ uint8_t drive_and_map() {
 			find_closest_unmapped |= !map_surroundings(1);
 			if (find_closest_unmapped)  // Update map coordinates  and update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
 			{
-				uint8_t msg[2] = {0xFF, 0xFF};
+				/*uint8_t msg[2] = {0xFF, 0xFF};
 				i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
 				stop_engines();
 				return goal_found;
@@ -169,26 +407,34 @@ uint8_t drive_and_map() {
 	map_surroundings(0);
 	stop_engines();
 	return goal_found;
-}
+}*/
 
-/* Contains all logic for mapping and searching through the map */
+/* Contains all logic for mapping and searching through the map 
 void search_state() { 
+	
+	
+	
+	
+	
+	
+	/*
 	if(drive_and_map()) { //The goal was found
 		current_task = RETRIEVE;
 		state_speed = SUPER_SPEED;
 	} else
 		flood_fill_to_unmapped();// calculate route to closest unmapped square
-}
+		
+}*/
 
-/* Ronny is back at the start to pick up the package (in a shady way) */
+/* Ronny is back at the start to pick up the package (in a shady way) 
 void grab_package_state() {
 	close_claw();
 	current_task = DELIVER;
 	state_speed = SUPER_SPEED;
 	flood_fill_to_destination(goal_position);
-}
+}*/
 
-/* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first */
+/* Ronny is going to retrieve the package but wants to make sure he knows the shortest path first 
 void retrieve_state() {
 	uint8_t route_index = 0;
 	direction next_direction = current_route[route_index];
@@ -198,7 +444,7 @@ void retrieve_state() {
 		map_surroundings(0);
 		flood_fill_home_optimistic();
 		
-		/* Decide what turn to make based on current direction and next direction in route */
+		/* Decide what turn to make based on current direction and next direction in route 
 		uint8_t next_turn = (current_direction - next_direction) & 3;
 		switch (next_turn) {
 			case LEFT:
@@ -220,36 +466,36 @@ void retrieve_state() {
 	
 	current_route[0] = ROUTE_END;
 	grab_package_state();
-}
+}*/
 
-/* Drops the package and positions Ronny to avoid running it over later */
+/* Drops the package and positions Ronny to avoid running it over later 
 void drop_package_state() {
 	open_claw();
 	current_task = RETURN;
 	state_speed = SUPER_SPEED;
 	flood_fill_to_destination(start_position);
-}
+}*/
 
-/* Ronny has reached the goal and does a victory dance */
+/* Ronny has reached the goal and does a victory dance 
 void end_state() {
 	
-}
+}*/
 
-/* Follows the current path until the end and then selects state transition */
+/* Follows the current path until the end and then selects state transition 
 state_function navigate() {
 	uint8_t route_index = 0;
   	direction next_direction = current_route[route_index];
 	  
-	/* Follow current path */
+	/* Follow current path 
 	while(next_direction != ROUTE_END) {
 		distance_remaining = 0;
-		/* Calculate straight line distance remaining in current direction */
+		/* Calculate straight line distance remaining in current direction
 		do {
 			distance_remaining += 400;
 			++route_index;
 		} while (next_direction == current_route[route_index]);
 		
-		/* Decide what turn to make based on current direction and next direction in route */
+		/* Decide what turn to make based on current direction and next direction in route
 		uint8_t next_turn = (current_direction - next_direction) & 3;
 		switch (next_turn) {
 			case LEFT:
@@ -270,7 +516,7 @@ state_function navigate() {
 	}
 	
 	current_route[0] = ROUTE_END;
-	/* Figure out the correct state transition*/
+	/* Figure out the correct state transition
 	state_function state_transition;
 	switch (current_task) {
 		case SEARCH:
@@ -292,8 +538,8 @@ state_function navigate() {
 	}
 	
 	return state_transition;
-}
-
+}*/
+/*
 void manual_drive() {
 	while(current_mode == MANUAL) {
 		switch(last_manual_command) {
@@ -358,49 +604,16 @@ void manual_drive() {
 		}
 		stop_engines();
 	}
-}
+}*/
 
-void autonomous_drive() {
-	uint8_t msg[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
-	i2c_write(COMMUNICATION_UNIT, msg, 3);
-	state_function state_transition;
-	// ## TEMP_COMMENT ## Will currently follow the predefined path 4 times in a row since no new path is ever calculated for next task.
-	do {
-		state_transition = navigate();
-		(*state_transition)();
-	} while (current_task != IDLE);
-	stop_engines();
-	while(current_mode == AUTONOMOUS)
-		_delay_ms(25);
-}
-
+/*
 void test_mode()
 {
-	_delay_ms(2000);
-	rotate_left_90();
-	_delay_ms(2000);
-	rotate_right_90();
-	_delay_ms(2000);
-	rotate_180();
-	_delay_ms(2000);
-	distance_remaining = 800;
+
+	distance_remaining = 10000;
 	drive_forward();
 	_delay_ms(2000);
 	//current_mode = AUTONOMOUS;
 	//i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
 }
-
-int main(void) {
-	initialize_control_unit();
-	sei();
-	_delay_ms(1000);
-	while (1) {
-		if(current_mode == MANUAL)
-			manual_drive();
-		else if(current_mode == AUTONOMOUS)
-			autonomous_drive();
-		else if (current_mode == TEST)
-			test_mode();
-		_delay_ms(1);
-	}
-}
+*/

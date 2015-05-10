@@ -28,19 +28,14 @@ uint8_t ff_map[MAP_SIZE][MAP_SIZE];
 coordinate start_position;
 coordinate current_position;
 coordinate goal_position;
-uint8_t goal_found;
 
 direction current_direction;
 direction current_route[64];
 
 void init_map();
-void set_current_direction(direction dir);
-uint8_t move_map_position_forward();
-void set_wall_left();
-void set_wall_right();
-void set_wall_front();
-void set_goal_position();
-uint8_t is_wall_left();
-uint8_t is_wall_right();
+void move_map_position_forward();
+void set_walls(uint8_t wall_front, uint8_t wall_left, uint8_t wall_right);
+uint8_t current_sqaure_not_wall();
+void set_current_sqaure_not_wall();
 
 #endif /* MAP_H_ */

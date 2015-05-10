@@ -9,24 +9,25 @@
 
 void init_bus_communication() {
 	i2c_init(atmega20br, atmega20pc, CONTROL_UNIT);
-	current_derivative_error = 0;
-	current_angle_left = 0;
-	current_angle_right = 0;
-	current_distance_error = 0;
-	previous_distance_error = 0;
+	
+	last_manual_command = M_FORWARD;
+	
+	tape_square = 0;
+	
 	left_wall_distance = 0;
 	right_wall_distance = 0;
 	front_wall_distance = 0;
-	last_tick_angle_left = 0;
-	last_tick_angle_right = 0;
-	distance_remaining = 0;
-	square_distance_remaining = 0;
-	inverse_sampling_speed = 1;
-	last_manual_command = M_FORWARD;
+	
+	current_distance_error = 0;
+	current_derivative_error = 0;
+	
+	distance_travelled = 0;
+	absolute_rotation = 0;
 }
 
 void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t front_left_h, uint8_t front_left_l,
 							uint8_t rear_right_h, uint8_t rear_right_l, uint8_t front_right_h, uint8_t front_right_l, uint8_t front_h, uint8_t front_l) {
+	/* Pack 16 bit sensor data */
 	uint16_t rear_left = rear_left_h;
 	rear_left = rear_left << 8;
 	rear_left |= rear_left_l;
@@ -47,18 +48,23 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	front_wall_distance = front_wall_distance << 8;
 	front_wall_distance |= front_l;	
 	
+	/* Keep previous values */
+	static int16_t previous_distance_left;
+	static int16_t previous_distance_right;
 	previous_distance_left = left_wall_distance;
 	previous_distance_right = right_wall_distance;
+	
+	/* Calculate new values */
 	left_wall_distance = (front_left + rear_left) / 2;
 	right_wall_distance = (front_right + rear_right) / 2;
 
+	/* Calculate control errors */
 	current_distance_error = left_wall_distance - right_wall_distance;
-	
-	current_derivative_left = (left_wall_distance - previous_distance_left) * 25;
-	current_derivative_right = -(right_wall_distance - previous_distance_right) * 25;
-	
+	int16_t current_derivative_left = (left_wall_distance - previous_distance_left) * SAMPLE_FREQUENCY;
+	int16_t current_derivative_right = -(right_wall_distance - previous_distance_right) * SAMPLE_FREQUENCY;
 	current_derivative_error = current_derivative_left + current_derivative_right;
 	
+	/* Ignore bad values */
 	if (abs(current_derivative_left) > 450 || abs(current_derivative_right) > 450 || rear_left > 300 || front_left > 300 || rear_right > 300 || front_right > 300)
 	{
 		if (abs(current_derivative_left) < 450 && rear_left < 300 && front_left < 300)
@@ -71,68 +77,10 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 			current_derivative_error = current_derivative_right * 2;
 		} else
 		{
-			current_distance_error = 0; //Turn off control system if we get spooky values
+			current_distance_error = 0;
 			current_derivative_error = 0;
 		}
 	}
-}
-
-void update_distance_and_angle(int8_t distance, int8_t angle) {
-	
-	if(abs(distance_remaining) > abs(distance))
-		distance_remaining -= distance;
-	else
-		distance_remaining = 0;
-
-	if(abs(square_distance_remaining) > abs(distance))
-		square_distance_remaining -= distance;
-	else
-		square_distance_remaining = 0;
-
-	if(abs(angle_remaining) > abs(angle))
-		angle_remaining -= angle;
-	else
-		angle_remaining = 0;
-}
-
-void tape_found() {
-	tape_square = 1;
-}
-
-void manual_drive_forward() {
-	P_COEFFICIENT += 0x0100;
-	//last_manual_command = M_FORWARD;
-	//distance_remaining = 100;
-}
-
-void manual_turn_right() {
-	D_COEFFICIENT += 0x0100;
-	//last_manual_command = M_RIGHT;
-	//angle_remaining = -20;
-}
-
-void manual_turn_left() {
-	D_COEFFICIENT -= 0x0100;
-	//last_manual_command = M_LEFT;
-	//angle_remaining = 20;
-}
-
-void manual_drive_forward_right() {
-	state_speed += 5;
-	//last_manual_command = M_FORWARD_RIGHT;
-	//distance_remaining = 100;
-}
-
-void manual_drive_forward_left() {
-	state_speed -= 5;
-	//last_manual_command = M_FORWARD_LEFT;
-	//distance_remaining = 100;
-}
-
-void manual_drive_backward() {
-	P_COEFFICIENT -= 0x0100;
-	//last_manual_command = M_BACKWARD;
-	//distance_remaining = -100;
 }
 
 void handle_received_message() {
@@ -141,28 +89,29 @@ void handle_received_message() {
 			update_sensor_readings(busbuffer[1], busbuffer[2], busbuffer[3], busbuffer[4], busbuffer[5], busbuffer[6], busbuffer[7], busbuffer[8], busbuffer[9], busbuffer[10]);
 			break;
 		case MOVED_DISTANCE_AND_ANGLE:
-			update_distance_and_angle(busbuffer[1], busbuffer[2]);
+			distance_travelled += (int8_t)busbuffer[1];
+			absolute_rotation += (int8_t)busbuffer[2];
 			break;
 		case TAPE_FOUND:
-			//tape_found();
+			//tape_square = 1;
 			break;
 		case DRIVE_FORWARD:
-			manual_drive_forward();
+			last_manual_command = M_FORWARD;
 			break;
 		case TURN_RIGHT:
-			manual_turn_right();
+			last_manual_command = M_RIGHT;
 			break;
 		case TURN_LEFT:
-			manual_turn_left();
+			last_manual_command = M_LEFT;
 			break;
 		case DRIVE_FORWARD_RIGHT:
-			manual_drive_forward_right();		
+			last_manual_command = M_FORWARD_RIGHT;
 			break;
 		case DRIVE_FORWARD_LEFT:
-			manual_drive_forward_left();
+			last_manual_command = M_FORWARD_LEFT;
 			break;
 		case DRIVE_BACKWARD:
-			manual_drive_backward();
+			last_manual_command = M_BACKWARD;
 			break;
 		default:
 			break;

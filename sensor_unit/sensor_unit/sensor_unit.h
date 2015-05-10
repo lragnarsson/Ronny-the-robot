@@ -50,7 +50,7 @@
 #define IR_NUM_SAMPLES 2
 
 #define ENCODER_DISTANCE_SCALE 85
-#define ENCODER_ROTATION_SCALE 150
+#define ENCODER_ROTATION_SCALE 165
 
 #include <avr/io.h>
 #include <avr/interrupt.h>

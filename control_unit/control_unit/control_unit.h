@@ -15,17 +15,23 @@
 #include "control_system.h"
 #include "map.h"
 
-static const uint8_t MAPPING_SPEED = 135;
-static const uint8_t SUPER_SPEED = 155;
-static const uint8_t TURN_SPEED = 75;
-uint8_t state_speed;
 typedef void (*state_function)();
 
+state_function next_state;
+state_function follow_up_state;
+
 typedef enum { MANUAL, AUTONOMOUS, TEST } mode;
-typedef enum { SEARCH, RETRIEVE, DELIVER, RETURN, IDLE } task;
-
 mode current_mode;
-task current_task;
 
+void autonomous_mode();
+void search_state();
+void navigate_state();
+void return_state();
+void grab_package_state();
+void drop_package_state();
+void end_state();
+void rotate_left_90();
+void rotate_right_90();
+void rotate_180();
 
-#endif
+#endif /* CONTROL_UNIT_H */
