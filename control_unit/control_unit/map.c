@@ -7,7 +7,7 @@
 #include "bus_communication.h"
 
 											// 0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29   30   31   32
-extern uint8_t map[MAP_SIZE][MAP_SIZE] = { {254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 0
+/*extern uint8_t map[MAP_SIZE][MAP_SIZE] = { {254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 0
 											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 1
 											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 2
 											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 3
@@ -41,6 +41,8 @@ extern uint8_t map[MAP_SIZE][MAP_SIZE] = { {254, 254, 254, 254, 254, 254, 254, 2
 											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254}, // 31
 											{254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254, 254} }; // 32
 
+*/
+extern uint8_t map[MAP_SIZE][MAP_SIZE];
 void init_map() {
 	
 	for (int i = 0; i < MAP_SIZE; ++i)
@@ -92,19 +94,19 @@ uint8_t move_map_position_forward() {
 	{
 		goal_position = current_position;
 		goal_found = 1;
-		uint8_t msg[3] = {MAPPED_GOAL, goal_position.x, goal_position.y};
-		i2c_write(COMMUNICATION_UNIT, msg, 3);
+		/*uint8_t msg[3] = {MAPPED_GOAL, goal_position.x, goal_position.y};
+		i2c_write(COMMUNICATION_UNIT, msg, 3);*/
 	}
 	tape_square = 0;
 	if(map[current_position.x][current_position.y] == NOT_WALL)
 		already_visited = 1;
 	map[current_position.x][current_position.y] = NOT_WALL;
-	uint8_t msg1[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
+	/*uint8_t msg1[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
 	uint8_t msg2[3] = {ABSOLUTE_X_Y, current_position.x, current_position.y};
 	while (!i2c_write(COMMUNICATION_UNIT, msg1, 3))
 		_delay_ms(5);
 	while (!i2c_write(COMMUNICATION_UNIT, msg2, 3))
-		_delay_ms(5);
+		_delay_ms(5);*/
 	return already_visited;
 }
 
@@ -126,9 +128,9 @@ void set_wall_left() {
 			break;
 	}
 	map[wall_pos.x][wall_pos.y] = WALL;
-	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
+	/*uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
 	while(!i2c_write(COMMUNICATION_UNIT, msg, 3))
-		_delay_ms(5);
+		_delay_ms(5);*/
 }
 
 /* Updated map with a detected wall to the right of Ronny */
@@ -149,9 +151,9 @@ void set_wall_right() {
 			break;
 	}
 	map[wall_pos.x][wall_pos.y] = WALL;
-	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
+	/*uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
 	while(!i2c_write(COMMUNICATION_UNIT, msg, 3))
-		_delay_ms(5);
+		_delay_ms(5);*/
 }
 
 /* Updated map with a detected wall in front of Ronny */
@@ -172,9 +174,9 @@ void set_wall_front() {
 			break;
 	}
 	map[wall_pos.x][wall_pos.y] = WALL;
-	uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
+	/*uint8_t msg[3] = {MAPPED_WALL, wall_pos.x, wall_pos.y};
 	while(!i2c_write(COMMUNICATION_UNIT, msg, 3))
-		_delay_ms(5);
+		_delay_ms(5);*/
 }
 
 uint8_t is_wall_left() {

@@ -29,7 +29,7 @@ void drive_forward()
 {
 	square_distance_remaining = 400;
 	uint8_t has_moved_map_position_forward = 0;
-	while (distance_remaining || !has_moved_map_position_forward)
+	while (distance_remaining) //|| !has_moved_map_position_forward)
 	{
 		has_moved_map_position_forward = 0;
 		
@@ -158,8 +158,8 @@ uint8_t drive_and_map() {
 			find_closest_unmapped |= !map_surroundings(1);
 			if (find_closest_unmapped)  // Update map coordinates  and update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
 			{
-				uint8_t msg[2] = {0xFF, 0xFF};
-				i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+				/*uint8_t msg[2] = {0xFF, 0xFF};
+				i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));*/
 				stop_engines();
 				return goal_found;
 			}
@@ -361,8 +361,8 @@ void manual_drive() {
 }
 
 void autonomous_drive() {
-	uint8_t msg[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
-	i2c_write(COMMUNICATION_UNIT, msg, 3);
+	/*uint8_t msg[3] = {MAPPED_SQUARE, current_position.x, current_position.y};
+	i2c_write(COMMUNICATION_UNIT, msg, 3);*/
 	state_function state_transition;
 	// ## TEMP_COMMENT ## Will currently follow the predefined path 4 times in a row since no new path is ever calculated for next task.
 	do {
@@ -376,14 +376,8 @@ void autonomous_drive() {
 
 void test_mode()
 {
-	_delay_ms(2000);
-	rotate_left_90();
-	_delay_ms(2000);
-	rotate_right_90();
-	_delay_ms(2000);
-	rotate_180();
-	_delay_ms(2000);
-	distance_remaining = 800;
+
+	distance_remaining = 10000;
 	drive_forward();
 	_delay_ms(2000);
 	//current_mode = AUTONOMOUS;

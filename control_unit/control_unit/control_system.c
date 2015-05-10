@@ -45,7 +45,7 @@ ISR(TIMER1_COMPA_vect) {
 		++current_speed;
 	else if(desired_speed < current_speed)
 		--current_speed;
-	control_speed_max = current_speed / 2;
+	control_speed_max = current_speed;
 	
 }
 
@@ -63,7 +63,8 @@ void stop_engines() {
 }
 
 void set_same_engine_speed() {
-	ENGINE_LEFT_SPEED = ENGINE_RIGHT_SPEED = current_speed;
+	ENGINE_LEFT_SPEED = current_speed + 3;
+	ENGINE_RIGHT_SPEED = current_speed;
 }
 
 /* Calculates the control_speed based on current angle and error in distance to the middle of the corridor */
@@ -96,7 +97,7 @@ void calculate_control_speed() {
 
 void set_controlled_engine_speed() {
 	calculate_control_speed();
-	ENGINE_LEFT_SPEED = current_speed - control_speed_left;
+	ENGINE_LEFT_SPEED = current_speed - control_speed_left + 3;
 	ENGINE_RIGHT_SPEED = current_speed - control_speed_right;
 }
 
