@@ -53,11 +53,135 @@ namespace GUIronny {
 			findPorts();
 
 			createarray(image1);
+			/*
+			//1
+			data_recieved_buffer[0] = 16;
+			data_recieved_buffer[1] = 16;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 16;
+			data_recieved_buffer[1] = 17;
+			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 16;
+			data_recieved_buffer[1] = 15;
+			header = WALL;
+			handlebyte();
+			//2
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 16;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 15;
+			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 17;
+			header = WALL;
+			handlebyte();
+			//3
+			data_recieved_buffer[0] = 14;
+			data_recieved_buffer[1] = 16;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 14;
+			data_recieved_buffer[1] = 17;
+			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 13;
+			data_recieved_buffer[1] = 16;
+			header = WALL;
+			handlebyte();
+			//4
+			data_recieved_buffer[0] = 14;
+			data_recieved_buffer[1] = 15;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 13;
+			data_recieved_buffer[1] = 15;
+			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 14;
+			data_recieved_buffer[1] = 14;
+			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 15;
+			header = WALL;
+			handlebyte();*/
+
+			data_recieved_buffer[0] = 16;
+			data_recieved_buffer[1] = 16;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 16;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 15;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 14;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 13;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 12;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 11;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 10;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 9;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[1] = 8;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 14;
+			data_recieved_buffer[1] = 8;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 13;
+			data_recieved_buffer[1] = 8;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 13;
+			data_recieved_buffer[1] = 7;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 13;
+			data_recieved_buffer[1] = 6;
+			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 12;
+			data_recieved_buffer[1] = 6;
+			header = DRIVABLE_SQUARE;
+			handlebyte();
+			data_recieved_buffer[0] = 12;
+			data_recieved_buffer[1] = 5;
+			header = WALL;
+			handlebyte();
+
+			
 			//initvalues();
 			//fillkarta(image1, 16, 8, DRIVABLE_SQUARE);
-		/*	fillkarta(image1, 16, 9, WALL);
-			fillkarta(image1, 16, 7, WALL);
-			fillkarta(image1, 15, 8, DISTRESSEDFOUND);*/
+			/*	fillkarta(image1, 16, 9, WALL);
+				fillkarta(image1, 16, 7, WALL);
+				fillkarta(image1, 15, 8, DISTRESSEDFOUND);*/
 
 			//
 			//TODO: Add the constructor code here
@@ -70,7 +194,7 @@ namespace GUIronny {
 		static Bitmap^ image1 = gcnew Bitmap(600, 600);
 		static int prevx = 450;
 		static int prevy = 480;
-		static array <int, 2 >^ driveblesquares = gcnew array < int, 2 >(150, 2);
+		static array <int, 2 >^ drivablesquares = gcnew array < int, 2 >(150, 2);
 		static array <int, 2 >^ walls = gcnew array < int, 2 >(150, 2);
 		static array <int, 2 >^ distressed = gcnew array < int, 2 >(2, 2); // egentligen finns det bara en men vi vill ju flytta denna ruta också precis som walls o drivebles. bör gå att göra med bara variabler ty bara ett (x,y).
 		static array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
@@ -96,12 +220,13 @@ namespace GUIronny {
 		static unsigned int xpos_wall = 0;
 		static unsigned int ypos_wall = 0;
 		static int drivable_cell = 0;
-		
+
 		static int wall_cell = 0;
 		static int squaresize = 35;
 
 		bool Header = false;
 		bool Recieved_all_bytes = false;
+		static bool first_square  =true;
 
 
 		//Data received
@@ -111,6 +236,8 @@ namespace GUIronny {
 		static bool automode = false;
 		static bool tejp_found = false;
 		static unsigned char header = 0x00;
+		static unsigned int current_distance = 0;
+		static unsigned int added_distance = 0;
 
 		//Sensor window
 		static Grafer_data^ sensorwindow = (gcnew Grafer_data());
@@ -121,7 +248,17 @@ namespace GUIronny {
 		//Others
 		int w = 0;
 		int d = 0;
-	private: System::Windows::Forms::Button^  Reset;
+private: static System::Windows::Forms::Button^  Reset;
+protected:
+private: static System::Windows::Forms::Label^  label3;
+private: static System::Windows::Forms::Label^  label4;
+private: static System::Windows::Forms::TextBox^  Kp_value;
+private: static System::Windows::Forms::Label^  label5;
+private: static System::Windows::Forms::TextBox^  Ki_value;
+private: static System::Windows::Forms::Button^  change_control;
+private: static System::Windows::Forms::Label^  label6;
+private: static System::Windows::Forms::TextBox^  totaldistance;
+
 	protected:
 		int en = 0;
 
@@ -135,62 +272,36 @@ namespace GUIronny {
 				delete components;
 			}
 		}
-	private: static System::Windows::Forms::PictureBox^  Ronny_robot;
-	protected:
-	private: static System::Windows::Forms::Label^  Sensorvärden;
-	private: static System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Leftarrow_pressed;
-	private: static System::Windows::Forms::PictureBox^  Uparrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Downarrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
-	private: static System::Windows::Forms::PictureBox^  Uparrow_pressed;
-	private: static System::Windows::Forms::PictureBox^  Downarrow_pressed;
-	private: static System::Windows::Forms::PictureBox^  Rightarrow_pressed;
-	public: static System::Windows::Forms::TextBox^  IRsensor_VF;
-	private:
-	public: static  System::Windows::Forms::TextBox^  IRsensor_VB;
-	public: static  System::Windows::Forms::TextBox^  IRsensor_HF;
-	public: static  System::Windows::Forms::TextBox^  IRsensor_HB;
-	public: static System::Windows::Forms::TextBox^  IRsensor_Front;
-	private: static System::IO::Ports::SerialPort^  serialPort1;
-	public:
-	private: static System::Windows::Forms::Button^  button3;
-	private: static System::Windows::Forms::Button^  button4;
-	private: static System::Windows::Forms::TextBox^  Kommandon;
-	private: static System::Windows::Forms::Button^  Sensordata;
-	private: static System::Windows::Forms::Label^  label1;
-	private: static System::Windows::Forms::ComboBox^  comboBox1;
-	private: static System::Windows::Forms::Label^  label2;
-	private: static System::Windows::Forms::TextBox^  open_closed;
-	private: static System::Windows::Forms::PictureBox^  pictureBox1;
-	private: static System::ComponentModel::IContainer^  components;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+private: static System::Windows::Forms::PictureBox^  Ronny_robot;
+protected:
+private: static System::Windows::Forms::Label^  Sensorvärden;
+private: static System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
+private: static System::Windows::Forms::PictureBox^  Leftarrow_pressed;
+private: static System::Windows::Forms::PictureBox^  Uparrow_unpressed;
+private: static System::Windows::Forms::PictureBox^  Downarrow_unpressed;
+private: static System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
+private: static System::Windows::Forms::PictureBox^  Uparrow_pressed;
+private: static System::Windows::Forms::PictureBox^  Downarrow_pressed;
+private: static System::Windows::Forms::PictureBox^  Rightarrow_pressed;
+public: static System::Windows::Forms::TextBox^  IRsensor_VF;
+private:
+public: static System::Windows::Forms::TextBox^  IRsensor_VB;
+public: static System::Windows::Forms::TextBox^  IRsensor_HF;
+public: static System::Windows::Forms::TextBox^  IRsensor_HB;
+public: static System::Windows::Forms::TextBox^  IRsensor_Front;
+private: static System::IO::Ports::SerialPort^  serialPort1;
+public:
+private: static System::Windows::Forms::Button^  button3;
+private: static System::Windows::Forms::Button^  button4;
+private: static System::Windows::Forms::TextBox^  Kommandon;
+private: static System::Windows::Forms::Button^  Sensordata;
+private: static System::Windows::Forms::Label^  label1;
+private: static System::Windows::Forms::ComboBox^  comboBox1;
+private: static System::Windows::Forms::Label^  label2;
+private: static System::Windows::Forms::TextBox^  open_closed;
+private: static System::Windows::Forms::PictureBox^  pictureBox1;
+private: static System::ComponentModel::IContainer^  components;
 
 
 	private:
@@ -234,6 +345,14 @@ namespace GUIronny {
 			this->open_closed = (gcnew System::Windows::Forms::TextBox());
 			this->pictureBox1 = (gcnew System::Windows::Forms::PictureBox());
 			this->Reset = (gcnew System::Windows::Forms::Button());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->label4 = (gcnew System::Windows::Forms::Label());
+			this->Kp_value = (gcnew System::Windows::Forms::TextBox());
+			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->Ki_value = (gcnew System::Windows::Forms::TextBox());
+			this->change_control = (gcnew System::Windows::Forms::Button());
+			this->label6 = (gcnew System::Windows::Forms::Label());
+			this->totaldistance = (gcnew System::Windows::Forms::TextBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Ronny_robot))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_unpressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_pressed))->BeginInit();
@@ -262,9 +381,9 @@ namespace GUIronny {
 				static_cast<System::Byte>(0)));
 			this->Sensorvärden->Location = System::Drawing::Point(96, 216);
 			this->Sensorvärden->Name = L"Sensorvärden";
-			this->Sensorvärden->Size = System::Drawing::Size(85, 13);
+			this->Sensorvärden->Size = System::Drawing::Size(83, 13);
 			this->Sensorvärden->TabIndex = 1;
-			this->Sensorvärden->Text = L"Sensorvärden";
+			this->Sensorvärden->Text = L"Sensorvalues";
 			// 
 			// Leftarrow_unpressed
 			// 
@@ -409,6 +528,7 @@ namespace GUIronny {
 			// 
 			this->serialPort1->BaudRate = 115200;
 			this->serialPort1->PortName = L"COM3";
+			this->serialPort1->ReadTimeout = 500;
 			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &MyForm::serialPort1_DataReceived_1);
 			// 
 			// button3
@@ -508,7 +628,7 @@ namespace GUIronny {
 			// 
 			// Reset
 			// 
-			this->Reset->Location = System::Drawing::Point(1073, 71);
+			this->Reset->Location = System::Drawing::Point(969, 38);
 			this->Reset->Name = L"Reset";
 			this->Reset->Size = System::Drawing::Size(81, 38);
 			this->Reset->TabIndex = 24;
@@ -516,12 +636,89 @@ namespace GUIronny {
 			this->Reset->UseVisualStyleBackColor = true;
 			this->Reset->Click += gcnew System::EventHandler(this, &MyForm::Reset_Click);
 			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(956, 100);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(95, 13);
+			this->label3->TabIndex = 25;
+			this->label3->Text = L"Control parameters";
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Location = System::Drawing::Point(952, 129);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(20, 13);
+			this->label4->TabIndex = 26;
+			this->label4->Text = L"Kp";
+			// 
+			// Kp_value
+			// 
+			this->Kp_value->Location = System::Drawing::Point(978, 126);
+			this->Kp_value->Name = L"Kp_value";
+			this->Kp_value->Size = System::Drawing::Size(56, 20);
+			this->Kp_value->TabIndex = 27;
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->Location = System::Drawing::Point(955, 160);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(16, 13);
+			this->label5->TabIndex = 28;
+			this->label5->Text = L"Ki";
+			// 
+			// Ki_value
+			// 
+			this->Ki_value->Location = System::Drawing::Point(978, 157);
+			this->Ki_value->Name = L"Ki_value";
+			this->Ki_value->Size = System::Drawing::Size(56, 20);
+			this->Ki_value->TabIndex = 29;
+			// 
+			// change_control
+			// 
+			this->change_control->Location = System::Drawing::Point(968, 183);
+			this->change_control->Name = L"change_control";
+			this->change_control->Size = System::Drawing::Size(76, 47);
+			this->change_control->TabIndex = 30;
+			this->change_control->Text = L"Change parameteres";
+			this->change_control->UseVisualStyleBackColor = true;
+			this->change_control->Click += gcnew System::EventHandler(this, &MyForm::change_control_Click);
+			// 
+			// label6
+			// 
+			this->label6->AutoSize = true;
+			this->label6->Location = System::Drawing::Point(19, 427);
+			this->label6->Name = L"label6";
+			this->label6->Size = System::Drawing::Size(70, 13);
+			this->label6->TabIndex = 31;
+			this->label6->Text = L"total distance";
+			// 
+			// totaldistance
+			// 
+			this->totaldistance->Enabled = false;
+			this->totaldistance->Location = System::Drawing::Point(95, 424);
+			this->totaldistance->Name = L"totaldistance";
+			this->totaldistance->ReadOnly = true;
+			this->totaldistance->Size = System::Drawing::Size(114, 20);
+			this->totaldistance->TabIndex = 32;
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::White;
-			this->ClientSize = System::Drawing::Size(1300, 667);
+			this->ClientSize = System::Drawing::Size(1081, 652);
+			this->Controls->Add(this->totaldistance);
+			this->Controls->Add(this->label6);
+			this->Controls->Add(this->change_control);
+			this->Controls->Add(this->Ki_value);
+			this->Controls->Add(this->label5);
+			this->Controls->Add(this->Kp_value);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->label3);
 			this->Controls->Add(this->Reset);
 			this->Controls->Add(this->pictureBox1);
 			this->Controls->Add(this->open_closed);
@@ -580,6 +777,7 @@ namespace GUIronny {
 	private: System::Void button4_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void Reset_Click(System::Object^  sender, System::EventArgs^  e);
+			 static System::Void Reset_Map();
 			 //Data recieved from serialport.
 	private: delegate void myrecievedata_delegate(/*SerialPort^ sender,*/ char status);
 	private: delegate void hanldebyte(unsigned char byte);
@@ -598,9 +796,13 @@ namespace GUIronny {
 	private: static void change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y, int status);
 	private: static void move_squares(int unsigned x_new, unsigned int y_new);
 	private: static void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status);
+	private: static void Show_Map();
 
 			 //Grafer_data
-	private: void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5);
+	private: delegate void sensorvaluesDelegate(int byte1, int byte2, int byte3, int byte4, int byte5);
+	private: static void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5);
+
 	
+	private: System::Void change_control_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }
