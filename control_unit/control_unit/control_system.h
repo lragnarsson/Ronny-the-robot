@@ -33,18 +33,26 @@
 #define TIMER1_MATCH_FREQUENCY_100HZ F_CPU / 500 / 64	// = 625
 #define TIMER1_INTERRUPT_ENABLE (1<<OCIE1A)
 
-#define TIMER2_CLEAR_ON_MATCH_H (0<<WGM01)|(1<<WGM00)|(1<<COM0A1)|(0<<COM0A0)
-#define TIMER2_CLEAR_ON_MATCH_L (0<<WGM02)|(1<<CS02)|(0<<CS01)|(0<<CS00)
-
 volatile uint16_t P_COEFFICIENT;
 volatile uint16_t D_COEFFICIENT;
 
-void init_control_system(void);
-void set_desired_speed(uint8_t speed);
-void stop_engines(void);
-void set_same_engine_speed(void);
-void set_controlled_engine_speed(void);
-uint8_t corner_detected(void);
+static const uint8_t MAPPING_SPEED = 135;
+static const uint8_t SUPER_SPEED = 155;
+static const uint8_t TURN_SPEED = 75;
+
+typedef enum {
+	ENGINE_DIRECTION_FORWARD = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION),
+	ENGINE_DIRECTION_LEFT = (0<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION),
+	ENGINE_DIRECTION_RIGHT = (1<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION),
+	ENGINE_DIRECTION_BACKWARD = (0<<ENGINE_LEFT_DIRECTION)|(0<<ENGINE_RIGHT_DIRECTION)
+} engine_direction;
+
+void init_control_system();
+void set_desired_engine_speed(uint8_t speed);
+void set_desired_engine_direction(engine_direction direction);
+uint8_t is_stationary();
+void set_manual_forward_engine_speed();
+void set_manual_turn_engine_speed();
 void set_manual_forward_left_engine_speed();
 void set_manual_forward_right_engine_speed();
 
