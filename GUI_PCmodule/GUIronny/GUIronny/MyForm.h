@@ -54,10 +54,10 @@ namespace GUIronny {
 
 			createarray(image1);
 			//initvalues();
-			//fillkarta(image1, 16, 8, DRIVABLE_SQUARE);
-		/*	fillkarta(image1, 16, 9, WALL);
+			fillkarta(image1, 16, 8, DRIVABLE_SQUARE);
+			fillkarta(image1, 16, 9, WALL);
 			fillkarta(image1, 16, 7, WALL);
-			fillkarta(image1, 15, 8, DISTRESSEDFOUND);*/
+			fillkarta(image1, 15, 8, DISTRESSEDFOUND);
 
 			//
 			//TODO: Add the constructor code here
