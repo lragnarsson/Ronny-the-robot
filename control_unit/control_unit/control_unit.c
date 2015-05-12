@@ -13,8 +13,10 @@ int main(void)
 	init_map();
 	init_bus_communication();
 	init_control_system();
-	
+	DDRD |= (1<<DDD1)|(1<<DD2); // LED output
+	PORTD ^= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	sei();
+	
 	_delay_ms(1000);
 	
 	while (1) {
@@ -37,13 +39,34 @@ void autonomous_mode()
 }
 
 void test_mode()
-{
+{/*
+	rotate_left_90();
+	rotate_right_90();
+	*/
 	follow_up_state = end_state;
 	current_route[0] = NORTH;
 	current_route[1] = NORTH;
-	current_route[2] = ROUTE_END;
+	current_route[2] = NORTH;
+	current_route[3] = NORTH;
+	current_route[4] = NORTH;
+	current_route[5] = NORTH;
+	current_route[6] = NORTH;
+	current_route[7] = NORTH;
+	current_route[8] = NORTH;
+	current_route[9] = NORTH;
+	current_route[10] = SOUTH;
+	current_route[11] = SOUTH;
+	current_route[12] = SOUTH;
+	current_route[13] = SOUTH;
+	current_route[14] = SOUTH;
+	current_route[15] = SOUTH;
+	current_route[16] = SOUTH;
+	current_route[17] = SOUTH;
+	current_route[18] = SOUTH;
+	current_route[19] = SOUTH;
+	current_route[20] = ROUTE_END;
 	navigate_state();
-	end_state();
+	
 }
 
 /* Search state */
@@ -51,15 +74,40 @@ void search_state()
 {
 	int16_t last_distance_travelled = distance_travelled;
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(500);
+	
+	set_walls((front_wall_distance < 300), (left_wall_distance < 300), (right_wall_distance < 300));
+	set_current_sqaure_not_wall();
+	
+	if ((front_wall_distance < 300))
+	{
+		if (!(left_wall_distance < 300))
+			rotate_left_90();
+		else if (!(right_wall_distance < 300))
+			rotate_right_90();
+		else
+		{
+			set_desired_engine_speed(0);
+			
+			flood_fill_to_unmapped();
+			next_state = navigate_state;
+			follow_up_state = search_state;
+			
+			return;
+		}
+	}
 	
 	for (;;)
 	{
 		int16_t sqaure_diff = distance_travelled - last_distance_travelled;
 		
 		set_desired_engine_speed(MAPPING_SPEED);
+		_delay_ms(1);
 		
-		if (sqaure_diff > 395 || (sqaure_diff > 200 && front_wall_distance < 230))
+		if (sqaure_diff > 350 || (sqaure_diff > 200 && front_wall_distance < 230))
 		{
+			PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+			
 			uint8_t wall_front = (front_wall_distance < 300);
 			uint8_t wall_left = (left_wall_distance < 300);
 			uint8_t wall_right = (right_wall_distance < 300);
@@ -119,15 +167,18 @@ void search_state()
 
 void navigate_state()
 {
+	set_desired_engine_speed(0);
+	_delay_ms(500);
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(500);
+	
 	uint8_t route_index = 0;
 	direction next_direction = current_route[route_index];
-	
-	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
 	
 	while (next_direction != ROUTE_END)
 	{
 		/* Decide what turn to make based on current direction and next direction in route */
-		uint8_t next_turn = (current_direction - next_direction) % 4;
+		uint8_t next_turn = (current_direction - next_direction) & 3;
 		switch (next_turn)
 		{
 			case LEFT:
@@ -151,9 +202,11 @@ void navigate_state()
 		for (;;)
 		{
 			int16_t square_diff = distance_travelled - last_distance_travelled;
+			_delay_ms(1);
 			
-			if (square_diff > 395 || (square_diff > 200 && front_wall_distance < 230))
+			if (square_diff > 350 || (square_diff > 200 && front_wall_distance < 230))
 			{
+				PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 				move_map_position_forward();
 				break;
 			}
@@ -198,38 +251,48 @@ void end_state()
 void rotate_left_90()
 {
 	set_desired_engine_speed(0);
-	set_desired_engine_direction(ENGINE_DIRECTION_LEFT);
-	_delay_ms(500);
+	_delay_ms(250);
+	force_engine_direction(ENGINE_DIRECTION_LEFT);
+	_delay_ms(250);
 	
 	int16_t last_absolute_rotation = absolute_rotation;
-	set_desired_engine_speed(TURN_SPEED);
+	force_engine_speed(TURN_SPEED);
 	
-	while (absolute_rotation - last_absolute_rotation < 85) { }
+	while (absolute_rotation - last_absolute_rotation < 85)
+	{
+		_delay_ms(1);
+	}
 	
-	current_direction = (current_direction - 1) % 4;
+	current_direction = (current_direction + 3) & 3;
 	
-	set_desired_engine_speed(0);
-	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
-	_delay_ms(500);
+	force_engine_speed(0);
+	_delay_ms(250);
+	force_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(250);
 }
 
 /* Rotate right 90 degrees */
 void rotate_right_90()
 {
 	set_desired_engine_speed(0);
-	set_desired_engine_direction(ENGINE_DIRECTION_RIGHT);
-	_delay_ms(500);
+	_delay_ms(250);
+	force_engine_direction(ENGINE_DIRECTION_RIGHT);
+	_delay_ms(250);
 	
 	int16_t last_absolute_rotation = absolute_rotation;
-	set_desired_engine_speed(TURN_SPEED);
+	force_engine_speed(TURN_SPEED);
 	
-	while (absolute_rotation - last_absolute_rotation > -85) { }
+	while (absolute_rotation - last_absolute_rotation > -85)
+	{
+		_delay_ms(1);
+	}
 	
-	current_direction = (current_direction + 1) % 4;
+	current_direction = (current_direction + 1) & 3;
 	
-	set_desired_engine_speed(0);
-	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
-	_delay_ms(500);
+	force_engine_speed(0);
+	_delay_ms(250);
+	force_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(250);
 }
 
 /* Rotate left or right 180 degrees */
@@ -241,24 +304,27 @@ void rotate_180()
 	
 	if (left_wall_distance < right_wall_distance)
 	{
-		set_desired_engine_direction(ENGINE_DIRECTION_RIGHT);
-		_delay_ms(500);
-		set_desired_engine_speed(TURN_SPEED);
-		while (absolute_rotation - last_absolute_rotation > -190) { }
+		_delay_ms(250);
+		force_engine_direction(ENGINE_DIRECTION_RIGHT);
+		_delay_ms(250);
+		force_engine_speed(TURN_SPEED);
+		while (absolute_rotation - last_absolute_rotation > -200) { }
 	}
 	else
 	{
-		set_desired_engine_direction(ENGINE_DIRECTION_LEFT);
-		_delay_ms(500);
-		set_desired_engine_speed(TURN_SPEED);
-		while (absolute_rotation - last_absolute_rotation < 190) { }
+		_delay_ms(250);
+		force_engine_direction(ENGINE_DIRECTION_LEFT);
+		_delay_ms(250);
+		force_engine_speed(TURN_SPEED);
+		while (absolute_rotation - last_absolute_rotation < 200) { }
 	}
 	
-	current_direction = (current_direction + 2) % 4;
+	current_direction = (current_direction + 2) & 3;
 	
-	set_desired_engine_speed(0);
-	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
-	_delay_ms(500);
+	force_engine_speed(0);
+	_delay_ms(250);
+	force_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(250);
 }
 
 

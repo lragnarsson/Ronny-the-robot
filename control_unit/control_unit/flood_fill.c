@@ -6,6 +6,7 @@
 #include <avr/io.h>
 
 #include "flood_fill.h"
+#include "I2C.h"
 
 uint8_t current_wavefront_size;
 uint8_t new_wavefront_size;

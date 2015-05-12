@@ -58,13 +58,16 @@ ISR(TIMER1_COMPA_vect)
 	MultiSU16X16to32(d, current_derivative_error, D_COEFFICIENT);
 	int16_t control_speed = (p + d)>>16;
 	
+	if (desired_engine_direction == ENGINE_DIRECTION_LEFT || desired_engine_direction == ENGINE_DIRECTION_RIGHT)
+		control_speed = 0;
+	
 	if (control_speed > 0)
 	{
 		uint8_t left_control_speed = (uint8_t)control_speed;
 		if (left_control_speed > max_control_speed)
-			ENGINE_LEFT_SPEED = current_engine_speed - max_control_speed + current_engine_speed / 16;
+			ENGINE_LEFT_SPEED = current_engine_speed - max_control_speed + (current_engine_speed>>6);
 		else
-			ENGINE_LEFT_SPEED = current_engine_speed - left_control_speed + current_engine_speed / 16;
+			ENGINE_LEFT_SPEED = current_engine_speed - left_control_speed + (current_engine_speed>>6);
 			
 		ENGINE_RIGHT_SPEED = current_engine_speed;
 	}
@@ -76,11 +79,11 @@ ISR(TIMER1_COMPA_vect)
 		else
 			ENGINE_RIGHT_SPEED = current_engine_speed - right_control_speed;
 		
-		ENGINE_LEFT_SPEED = current_engine_speed;
+		ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>6);
 	}
 	
 	/* Engine direction */
-	if (1 || is_stationary())
+	if (is_stationary())
 		PORTB = desired_engine_direction;
 }
 
@@ -90,10 +93,26 @@ void set_desired_engine_speed(uint8_t speed)
 	desired_engine_speed = speed;
 }
 
+/* Forcefully set engine speed */
+void force_engine_speed(uint8_t speed)
+{
+	desired_engine_speed = speed;
+	current_engine_speed = speed;
+	ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>6);
+	ENGINE_RIGHT_SPEED = current_engine_speed;
+}
+
 /* Set desired engine direction */
 void set_desired_engine_direction(engine_direction direction)
 {
 	desired_engine_direction = direction;
+}
+
+/* Forcefully set engine direction */
+void force_engine_direction(engine_direction direction)
+{
+	desired_engine_direction = direction;
+	PORTB = direction;
 }
 
 /* Returns true if current engine speed is zero */
