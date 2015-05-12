@@ -148,7 +148,7 @@ void flood_fill_to_destination(coordinate destination) {
 void flood_fill_to_unmapped() {
 	reset_flood_fill_values();
 	*current_wavefront = current_position;
-	current_wavefront_size = 1;
+	current_wavefront_size = 1;  
 	
 	uint8_t distance = 0;
 	while(1)
@@ -158,15 +158,18 @@ void flood_fill_to_unmapped() {
 		{
 			uint8_t x_coord = (current_wavefront + i)->x;
 			uint8_t y_coord = (current_wavefront + i)->y;
-			if(map[x_coord][y_coord] == UNMAPPED)
-			{
-				ff_map[x_coord][y_coord] = distance;
-				calculate_route((coordinate){ x_coord, y_coord });
-				return;
-			}
 			
 			ff_map[x_coord][y_coord] = distance;
 			
+			if (x_coord == 17 && y_coord == 16) // don't let the flood fill escape into the void!
+				continue;
+			
+			if(map[x_coord][y_coord] == UNMAPPED)
+			{
+				calculate_route((coordinate){ x_coord, y_coord });
+				return;
+			}
+				
 			if((map[x_coord - 1][y_coord] == NOT_WALL || map[x_coord - 1][y_coord] == UNMAPPED) && ff_map[x_coord - 1][y_coord] == FF_DEFAULT) // NORTH
 			{
 				*(new_wavefront + new_wavefront_size) = (coordinate){x_coord - 1, y_coord};

@@ -65,9 +65,9 @@ ISR(TIMER1_COMPA_vect)
 	{
 		uint8_t left_control_speed = (uint8_t)control_speed;
 		if (left_control_speed > max_control_speed)
-			ENGINE_LEFT_SPEED = current_engine_speed - max_control_speed + (current_engine_speed>>6);
+			ENGINE_LEFT_SPEED = current_engine_speed - max_control_speed + (current_engine_speed>>4);
 		else
-			ENGINE_LEFT_SPEED = current_engine_speed - left_control_speed + (current_engine_speed>>6);
+			ENGINE_LEFT_SPEED = current_engine_speed - left_control_speed + (current_engine_speed>>4);
 			
 		ENGINE_RIGHT_SPEED = current_engine_speed;
 	}
@@ -79,7 +79,7 @@ ISR(TIMER1_COMPA_vect)
 		else
 			ENGINE_RIGHT_SPEED = current_engine_speed - right_control_speed;
 		
-		ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>6);
+		ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>4);
 	}
 	
 	/* Engine direction */
@@ -98,7 +98,7 @@ void force_engine_speed(uint8_t speed)
 {
 	desired_engine_speed = speed;
 	current_engine_speed = speed;
-	ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>6);
+	ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>4);
 	ENGINE_RIGHT_SPEED = current_engine_speed;
 }
 

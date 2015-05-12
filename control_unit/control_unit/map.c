@@ -89,8 +89,10 @@ void move_map_position_forward() {
 	// Send current position
 	uint8_t msg[] = { ABSOLUTE_X_Y, current_position.x, current_position.y };
 	i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+	_delay_ms(10);
 	uint8_t msg_[] = { MAPPED_SQUARE, current_position.x, current_position.y };
 	i2c_write(COMMUNICATION_UNIT, msg_, sizeof(msg_));
+	_delay_ms(10);
 }
 
 void set_walls(uint8_t wall_front, uint8_t wall_left, uint8_t wall_right)
@@ -140,16 +142,19 @@ void set_walls(uint8_t wall_front, uint8_t wall_left, uint8_t wall_right)
 	{
 		uint8_t msg[] = { MAPPED_WALL, front_wall.x, front_wall.y };
 		i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+		_delay_ms(10);
 	}
 	if (wall_left)
 	{
 		uint8_t msg[] = { MAPPED_WALL, left_wall.x, left_wall.y };
 		i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+		_delay_ms(10);
 	}
 	if (wall_right)
 	{
 		uint8_t msg[] = { MAPPED_WALL, right_wall.x, right_wall.y };
 		i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+		_delay_ms(10);
 	}
 }
 

@@ -90,8 +90,15 @@ void search_state()
 			set_desired_engine_speed(0);
 			
 			flood_fill_to_unmapped();
-			next_state = navigate_state;
-			follow_up_state = search_state;
+			if (current_route[0] == ROUTE_END) // no route found
+			{
+				next_state = end_state;
+			}
+			else
+			{
+				next_state = navigate_state;
+				follow_up_state = search_state;
+			}
 			
 			return;
 		}
@@ -104,7 +111,7 @@ void search_state()
 		set_desired_engine_speed(MAPPING_SPEED);
 		_delay_ms(1);
 		
-		if (sqaure_diff > 350 || (sqaure_diff > 200 && front_wall_distance < 230))
+		if (sqaure_diff > 400 || (sqaure_diff > 200 && front_wall_distance < 230))
 		{
 			PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 			
@@ -130,9 +137,16 @@ void search_state()
 			{
 				set_desired_engine_speed(0);
 				
-				flood_fill_to_unmapped();
-				next_state = navigate_state;
-				follow_up_state = search_state;
+				flood_fill_to_unmapped();	
+				if (current_route[0] == ROUTE_END) // no route found
+				{
+					next_state = end_state;
+				}
+				else
+				{
+					next_state = navigate_state;
+					follow_up_state = search_state;
+				}
 				
 				return;
 			}
@@ -151,8 +165,15 @@ void search_state()
 						set_desired_engine_speed(0);
 						
 						flood_fill_to_unmapped();
-						next_state = navigate_state;
-						follow_up_state = search_state;
+						if (current_route[0] == ROUTE_END) // no route found
+						{
+							next_state = end_state;
+						}
+						else
+						{
+							next_state = navigate_state;
+							follow_up_state = search_state;
+						}
 						
 						return;
 					}
@@ -204,7 +225,7 @@ void navigate_state()
 			int16_t square_diff = distance_travelled - last_distance_travelled;
 			_delay_ms(1);
 			
-			if (square_diff > 350 || (square_diff > 200 && front_wall_distance < 230))
+			if (square_diff > 400 || (square_diff > 200 && front_wall_distance < 230))
 			{
 				PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 				move_map_position_forward();
@@ -243,7 +264,8 @@ void end_state()
 {
 	while (1)
 	{
-		
+		PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+		_delay_ms(200);
 	}
 }
 
