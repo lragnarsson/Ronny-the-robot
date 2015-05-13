@@ -1,6 +1,10 @@
 #pragma once
 #include "Grafer_data.h"
 #include <windows.h>
+//#include <stdafx.h>
+//#pragma comment (lib, "th32.lib")
+
+//#include <pplawait.h>
 
 
 /*
@@ -39,6 +43,7 @@ namespace GUIronny {
 	using namespace System::Text;
 	using namespace System::Windows;
 	using namespace System::Threading;
+	using namespace System::Collections::Generic;
 
 	/// <summary>
 	/// Summary for MyForm
@@ -53,6 +58,26 @@ namespace GUIronny {
 			findPorts();
 
 			createarray(image1);
+			
+			/*//1
+			data_recieved_buffer[0] = 0x33;
+			data_recieved_buffer[1] = 16;
+			data_recieved_buffer[2] = 16;
+			//header =
+			//handlebyte();
+			data_recieved_buffer[3] = 0x34;
+			data_recieved_buffer[4] = 16;
+			data_recieved_buffer[5] = 17;
+			//header = WALL;
+			//handlebyte();
+			data_recieved_buffer[6] = 0x34;
+			data_recieved_buffer[7] = 16;
+			data_recieved_buffer[8] = 15;
+			count = 9;
+			//header = WALL;
+			//handlebyte();
+			myrecievedata('h');
+			*/
 			/*
 			//1
 			data_recieved_buffer[0] = 16;
@@ -111,11 +136,11 @@ namespace GUIronny {
 			header = WALL;
 			handlebyte();*/
 
-			data_recieved_buffer[0] = 16;
+			/*data_recieved_buffer[0] = 16;
 			data_recieved_buffer[1] = 16;
 			header = DRIVABLE_SQUARE;
 			handlebyte();
-			data_recieved_buffer[0] = 15;
+			data_recieved_buffer[0] = 17;
 			data_recieved_buffer[1] = 16;
 			header = DRIVABLE_SQUARE;
 			handlebyte();
@@ -174,7 +199,7 @@ namespace GUIronny {
 			data_recieved_buffer[0] = 12;
 			data_recieved_buffer[1] = 5;
 			header = WALL;
-			handlebyte();
+			handlebyte();*/
 
 			
 			//initvalues();
@@ -198,6 +223,7 @@ namespace GUIronny {
 		static array <int, 2 >^ walls = gcnew array < int, 2 >(150, 2);
 		static array <int, 2 >^ distressed = gcnew array < int, 2 >(2, 2); // egentligen finns det bara en men vi vill ju flytta denna ruta också precis som walls o drivebles. bör gå att göra med bara variabler ty bara ett (x,y).
 		static array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
+		static array <int, 2 >^ KartaRecieved = gcnew array < int, 2 >(32, 32);
 		static unsigned int current_xpos = 0;
 		static unsigned int current_ypos = 0;
 		static unsigned int current_angle = 0;
@@ -230,7 +256,8 @@ namespace GUIronny {
 
 
 		//Data received
-		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(16);
+		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(100);
+		static array < System::Byte >^ remaining_buffer = gcnew array < System::Byte >(100);
 		static int write_position = 0;
 		static int expected_length = 0;
 		static bool automode = false;
@@ -238,6 +265,9 @@ namespace GUIronny {
 		static unsigned char header = 0x00;
 		static unsigned int current_distance = 0;
 		static unsigned int added_distance = 0;
+		static int count = 0;
+		static bool finished = false;
+		static int bufferindex = 0;
 
 		//Sensor window
 		static Grafer_data^ sensorwindow = (gcnew Grafer_data());
@@ -258,6 +288,7 @@ private: static System::Windows::Forms::TextBox^  Ki_value;
 private: static System::Windows::Forms::Button^  change_control;
 private: static System::Windows::Forms::Label^  label6;
 private: static System::Windows::Forms::TextBox^  totaldistance;
+private: static System::ComponentModel::BackgroundWorker^  backgroundWorker1;
 
 	protected:
 		int en = 0;
@@ -272,7 +303,6 @@ private: static System::Windows::Forms::TextBox^  totaldistance;
 				delete components;
 			}
 		}
-
 private: static System::Windows::Forms::PictureBox^  Ronny_robot;
 protected:
 private: static System::Windows::Forms::Label^  Sensorvärden;
@@ -303,8 +333,6 @@ private: static System::Windows::Forms::TextBox^  open_closed;
 private: static System::Windows::Forms::PictureBox^  pictureBox1;
 private: static System::ComponentModel::IContainer^  components;
 
-
-	private:
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -353,6 +381,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->change_control = (gcnew System::Windows::Forms::Button());
 			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->totaldistance = (gcnew System::Windows::Forms::TextBox());
+			this->backgroundWorker1 = (gcnew System::ComponentModel::BackgroundWorker());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Ronny_robot))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_unpressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_pressed))->BeginInit();
@@ -528,7 +557,6 @@ private: static System::ComponentModel::IContainer^  components;
 			// 
 			this->serialPort1->BaudRate = 115200;
 			this->serialPort1->PortName = L"COM3";
-			this->serialPort1->ReadTimeout = 500;
 			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &MyForm::serialPort1_DataReceived_1);
 			// 
 			// button3
@@ -705,6 +733,11 @@ private: static System::ComponentModel::IContainer^  components;
 			this->totaldistance->Size = System::Drawing::Size(114, 20);
 			this->totaldistance->TabIndex = 32;
 			// 
+			// backgroundWorker1
+			// 
+			this->backgroundWorker1->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &MyForm::backgroundWorker1_DoWork);
+			//this->backgroundWorker1->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &MyForm::backgroundWorker1_RunWorkerCompleted);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -804,5 +837,9 @@ private: static System::ComponentModel::IContainer^  components;
 
 	
 	private: System::Void change_control_Click(System::Object^  sender, System::EventArgs^  e);
+
+
+private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e);
+//private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e);
 };
 }

@@ -1,5 +1,6 @@
 #include "MyForm.h"
 
+
 using namespace System;
 using namespace System::Windows::Forms;
 using namespace GUIronny;
@@ -130,14 +131,21 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 }
 System::Void MyForm::button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
 	auto data = gcnew array < System::Byte > { 12 };
-	if (!this->serialPort1->IsOpen){
+	//if (!this->serialPort1->IsOpen){
 
-		this->serialPort1->PortName = this->comboBox1->Text;
-		this->open_closed->Text = "port openeing, waiting";
-		this->serialPort1->Open();
-		this->open_closed->Text = "port open";
-	}
+	/*CSerial serial;
+		int comport = Convert::ToInt32(comboBox1->Text);
+		if (serial.Open(comport, 115200))
+		open_closed->Text = "Port opened successfully";
+		else
+		open_closed->Text = "Failed to open port!";*/
+
+	this->serialPort1->PortName = this->comboBox1->Text;
+	this->open_closed->Text = "port openeing, waiting";
+	this->serialPort1->Open();
+	this->open_closed->Text = "port open";
 }
+//}
 System::Void MyForm::button4_Click_1(System::Object^  sender, System::EventArgs^  e) {
 	if (this->serialPort1->IsOpen){
 		this->serialPort1->Close();
@@ -160,11 +168,11 @@ System::Void MyForm::Reset_Click(System::Object^  sender, System::EventArgs^  e)
 }
 System::Void MyForm::change_control_Click(System::Object^  sender, System::EventArgs^  e){
 	/*if (!Kp_value->Text->Empty && !Ki_value->Text->Empty && !automode)
-	{ 
-		auto kpvalue = gcnew array < System::Byte > {"some hex value" }; 
-		auto kivalue = gcnew array < System::Byte > { "some hex value"};
-		serialPort1->Write(kpvalue, 0,  kpvalue->Length);
-		serialPort1->Write(kivalue, 0, kivalue->Length);
+	{
+	auto kpvalue = gcnew array < System::Byte > {"some hex value" };
+	auto kivalue = gcnew array < System::Byte > { "some hex value"};
+	serialPort1->Write(kpvalue, 0,  kpvalue->Length);
+	serialPort1->Write(kivalue, 0, kivalue->Length);
 	}*/
 }
 
@@ -172,41 +180,180 @@ System::Void MyForm::Reset_Map(){
 	createarray(image1);
 }
 
-Console::WriteLine("TOTAL BUFFER " + this->serialPort1->BytesToRead);
+
+
 //Serialport
 System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-	
+	Console::WriteLine("EVENTRAISED");
 	if (serialPort1->BytesToRead > 0){
-		if (write_position == 0){
+		Console::WriteLine("--------------BEGIN ------------");
+		Console::WriteLine("Initial buffer: " + serialPort1->BytesToRead);
+		count = serialPort1->BytesToRead;
+		int initial = count;
+		int recievedcount = serialPort1->Read(data_recieved_buffer, 0, count);
+			SetText("buffer: " + Convert::ToString(initial) + Convert::ToString(data_recieved_buffer[initial]), Kommandon);
+		
+		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&MyForm::myrecievedata);
+		this->Invoke(d, gcnew array < Object^ > { 'h' });
+		Console::WriteLine("----------- END-----------");
 
-			myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
-			this->Invoke(d, gcnew array < Object^ > {/*serialPort1,*/ 'h'});
+		/*
+		//handleheader(data_recieved_buffer[0]);
+		Console::WriteLine("data that is recieved");
+		serialPort1->Read(data_recieved_buffer, 0, 2);
+		Console::WriteLine("X" + data_recieved_buffer[0] + "Y " + data_recieved_buffer[1]);
+		Console::WriteLine("Remaining buffer: " + serialPort1->BytesToRead);
+		write_position = 0;
+		expected_length = 0;*/
+	}
+	/*if (write_position == 0){
+		Console::WriteLine("Buffer header: " + serialPort1->BytesToRead);
+		serialPort1->Read(data_recieved_buffer, 0, 1);
+		header = data_recieved_buffer[0];
+		if (this->InvokeRequired){
+		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
+		this->Invoke(d, gcnew array < Object^ > {'h'});
+		}
+		else
+		{
+		myrecievedata('h');
+		}
 		}
 		else if (this->serialPort1->BytesToRead > expected_length - 1)
 		{
-			myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
-			this->Invoke(d, gcnew array < Object^ > {/*serialPort1,*/ 'b'});
-
+		//Console::WriteLine("Data " );
+		Console::WriteLine("Buffer before DATA: " + serialPort1->BytesToRead);
+		serialPort1->Read(data_recieved_buffer, 0, expected_length - 1);
+		Console::WriteLine("Buffer after DATA: " + serialPort1->BytesToRead);
+		//handlebyte();
+		if (this->InvokeRequired){
+		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&myrecievedata);
+		this->Invoke(d, gcnew array < Object^ > {'b'});
+		}
+		else
+		{
+		myrecievedata('b');
+		}
 		}
 		else{
-			return;
+		return;
 		}
-	}
+		}
+		else
+		return;*/
 }
 
+
 System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
-	if (status == 'h'){
-		serialPort1->BaseStream->ReadAsync(data_recieved_buffer, 0, 1); //
-		//Console::WriteLine("header " + header);
-		header = data_recieved_buffer[0];
-		handleheader(header);
+	//if (status == 'h'){
+	//serialPort1->BaseStream->ReadAsync(data_recieved_buffer, 0, 1); //
+	//Console::WriteLine("header " + header);
+	//Console::WriteLine("in my recievedata: " + status);
+	/*switch (status)
+	{
+	case 'h':
+	handleheader(header);
+	break;
+	case 'b':
+	//handlebyte();
+	write_position = 0;
+	expected_length = 0;
+	break;
+	default:
+	break;
+	}*/
+	//data_recieved_buffer[0];
+	Console::WriteLine("invoke");
+	int bufferlength = count;
+	bool finished = false;
+	//int bufferindex = 0;
+	Console::WriteLine("----------- in while -> handling byte" + " " + bufferlength + "-----------");
+	while (!finished)
+	{
+		if (bufferlength > 0){
+			handleheader(data_recieved_buffer[bufferindex]);
+			if ((bufferlength >= expected_length))
+			{
+				handlebyte();
+				bufferindex = bufferindex + expected_length;
+				bufferlength =bufferlength - expected_length;
+				
+				write_position = 0;
+				expected_length = 0;
+			}
+			else if (bufferlength < expected_length && bufferlength > 0)
+			{
+				while (bufferlength < expected_length)
+				{
+					if (serialPort1->BytesToRead > 0){
+						serialPort1->Read(remaining_buffer, 0, 1);
+						bufferindex = bufferindex + 1;
+						data_recieved_buffer[bufferindex] = remaining_buffer[0];
+						bufferlength = bufferlength + 1;
+						bufferindex = bufferindex + 1;
+					}
+
+				}
+				//handlebyte();
+				bufferlength = bufferlength - expected_length;
+
+				write_position = 0;
+				expected_length = 0;
+			}
+			else
+			{
+				int x = count - bufferlength;
+				SetText("FEL : " + Convert::ToString(x), totaldistance);
+				finished = true;
+				bufferindex = 0;
+			}
+		}
+		else
+		{
+			finished = true;
+			bufferindex = 0;
+		}
 	}
-	else if (status == 'b'){
-		serialPort1->BaseStream->ReadAsync(data_recieved_buffer, 0, expected_length - 1);
-		//Console::WriteLine("buffer" + data_recieved_buffer[0] + data_recieved_buffer[1]);
-		handlebyte();
-	}
+	Console::WriteLine("----------- Finished While-----------");
 }
+
+//else if (status == 'b'){
+//serialPort1->BaseStream->ReadAsync(data_recieved_buffer, 0, expected_length - 1);
+//Console::WriteLine("buffer" + data_recieved_buffer[0] + data_recieved_buffer[1]);
+
+System::Void MyForm::backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e){
+	Console::WriteLine("backgroundworker doing work");
+	BackgroundWorker^ worker = dynamic_cast<BackgroundWorker^>(sender);
+	/*for (int i = 0; i <= data_recieved_buffer->Length; i++)
+	{
+	Worker_buffer->Add(data_recieved_buffer[i]);
+	}*/
+	int bufferlength = data_recieved_buffer->Length;
+	bool finished = false;
+	int bufferindex = 0;
+	while (!finished)
+	{
+		if (bufferlength > 0){
+			handleheader(data_recieved_buffer[bufferindex]);
+			if (bufferlength > expected_length)
+			{
+				handlebyte();
+				bufferlength = expected_length - 1;
+				bufferindex = bufferindex + expected_length;
+			}
+			else
+			{
+				finished = true;
+				bufferindex = 0;
+			}
+		}
+	}
+	Console::WriteLine("backgroundworker FINISHED");
+}
+/*System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e){
+	Console::WriteLine("RunWorkerCompleted...");
+	}*/
+
 System::Void MyForm::handleheader(unsigned char byte){
 
 	if (write_position == 0)  //If readposition = 0 we have a header. 
@@ -214,7 +361,8 @@ System::Void MyForm::handleheader(unsigned char byte){
 		switch (byte)
 		{
 		case ABSOLUTEVALUE: //Absolutevalue x,y (position)
-			expected_length = 4;
+			Console::WriteLine("Header: ABSOLUTEVALUE ");
+			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
@@ -227,6 +375,7 @@ System::Void MyForm::handleheader(unsigned char byte){
 			automode = false;
 			break;
 		case DRIVABLE_SQUARE: //drivalbe square
+			Console::WriteLine("Header: DRIVALBE_SQUARE ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
@@ -236,21 +385,25 @@ System::Void MyForm::handleheader(unsigned char byte){
 			header = byte;
 			break;
 		case SENSOR_VALUES: //Sensorvalues
+			Console::WriteLine("Header: SENSORVALUES ");
 			expected_length = 11;
 			header = byte;
 			++write_position;
 			break;
 		case WALL:
+			Console::WriteLine("Header: WALL ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
 		case WHEELENCODERS://Wheelencodervärden
+			Console::WriteLine("Header: WHEELENCODERS ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
 		case TEJP_FOUND: //Tejpbit funnen.
+			Console::WriteLine("TEJP FOUND");
 			write_position = 0;
 			tejp_found = true;
 			break;
@@ -260,6 +413,8 @@ System::Void MyForm::handleheader(unsigned char byte){
 			++write_position;
 			break;
 		default:
+			Console::WriteLine("Header: WIIIEEERRRDOOO HEADER!!!! ");
+			finished = true;
 			break;
 		}
 		return;
@@ -273,27 +428,28 @@ System::Void MyForm::handlebyte(){
 		current_xpos = data_recieved_buffer[0];
 		current_ypos = data_recieved_buffer[1];
 		current_angle = data_recieved_buffer[2];
-		Console::WriteLine("Current X-pos" + current_xpos + "Y-pos " + current_ypos);
+		Console::WriteLine("ABSOLUTEVALUE:  X " + current_xpos + "Y " + current_ypos);
 		//fillkarta(image1, current_xpos, current_ypos, ABSOLUTEVALUE);
 		break;
 
 	case DRIVABLE_SQUARE: //Körbar ruta x,y
-		drivablesquare_xpos = data_recieved_buffer[0];
-		drivablesquare_ypos = data_recieved_buffer[1];
-		change_coordinates(drivablesquare_xpos, drivablesquare_ypos, DRIVABLE_SQUARE);
-		drivablesquares[drivable_cell, 0] = x_GUIcurrent; // Vi hade ju tänkt helt fel, det är ju våra koord på våran grid som ska sparas
-		drivablesquares[drivable_cell, 1] = y_GUIcurrent;
-		if (!first_square) {
-			move_squares(x_GUIcurrent, y_GUIcurrent);
-		}
-		else
+		Console::WriteLine("DRIVALBE_SQUARE:  X " + data_recieved_buffer[bufferindex + 1] + "Y " + data_recieved_buffer[bufferindex + 2]);
+		drivablesquare_xpos = data_recieved_buffer[bufferindex + 1];
+		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
+		//change_coordinates(drivablesquare_xpos, drivablesquare_ypos, DRIVABLE_SQUARE);
+		//drivablesquares[drivable_cell, 0] = x_GUIcurrent; // Vi hade ju tänkt helt fel, det är ju våra koord på våran grid som ska sparas
+		//drivablesquares[drivable_cell, 1] = y_GUIcurrent;
+		//	if (!first_square) {
+		//		move_squares(x_GUIcurrent, y_GUIcurrent);
+		//	}
+		//	else
 		{
-			first_square = false;
+			//		first_square = false;
 		}
 		//Console::WriteLine("GUI")
-		//fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
-		Show_Map();
-		++drivable_cell;
+		//	fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
+		//	Show_Map();
+		//++drivable_cell;
 		break;
 	case DISTRESSEDFOUND: //Nödställd funnen
 		distressedfound_xpos = data_recieved_buffer[0];
@@ -306,13 +462,13 @@ System::Void MyForm::handlebyte(){
 		break;
 
 	case WALL:
-		wall_xpos = data_recieved_buffer[0];
-		wall_ypos = data_recieved_buffer[1];
-		change_coordinates(wall_xpos, wall_ypos, WALL);
+		wall_xpos = data_recieved_buffer[bufferindex + 1];
+		wall_ypos = data_recieved_buffer[bufferindex + 2];
+		//change_coordinates(wall_xpos, wall_ypos, WALL);
 		walls[wall_cell, 0] = xpos_wall;
 		walls[wall_cell, 1] = ypos_wall;
 		//move_squares(x_GUIcurrent, y_GUIcurrent);
-		fillkarta(image1, xpos_wall, ypos_wall, WALL);
+		//fillkarta(image1, xpos_wall, ypos_wall, WALL);
 		Console::WriteLine("WALL: X-pos " + wall_xpos + "Y-pos " + wall_ypos);
 		++wall_cell;
 		break;
@@ -356,6 +512,7 @@ System::Void MyForm::handlebyte(){
 		break;
 
 	case TEJP_FOUND: //Tejpbit funnen.
+		Console::WriteLine("TEJP FOUND:  X " + current_xpos + "Y " + current_ypos);
 		fillkarta(image1, current_xpos, current_ypos, DISTRESSEDFOUND);
 		break;
 	case TEJP_REF: //Referensvärde tejp
@@ -366,8 +523,8 @@ System::Void MyForm::handlebyte(){
 		break;
 	}
 
-	write_position = 0;
-	expected_length = 0;
+	//write_position = 0;
+	//expected_length = 0;
 
 }
 
@@ -524,7 +681,7 @@ System::Void MyForm::move_squares(int unsigned x_new, unsigned int y_new){
 			walls[i, 1] = y + 1; // samma som ovan
 			fillkarta(image1, y_GUIcurrent, drivablesquares[i, 1], WALL);
 		}
-		
+
 		++distressed[0, 1];
 		++y_GUIcurrent;
 		y_recieved_current = drivablesquare_ypos;
@@ -538,7 +695,7 @@ System::Void MyForm::move_squares(int unsigned x_new, unsigned int y_new){
 			drivablesquares[i, 1] = y - 1;
 			fillkarta(image1, drivablesquares[i, 0], drivablesquares[i, 1], DRIVABLE_SQUARE);
 		}
-		for (int i = 0; i < wall_cell ; i++){
+		for (int i = 0; i < wall_cell; i++){
 			int y = walls[i, 1];
 			walls[i, 1] = y - 1;
 			fillkarta(image1, walls[i, 0], walls[i, 1], WALL);
