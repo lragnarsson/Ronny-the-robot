@@ -93,7 +93,7 @@ void handle_received_message() {
 			absolute_rotation += (int8_t)busbuffer[2];
 			break;
 		case TAPE_FOUND:
-			//tape_square = 1;
+			tape_square = 1;
 			break;
 		case DRIVE_FORWARD:
 			last_manual_command = M_FORWARD;

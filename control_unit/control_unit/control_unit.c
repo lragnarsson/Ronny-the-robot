@@ -8,7 +8,7 @@
 
 int main(void)
 {
-	current_mode = AUTONOMOUS;
+	current_mode = TEST;
 	next_state = search_state;
 	init_map();
 	init_bus_communication();
@@ -17,7 +17,7 @@ int main(void)
 	PORTD ^= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	sei();
 	
-	_delay_ms(1000);
+	//_delay_ms(1000);
 	
 	while (1) {
 		if(current_mode == MANUAL)
@@ -39,46 +39,59 @@ void autonomous_mode()
 }
 
 void test_mode()
-{/*
-	rotate_left_90();
-	rotate_right_90();
-	*/
-	follow_up_state = end_state;
-	current_route[0] = NORTH;
-	current_route[1] = NORTH;
-	current_route[2] = NORTH;
-	current_route[3] = NORTH;
-	current_route[4] = NORTH;
-	current_route[5] = NORTH;
-	current_route[6] = NORTH;
-	current_route[7] = NORTH;
-	current_route[8] = NORTH;
-	current_route[9] = NORTH;
-	current_route[10] = SOUTH;
-	current_route[11] = SOUTH;
-	current_route[12] = SOUTH;
-	current_route[13] = SOUTH;
-	current_route[14] = SOUTH;
-	current_route[15] = SOUTH;
-	current_route[16] = SOUTH;
-	current_route[17] = SOUTH;
-	current_route[18] = SOUTH;
-	current_route[19] = SOUTH;
-	current_route[20] = ROUTE_END;
-	navigate_state();
+{
+	map[16][15] = WALL;
+	map[15][15] = WALL;
+	map[14][15] = WALL;
+	map[13][16] = WALL;
+	map[13][17] = WALL;
+	map[13][18] = WALL;
+	map[14][19] = WALL;
+	map[15][19] = WALL;
+	map[16][19] = WALL;
+	map[17][18] = WALL;
+	map[17][17] = WALL;
+	map[17][16] = WALL;
+	map[15][17] = WALL;
+	
+	map[16][16] = NOT_WALL;
+	map[15][16] = NOT_WALL;
+	map[14][16] = NOT_WALL;
+	map[14][17] = NOT_WALL;
+	map[14][18] = NOT_WALL;
+	map[15][18] = NOT_WALL;
+	map[16][18] = NOT_WALL;
+	map[16][17] = NOT_WALL;
+	
+	current_position = (coordinate){16, 16};
+	current_direction = WEST;
+	flood_fill_to_unmapped();
+	
 	
 }
 
 /* Search state */
 void search_state()
 {
-	int16_t last_distance_travelled = distance_travelled;
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
 	_delay_ms(500);
 	
+	/* Handle unawareness of initial surroundings */
 	set_walls((front_wall_distance < 300), (left_wall_distance < 300), (right_wall_distance < 300));
 	set_current_sqaure_not_wall();
 	
+	// We might end up in tape square directly from navigate
+	if (tape_square)
+	{
+		set_desired_engine_speed(0);
+		
+		goal_position = current_position;
+		next_state = return_state;
+		
+		return;
+	}
+	
+	// Or we might end up in an intersection...
 	if ((front_wall_distance < 300))
 	{
 		if (!(left_wall_distance < 300))
@@ -104,6 +117,9 @@ void search_state()
 		}
 	}
 	
+	/* Start searching */
+	int16_t last_distance_travelled = distance_travelled;
+	
 	for (;;)
 	{
 		int16_t sqaure_diff = distance_travelled - last_distance_travelled;
@@ -111,7 +127,7 @@ void search_state()
 		set_desired_engine_speed(MAPPING_SPEED);
 		_delay_ms(1);
 		
-		if (sqaure_diff > 400 || (sqaure_diff > 200 && front_wall_distance < 230))
+		if (sqaure_diff > 400 || (sqaure_diff > 150 && front_wall_distance < 230))
 		{
 			PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 			
@@ -225,7 +241,7 @@ void navigate_state()
 			int16_t square_diff = distance_travelled - last_distance_travelled;
 			_delay_ms(1);
 			
-			if (square_diff > 400 || (square_diff > 200 && front_wall_distance < 230))
+			if (square_diff > 400 || (square_diff > 150 && front_wall_distance < 230))
 			{
 				PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 				move_map_position_forward();
@@ -330,7 +346,10 @@ void rotate_180()
 		force_engine_direction(ENGINE_DIRECTION_RIGHT);
 		_delay_ms(250);
 		force_engine_speed(TURN_SPEED);
-		while (absolute_rotation - last_absolute_rotation > -200) { }
+		while (absolute_rotation - last_absolute_rotation > -200)
+		{
+			_delay_ms(1);
+		}
 	}
 	else
 	{
@@ -338,7 +357,10 @@ void rotate_180()
 		force_engine_direction(ENGINE_DIRECTION_LEFT);
 		_delay_ms(250);
 		force_engine_speed(TURN_SPEED);
-		while (absolute_rotation - last_absolute_rotation < 200) { }
+		while (absolute_rotation - last_absolute_rotation < 200)
+		{
+			_delay_ms(1);
+		}
 	}
 	
 	current_direction = (current_direction + 2) & 3;

@@ -8,6 +8,11 @@
 #include "flood_fill.h"
 #include "I2C.h"
 
+#ifndef F_CPU
+#define F_CPU 20000000UL
+#endif
+#include <util/delay.h>
+
 uint8_t current_wavefront_size;
 uint8_t new_wavefront_size;
 coordinate wavefront_1[128];
@@ -194,6 +199,32 @@ void flood_fill_to_unmapped() {
 		if(new_wavefront_size == 0) // Route to destination not found
 		{
 			current_route[0] = ROUTE_END;
+			PORTD &= ~((1<<PORTD1)|(1<<PORTD2));
+			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
+			_delay_ms(200);
+			
+			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
+			_delay_ms(200);
+			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
+			_delay_ms(200);
 			return;
 		}
 		++distance;
