@@ -159,12 +159,8 @@ System::Void MyForm::Sensordata_Click_1(System::Object^  sender, System::EventAr
 }
 System::Void MyForm::Reset_Click(System::Object^  sender, System::EventArgs^  e) {
 	createarray(image1);
-	x_recieved_current = 16;
-	y_recieved_current = 16;
-	x_GUIcurrent = 16;
-	y_GUIcurrent = 8;
-	xpos_wall = 0;
-	ypos_wall = 0;
+	x_start = 0;
+	y_start = 8;
 }
 System::Void MyForm::change_control_Click(System::Object^  sender, System::EventArgs^  e){
 	/*if (!Kp_value->Text->Empty && !Ki_value->Text->Empty && !automode)
@@ -431,7 +427,6 @@ System::Void MyForm::handlebyte(){
 	case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
 		current_xpos = data_recieved_buffer[0];
 		current_ypos = data_recieved_buffer[1];
-		current_angle = data_recieved_buffer[2];
 		Console::WriteLine("ABSOLUTEVALUE:  X " + current_xpos + "Y " + current_ypos);
 		//fillkarta(image1, current_xpos, current_ypos, ABSOLUTEVALUE);
 		break;
@@ -440,27 +435,33 @@ System::Void MyForm::handlebyte(){
 		Console::WriteLine("DRIVALBE_SQUARE:  X " + data_recieved_buffer[bufferindex + 1] + "Y " + data_recieved_buffer[bufferindex + 2]);
 		drivablesquare_xpos = data_recieved_buffer[bufferindex + 1];
 		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
+		map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
+		move_grid(drivablesquare_xpos, drivablesquare_ypos);
+		update_map();
+		Console::WriteLine("DRIVBLE_SQUARE: X-pos " + drivablesquare_xpos + "Y-pos " + drivablesquare_ypos);
 		//change_coordinates(drivablesquare_xpos, drivablesquare_ypos, DRIVABLE_SQUARE);
 		//drivablesquares[drivable_cell, 0] = x_GUIcurrent; // Vi hade ju tänkt helt fel, det är ju våra koord på våran grid som ska sparas
 		//drivablesquares[drivable_cell, 1] = y_GUIcurrent;
-		//	if (!first_square) {
-		//		move_squares(x_GUIcurrent, y_GUIcurrent);
-		//	}
-		//	else
-		{
-			//		first_square = false;
-		}
+		/*if (!first_square) {
+			move_squares(x_GUIcurrent, y_GUIcurrent);
+			}
+			else
+			{
+			first_square = false;
+			}*/
 		//Console::WriteLine("GUI")
-		//	fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
-		//	Show_Map();
-		//++drivable_cell;
+		//fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
+		//Show_Map();
 		break;
 	case DISTRESSEDFOUND: //Nödställd funnen
 		distressedfound_xpos = data_recieved_buffer[0];
 		distressedfound_ypos = data_recieved_buffer[1];
-		change_coordinates(distressedfound_xpos, distressedfound_ypos, DISTRESSEDFOUND);
-		distressed[0, 0] = x_GUIcurrent;
-		distressed[0, 1] = y_GUIcurrent; // antar att vi bara kan få information om en nödställd (ett mål)
+		map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
+		move_grid(distressedfound_xpos, distressedfound_ypos);
+		update_map();
+		//change_coordinates(distressedfound_xpos, distressedfound_ypos, DISTRESSEDFOUND);
+		//distressed[0, 0] = x_GUIcurrent;
+		//distressed[0, 1] = y_GUIcurrent; // antar att vi bara kan få information om en nödställd (ett mål)
 		//move_squares(x_GUIcurrent, y_GUIcurrent); // behöver inte göra ett case för distressed då de ska funka lika som drivables ( kolla banspec)
 		//fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DISTRESSEDFOUND);
 		break;
@@ -468,13 +469,16 @@ System::Void MyForm::handlebyte(){
 	case WALL:
 		wall_xpos = data_recieved_buffer[bufferindex + 1];
 		wall_ypos = data_recieved_buffer[bufferindex + 2];
+		map_squares[wall_xpos, wall_ypos] = 'W';
+		move_grid(wall_xpos, wall_ypos);
+		update_map();
 		//change_coordinates(wall_xpos, wall_ypos, WALL);
 		//walls[wall_cell, 0] = xpos_wall;
 		//walls[wall_cell, 1] = ypos_wall;
 		//move_squares(x_GUIcurrent, y_GUIcurrent);
 		//fillkarta(image1, xpos_wall, ypos_wall, WALL);
 		Console::WriteLine("WALL: X-pos " + wall_xpos + "Y-pos " + wall_ypos);
-		++wall_cell;
+	
 		break;
 
 	case SENSOR_VALUES:  //Dealing with sensorvalues
@@ -592,87 +596,87 @@ System::Void MyForm::createarray(Bitmap^ image1){
 	}
 	pictureBox1->Image = image1;
 }
-System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y, int status){
+/*System::Void MyForm::change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y, int status){
 	switch (status)
 	{
 	case DRIVABLE_SQUARE:
-		if (first_square){//if first square!
-			return;
-		}
-		else if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
-			//--y_recieved_current;
-			y_recieved_current = newrecieved_y;
-			--y_GUIcurrent;
-		}
-		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
-			//++y_recieved_current;
-			y_recieved_current = newrecieved_y;
-			++y_GUIcurrent;
-		}
-		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
-			x_recieved_current = newrecieved_x;
-			--x_GUIcurrent;
-		}
+	if (first_square){//if first square!
+	return;
+	}
+	else if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+	//--y_recieved_current;
+	y_recieved_current = newrecieved_y;
+	--y_GUIcurrent;
+	}
+	else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
+	//++y_recieved_current;
+	y_recieved_current = newrecieved_y;
+	++y_GUIcurrent;
+	}
+	else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
+	x_recieved_current = newrecieved_x;
+	--x_GUIcurrent;
+	}
 
-		else if (newrecieved_y == y_recieved_current && newrecieved_x > x_recieved_current)
-		{
-			//++x_recieved_current;
-			x_recieved_current = newrecieved_x;
-			++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
-		}
-		else
-		{
-			Console::WriteLine("wrong value ");
-		}
-		break;
+	else if (newrecieved_y == y_recieved_current && newrecieved_x > x_recieved_current)
+	{
+	//++x_recieved_current;
+	x_recieved_current = newrecieved_x;
+	++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
+	}
+	else
+	{
+	Console::WriteLine("wrong value ");
+	}
+	break;
 
 	case WALL:
-		Console::WriteLine("ChangeCoordinates: Wall");
-		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+	Console::WriteLine("ChangeCoordinates: Wall");
+	if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
 
-			ypos_wall = y_GUIcurrent - 1;
-			xpos_wall = x_GUIcurrent;
-		}
-		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
+	ypos_wall = y_GUIcurrent - 1;
+	xpos_wall = x_GUIcurrent;
+	}
+	else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
 
-			ypos_wall = y_GUIcurrent + 1;
-			xpos_wall = x_GUIcurrent;
-		}
-		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
+	ypos_wall = y_GUIcurrent + 1;
+	xpos_wall = x_GUIcurrent;
+	}
+	else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
 
-			ypos_wall = y_GUIcurrent;
-			xpos_wall = x_GUIcurrent - 1;
-		}
-		else {
+	ypos_wall = y_GUIcurrent;
+	xpos_wall = x_GUIcurrent - 1;
+	}
+	else {
 
-			ypos_wall = y_GUIcurrent;
-			xpos_wall = x_GUIcurrent + 1; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
-		}
-		break;
+	ypos_wall = y_GUIcurrent;
+	xpos_wall = x_GUIcurrent + 1; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
+	}
+	break;
 	case DISTRESSEDFOUND:
-		if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
-			--y_recieved_current;
-			--y_GUIcurrent;
-		}
-		else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
-			++y_recieved_current;
-			++y_GUIcurrent;
-		}
-		else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
-			--x_recieved_current;
-			--x_GUIcurrent;
-		}
-		else {
-			++x_recieved_current;
-			++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
-		}
-		break;
+	if (newrecieved_x == x_recieved_current && newrecieved_y < y_recieved_current){
+	--y_recieved_current;
+	--y_GUIcurrent;
+	}
+	else if (newrecieved_x == x_recieved_current && newrecieved_y > y_recieved_current) {
+	++y_recieved_current;
+	++y_GUIcurrent;
+	}
+	else if (newrecieved_y == y_recieved_current && newrecieved_x < x_recieved_current){
+	--x_recieved_current;
+	--x_GUIcurrent;
+	}
+	else {
+	++x_recieved_current;
+	++x_GUIcurrent; // kan behöva köra else if på sista fallet för att utesluta/visa att det är de enda fallen vi får, antar nu att koord vi får
+	}
+	break;
 	default:
-		break;
+	break;
 	}
 	Console::WriteLine("Change coordinates: Current GUI X, Y " + x_GUIcurrent + " " + y_GUIcurrent);
-}
-System::Void MyForm::move_squares(int unsigned x_new, unsigned int y_new){
+	}*/
+/*System::Void MyForm::move_squares(int unsigned x_new, unsigned int y_new){
 	if (y_new < 1){
 		Reset_Map();
 		for (int i = 0; i < drivable_cell + 1; i++){
@@ -709,33 +713,63 @@ System::Void MyForm::move_squares(int unsigned x_new, unsigned int y_new){
 		//--y_recieved_current;
 	}
 	else if (x_new > 15){
-		Reset_Map();
-		for (int i = 0; i < ++drivable_cell; i++){
-			int x = drivablesquares[i, 0];
-			drivablesquares[i, 0] = x - 1;
-			fillkarta(image1, drivablesquares[i, 0], drivablesquares[i, 1], DRIVABLE_SQUARE);
-		}
-		for (int i = 0; i < wall_cell + 1; i++){
-			int x = walls[i, 0];
-			walls[i, 0] = x - 1;
-			fillkarta(image1, walls[i, 0], walls[i, 1], WALL);
-		}
-		--distressed[0, 0];
-		--x_GUIcurrent;
-		//--x_recieved_current;
+	Reset_Map();
+	for (int i = 0; i < ++drivable_cell; i++){
+	int x = drivablesquares[i, 0];
+	drivablesquares[i, 0] = x - 1;
+	fillkarta(image1, drivablesquares[i, 0], drivablesquares[i, 1], DRIVABLE_SQUARE);
+	}
+	for (int i = 0; i < wall_cell + 1; i++){
+	int x = walls[i, 0];
+	walls[i, 0] = x - 1;
+	fillkarta(image1, walls[i, 0], walls[i, 1], WALL);
+	}
+	--distressed[0, 0];
+	--x_GUIcurrent;
+	//--x_recieved_current;
 	}
 	else{
-		fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
-		return;
+	fillkarta(image1, x_GUIcurrent, y_GUIcurrent, DRIVABLE_SQUARE); // eller skulle vi byta plats på x o y när vi skickar in i fillkartan här eller fixade funktionen switchen?! så att de ritas ut rätt
+	return;
 	}
 
 	Show_Map();
+	}*/
+
+System::Void MyForm::move_grid(unsigned int x_newrecieved, unsigned int y_newrecieved){
+	if (x_newrecieved > x_start + 16){
+		x_start = x_newrecieved - 16;
+	}
+	else if (y_newrecieved > y_start + 16){
+		y_start = y_newrecieved - 16;
+	}
+	else if (y_newrecieved < y_start){
+		y_start = y_newrecieved;
+	}
+	else if (x_newrecieved < x_start){
+		Console::Write("Impossible coordinates" + x_newrecieved); // dels kommer vi inte kunna få koord mindre än 0 (från början) 
+		//o har vi flyttat ned gridet kommer vi aldrig kunna komma utanför uppåt! 
+	}
+	else{
+		return;
+	}
 }
-System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
+
+System::Void MyForm::update_map(){
+	for (int i = x_start; i < (x_start + 17); ++i){
+		for (int j = y_start; j < (y_start + 17); ++j){
+			fillkarta(image1, (i - x_start), (j - y_start), map_squares[i,j]);
+			
+			pictureBox1->Image = image1;
+		}
+	}
+}
+
+System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status){
 
 	switch (status)
 	{
-	case DRIVABLE_SQUARE:
+	case 'D':
 		for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 		{
 			for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
@@ -757,7 +791,7 @@ System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
 
 		break;
 
-	case WALL:
+	case 'W':
 		for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 		{
 			for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
@@ -767,7 +801,7 @@ System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
 		}
 		break;
 
-	case DISTRESSEDFOUND:
+	case 'T':
 		for (int x = squaresize * x_ny; x < squaresize * x_ny + squaresize; x++)
 		{
 			for (int y = squaresize * y_ny; y < squaresize * y_ny + squaresize; y++)
@@ -812,6 +846,7 @@ System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, int status){
 		}
 		break;
 	}
+	Show_Map();
 }
 System::Void MyForm::Show_Map(){
 	pictureBox1->Image = image1;
