@@ -14,6 +14,7 @@ int main(void)
 	init_reflectance();
 	init_wheel_encoder();
 	i2c_init(atmega20br, atmega20pc, SENSOR_UNIT);
+	DDRD = (0<<DDD0);
 	
 	sei();
 	
@@ -22,7 +23,6 @@ int main(void)
 		//uint8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, 0x42 };
 		//i2c_write(communication_unit, msg, sizeof(msg));
 		//_delay_ms(100);
-        //TODO:: Please write your application code
     }
 }
 

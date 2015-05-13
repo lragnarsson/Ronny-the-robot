@@ -49,7 +49,7 @@
 #define IR_LONG_MAX 550
 #define IR_NUM_SAMPLES 2
 
-#define ENCODER_DISTANCE_SCALE 85
+#define ENCODER_DISTANCE_SCALE 90
 #define ENCODER_ROTATION_SCALE 165
 
 #include <avr/io.h>

@@ -7,6 +7,9 @@
 #ifndef CONTROL_UNIT_H_
 #define CONTROL_UNIT_H_
 
+#define DEBUG_LED_GREEN PORTD1
+#define DEBUG_LED_RED PORTD2
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>

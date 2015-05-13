@@ -37,7 +37,7 @@ volatile uint16_t P_COEFFICIENT;
 volatile uint16_t D_COEFFICIENT;
 
 static const uint8_t MAPPING_SPEED = 135;
-static const uint8_t SUPER_SPEED = 155;
+static const uint8_t SUPER_SPEED = 135;
 static const uint8_t TURN_SPEED = 75;
 
 typedef enum {
@@ -49,7 +49,9 @@ typedef enum {
 
 void init_control_system();
 void set_desired_engine_speed(uint8_t speed);
+void force_engine_speed(uint8_t speed);
 void set_desired_engine_direction(engine_direction direction);
+void force_engine_direction(engine_direction direction);
 uint8_t is_stationary();
 void set_manual_forward_engine_speed();
 void set_manual_turn_engine_speed();
