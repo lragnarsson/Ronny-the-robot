@@ -272,7 +272,8 @@ System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 	{
 		if (bufferlength > 0){
 			handleheader(data_recieved_buffer[bufferindex]);
-			if ((bufferlength >= expected_length))
+			
+			if ((bufferlength >= expected_length) && !finished)
 			{
 				handlebyte();
 				bufferindex = bufferindex + expected_length;
@@ -281,7 +282,7 @@ System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 				write_position = 0;
 				expected_length = 0;
 			}
-			else if (bufferlength < expected_length && bufferlength > 0)
+			else if (bufferlength < expected_length && bufferlength > 0 && !finished)
 			{
 				while (bufferlength < expected_length)
 				{
@@ -294,6 +295,8 @@ System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 					}
 
 				}
+
+
 				//handlebyte();
 				bufferlength = bufferlength - expected_length;
 
@@ -404,6 +407,7 @@ System::Void MyForm::handleheader(unsigned char byte){
 			break;
 		case TEJP_FOUND: //Tejpbit funnen.
 			Console::WriteLine("TEJP FOUND");
+			finished = true;
 			write_position = 0;
 			tejp_found = true;
 			break;
@@ -465,8 +469,8 @@ System::Void MyForm::handlebyte(){
 		wall_xpos = data_recieved_buffer[bufferindex + 1];
 		wall_ypos = data_recieved_buffer[bufferindex + 2];
 		//change_coordinates(wall_xpos, wall_ypos, WALL);
-		walls[wall_cell, 0] = xpos_wall;
-		walls[wall_cell, 1] = ypos_wall;
+		//walls[wall_cell, 0] = xpos_wall;
+		//walls[wall_cell, 1] = ypos_wall;
 		//move_squares(x_GUIcurrent, y_GUIcurrent);
 		//fillkarta(image1, xpos_wall, ypos_wall, WALL);
 		Console::WriteLine("WALL: X-pos " + wall_xpos + "Y-pos " + wall_ypos);
@@ -511,12 +515,12 @@ System::Void MyForm::handlebyte(){
 		SetText(Convert::ToString(current_distance), totaldistance);
 		break;
 
-	case TEJP_FOUND: //Tejpbit funnen.
-		Console::WriteLine("TEJP FOUND:  X " + current_xpos + "Y " + current_ypos);
-		fillkarta(image1, current_xpos, current_ypos, DISTRESSEDFOUND);
-		break;
+	//case TEJP_FOUND: //Tejpbit funnen.
+		//Console::WriteLine("TEJP FOUND:  X " + current_xpos + "Y " + current_ypos);
+		//fillkarta(image1, current_xpos, current_ypos, DISTRESSEDFOUND);
+		//break;
 	case TEJP_REF: //Referensvärde tejp
-		tejp_ref_value = data_recieved_buffer[0];
+		//tejp_ref_value = data_recieved_buffer[0];
 		break;
 
 	default:
