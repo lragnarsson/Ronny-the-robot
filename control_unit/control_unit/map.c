@@ -123,7 +123,7 @@ void set_walls(uint8_t wall_front, uint8_t wall_left, uint8_t wall_right)
 			if (wall_front)
 				map[++front_wall.x][front_wall.y] = WALL;
 			if (wall_left)
-				map[left_wall.y][++left_wall.y] = WALL;
+				map[left_wall.x][++left_wall.y] = WALL;
 			if (wall_right)
 				map[right_wall.x][--right_wall.y] = WALL;
 			break;

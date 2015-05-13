@@ -8,7 +8,7 @@
 
 int main(void)
 {
-	current_mode = TEST;
+	current_mode = AUTONOMOUS;
 	next_state = search_state;
 	init_map();
 	init_bus_communication();
@@ -17,7 +17,7 @@ int main(void)
 	PORTD ^= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	sei();
 	
-	//_delay_ms(1000);
+	_delay_ms(1000);
 	
 	while (1) {
 		if(current_mode == MANUAL)
