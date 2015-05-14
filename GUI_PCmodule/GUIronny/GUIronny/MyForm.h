@@ -198,7 +198,7 @@ namespace GUIronny {
 			handlebyte();
 			data_recieved_buffer[0] = 12;
 			data_recieved_buffer[1] = 5;
-			header = WALL;
+			header = WALL;*/
 
 
 			

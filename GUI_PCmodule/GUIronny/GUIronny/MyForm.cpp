@@ -187,7 +187,7 @@ System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System:
 		count = serialPort1->BytesToRead;
 		int initial = count;
 		int recievedcount = serialPort1->Read(data_recieved_buffer, 0, count);
-			SetText("buffer: " + Convert::ToString(initial) + Convert::ToString(data_recieved_buffer[initial]), Kommandon);
+		SetText("buffer: " + Convert::ToString(initial) + Convert::ToString(data_recieved_buffer[initial]), Kommandon);
 		
 		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&MyForm::myrecievedata);
 		this->Invoke(d, gcnew array < Object^ > { 'h' });
@@ -261,7 +261,7 @@ System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 	//data_recieved_buffer[0];
 	Console::WriteLine("invoke");
 	int bufferlength = count;
-	bool finished = false;
+	//bool finished = false;
 	//int bufferindex = 0;
 	Console::WriteLine("----------- in while -> handling byte" + " " + bufferlength + "-----------");
 	while (!finished)
@@ -313,6 +313,7 @@ System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 			bufferindex = 0;
 		}
 	}
+	finished = false;
 	Console::WriteLine("----------- Finished While-----------");
 }
 
@@ -404,6 +405,9 @@ System::Void MyForm::handleheader(unsigned char byte){
 		case TEJP_FOUND: //Tejpbit funnen.
 			Console::WriteLine("TEJP FOUND");
 			finished = true;
+			/*map_squares[drivablesquare_xpos, drivablesquare_ypos] = '';
+			move_grid(drivablesquare_xpos, drivablesquare_ypos);
+			update_map();*/
 			write_position = 0;
 			tejp_found = true;
 			break;
@@ -432,7 +436,7 @@ System::Void MyForm::handlebyte(){
 		break;
 
 	case DRIVABLE_SQUARE: //Körbar ruta x,y
-		Console::WriteLine("DRIVALBE_SQUARE:  X " + data_recieved_buffer[bufferindex + 1] + "Y " + data_recieved_buffer[bufferindex + 2]);
+		//Console::WriteLine("DRIVALBE_SQUARE:  X " + data_recieved_buffer[bufferindex + 1] + "Y " + data_recieved_buffer[bufferindex + 2]);
 		drivablesquare_xpos = data_recieved_buffer[bufferindex + 1];
 		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
 		map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
