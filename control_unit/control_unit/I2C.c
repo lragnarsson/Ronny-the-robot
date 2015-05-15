@@ -14,7 +14,6 @@ volatile uint8_t helpadress;
 volatile uint8_t helpdata[16];
 volatile uint8_t startpointer;
 volatile uint8_t endpointer;
-volatile uint8_t isSending = 0;
 
 //TWCR definitions
 #define SEND 0xc5 // 1   1  0   0   0  1  0   1
@@ -28,12 +27,11 @@ volatile uint8_t isSending = 0;
 void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t adress) {
 	receiverstart = 0x00;
 	receiverstop = 0x00;
-	cli();
 	TWBR = bitrate;
 	TWSR |= prescaler;
 	TWAR = adress | (1<<TWGCE); //Set adress and general call enable
 	TWCR = RESET;	//enable TWI, TWI interrupts, TWI enable ack
-	sei();
+	is_sending = 0;
 }
 
 uint8_t i2c_get_buffer(uint8_t* bufferdata) {
@@ -62,7 +60,7 @@ void i2c_stop() {
 
 //Write to I2C
 uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
-	if(!isSending) {
+	if(!is_sending) {
 		helpadress = adress | 0; //Write
 		startpointer = 0x00;
 		endpointer = 0x00;
@@ -70,7 +68,7 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 			helpdata[endpointer] = data[endpointer];
 			endpointer++;
 		}
-		isSending = 0x01;
+		is_sending = 0x01;
 		i2c_start();
 		return 1;
 	}
@@ -80,12 +78,12 @@ uint8_t i2c_write(uint8_t adress, uint8_t* data, uint8_t length) {
 
 // Write one byte to I2C
 uint8_t i2c_write_byte(uint8_t adress, uint8_t data) {
-	if (!isSending) {
+	if (!is_sending) {
 		helpadress = adress | 0; //Write
 		startpointer = 0x00;
 		endpointer = 0x01;
 		helpdata[0] = data;
-		isSending = 0x01;
+		is_sending = 0x01;
 		i2c_start();
 		return 1;
 	}
@@ -110,7 +108,7 @@ ISR(TWI_vect) {
 			}
 			else {
 				startpointer = 0x00;
-				isSending = 0x00;
+				is_sending = 0x00;
 				TWCR = STOP;
 			}
 			//while (!(TWCR & (1<<TWINT)));

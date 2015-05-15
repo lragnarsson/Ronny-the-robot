@@ -10,6 +10,8 @@
 #define DEBUG_LED_GREEN PORTD1
 #define DEBUG_LED_RED PORTD2
 
+#define CLAMP(x, l, h) (((x) > (h)) ? (h) : (((x) < (l)) ? (l) : (x)))
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -27,6 +29,7 @@ typedef enum { MANUAL, AUTONOMOUS, TEST } mode;
 mode current_mode;
 
 void autonomous_mode();
+void test_mode();
 void search_state();
 void navigate_state();
 void return_state();

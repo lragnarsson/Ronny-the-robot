@@ -46,6 +46,8 @@ volatile uint8_t busbuffer[16];
 volatile uint8_t receiverstart;
 volatile uint8_t receiverstop;
 
+volatile uint8_t is_sending;
+
 //Init
 void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t adress);
 

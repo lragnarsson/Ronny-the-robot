@@ -20,8 +20,8 @@
 #define ENGINE_RIGHT_DIRECTION PB1
 
 #define CLAW_POSITION OCR2A
-#define CLAW_CLOSED 75
-#define CLAW_OPEN 150
+#define CLAW_CLOSED 240
+#define CLAW_OPEN 50
 #define TIMER0_CLEAR_ON_MATCH_H (0<<WGM01)|(1<<WGM00)|(1<<COM0A1)|(0<<COM0A0)|(1<<COM0B1)|(0<<COM0B0)
 #define TIMER0_CLEAR_ON_MATCH_L (0<<WGM02)|(1<<CS02)|(0<<CS01)|(0<<CS00)
 
@@ -30,7 +30,7 @@
 #define TIMER1_CLEAR_ON_MATCH_H (0<<WGM13) | (1<<WGM12)
 #define TIMER1_CLEAR_ON_MATCH_L (0<<WGM11) | (0<<WGM10)
 #define TIMER1_PRESCALE_64 (0<<CS12) | (1<<CS11) | (1<<CS10)
-#define TIMER1_MATCH_FREQUENCY_100HZ F_CPU / 500 / 64	// = 625
+#define TIMER1_MATCH_FREQUENCY_500HZ F_CPU / 500 / 64	// = 625
 #define TIMER1_INTERRUPT_ENABLE (1<<OCIE1A)
 
 volatile uint16_t P_COEFFICIENT;
@@ -39,6 +39,9 @@ volatile uint16_t D_COEFFICIENT;
 static const uint8_t MAPPING_SPEED = 135;
 static const uint8_t SUPER_SPEED = 135;
 static const uint8_t TURN_SPEED = 75;
+static const uint8_t INTERSECTION_SPEED = 135;
+
+volatile int8_t motor_trim;
 
 typedef enum {
 	ENGINE_DIRECTION_FORWARD = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION),

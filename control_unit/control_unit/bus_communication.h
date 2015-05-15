@@ -27,11 +27,17 @@ volatile uint16_t left_wall_distance;
 volatile uint16_t right_wall_distance;
 volatile uint16_t front_wall_distance;
 
+volatile uint8_t wall_left;
+volatile uint8_t wall_right;
+volatile uint8_t wall_front;
+
 volatile int16_t current_distance_error;
 volatile int16_t current_derivative_error;
 
 volatile int16_t distance_travelled;
 volatile int16_t absolute_rotation;
+
+volatile uint8_t intersection;
 
 void init_bus_communication();
 void handle_received_message();

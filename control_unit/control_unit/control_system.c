@@ -19,12 +19,19 @@ void init_control_system()
 	TCCR1A = TIMER1_CLEAR_ON_MATCH_L;
 	TCCR1B = TIMER1_CLEAR_ON_MATCH_H | TIMER1_PRESCALE_64;
 	TIMSK1 = TIMER1_INTERRUPT_ENABLE;
-	OCR1A = TIMER1_MATCH_FREQUENCY_100HZ;
+	OCR1A = TIMER1_MATCH_FREQUENCY_500HZ;
 
-	DDRD = (0<<DDD0);
+	DDRD = (0<<DDD0)|(1<<DDD7);
 	
-	P_COEFFICIENT = 0x0BB8;//A00;
-	D_COEFFICIENT = 0x0F00;
+	TCCR2A = (1<<COM2A1) | (0<<COM2A0) | (0<<WGM21) | (1<<WGM20);
+	TCCR2B = (0<<WGM22) | (1<<CS22) | (0<<CS21) | (0<<CS20);
+	
+	//OCR2A = 200;
+	
+	P_COEFFICIENT = 0x0C80;//BB8;//A00;
+	D_COEFFICIENT = 0x1220;//0F00;
+	
+	motor_trim = -6;
 }
 
 /* Service routine for handling acceleration */
@@ -61,25 +68,27 @@ ISR(TIMER1_COMPA_vect)
 	if (desired_engine_direction == ENGINE_DIRECTION_LEFT || desired_engine_direction == ENGINE_DIRECTION_RIGHT)
 		control_speed = 0;
 	
+	int16_t trim_speed = (int8_t)current_engine_speed * motor_trim;
+	
 	if (control_speed > 0)
 	{
 		uint8_t left_control_speed = (uint8_t)control_speed;
 		if (left_control_speed > max_control_speed)
-			ENGINE_LEFT_SPEED = current_engine_speed - max_control_speed + (current_engine_speed>>4);
+			ENGINE_LEFT_SPEED = current_engine_speed - max_control_speed + (trim_speed >> 8);//(uint8_t)(current_engine_speed != 0)*(encoder_right_velocity - encoder_left_velocity) / 2;
 		else
-			ENGINE_LEFT_SPEED = current_engine_speed - left_control_speed + (current_engine_speed>>4);
+			ENGINE_LEFT_SPEED = current_engine_speed - left_control_speed + (trim_speed >> 8);//(uint8_t)(current_engine_speed != 0)*(encoder_right_velocity - encoder_left_velocity) / 2;
 			
-		ENGINE_RIGHT_SPEED = current_engine_speed;
+		ENGINE_RIGHT_SPEED = current_engine_speed - (trim_speed >> 8);// + (uint8_t)(current_engine_speed != 0)*(encoder_left_velocity - encoder_right_velocity) / 2;
 	}
 	else 
 	{
 		uint8_t right_control_speed = (uint8_t)abs(control_speed);
 		if (right_control_speed > max_control_speed)
-			ENGINE_RIGHT_SPEED = current_engine_speed - max_control_speed;
+			ENGINE_RIGHT_SPEED = current_engine_speed - max_control_speed - (trim_speed >> 8);// + (uint8_t)(current_engine_speed != 0)*(encoder_left_velocity - encoder_right_velocity) / 2;
 		else
-			ENGINE_RIGHT_SPEED = current_engine_speed - right_control_speed;
+			ENGINE_RIGHT_SPEED = current_engine_speed - right_control_speed - (trim_speed >> 8);// + (uint8_t)(current_engine_speed != 0)*(encoder_left_velocity - encoder_right_velocity) / 2;
 		
-		ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>4);
+		ENGINE_LEFT_SPEED = current_engine_speed + (trim_speed >> 8);//(uint8_t)(current_engine_speed != 0)*(encoder_right_velocity - encoder_left_velocity) / 2;
 	}
 	
 	/* Engine direction */
@@ -98,7 +107,7 @@ void force_engine_speed(uint8_t speed)
 {
 	desired_engine_speed = speed;
 	current_engine_speed = speed;
-	ENGINE_LEFT_SPEED = current_engine_speed + (current_engine_speed>>4);
+	ENGINE_LEFT_SPEED = current_engine_speed;
 	ENGINE_RIGHT_SPEED = current_engine_speed;
 }
 

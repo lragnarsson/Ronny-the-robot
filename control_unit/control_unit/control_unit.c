@@ -8,16 +8,21 @@
 
 int main(void)
 {
-	current_mode = AUTONOMOUS;
+	current_mode = TEST;
 	next_state = search_state;
 	init_map();
 	init_bus_communication();
 	init_control_system();
-	DDRD |= (1<<DDD1)|(1<<DD2); // LED output
+	DDRD |= (1<<DDD1)|(1<<DDD2); // LED output
 	PORTD ^= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	sei();
 	
-	_delay_ms(1000);
+	while (PIND & (1<<PIND0))
+	{
+		_delay_ms(1);
+	}
+	
+	_delay_ms(100);
 	
 	while (1) {
 		if(current_mode == MANUAL)
@@ -40,6 +45,7 @@ void autonomous_mode()
 
 void test_mode()
 {
+	/*
 	map[16][15] = WALL;
 	map[15][15] = WALL;
 	map[14][15] = WALL;
@@ -66,7 +72,12 @@ void test_mode()
 	current_position = (coordinate){16, 16};
 	current_direction = WEST;
 	flood_fill_to_unmapped();
+	*/
 	
+	close_claw();
+	_delay_ms(500);
+	open_claw();
+	_delay_ms(500);
 	
 }
 
@@ -77,7 +88,7 @@ void search_state()
 	_delay_ms(500);
 	
 	/* Handle unawareness of initial surroundings */
-	set_walls((front_wall_distance < 300), (left_wall_distance < 300), (right_wall_distance < 300));
+	set_walls(wall_front, wall_left, wall_right);
 	set_current_sqaure_not_wall();
 	
 	// We might end up in tape square directly from navigate
@@ -92,11 +103,11 @@ void search_state()
 	}
 	
 	// Or we might end up in an intersection...
-	if ((front_wall_distance < 300))
+	if (wall_front)
 	{
-		if (!(left_wall_distance < 300))
+		if (!wall_left)
 			rotate_left_90();
-		else if (!(right_wall_distance < 300))
+		else if (!wall_right)
 			rotate_right_90();
 		else
 		{
@@ -124,17 +135,17 @@ void search_state()
 	{
 		int16_t sqaure_diff = distance_travelled - last_distance_travelled;
 		
-		set_desired_engine_speed(MAPPING_SPEED);
+		if (intersection)
+			set_desired_engine_speed(INTERSECTION_SPEED);
+		else
+			set_desired_engine_speed(MAPPING_SPEED);
+		
 		_delay_ms(1);
 		
-		if (sqaure_diff > 400 || (sqaure_diff > 150 && front_wall_distance < 230))
+		if (sqaure_diff > 400 || (sqaure_diff > 100 && front_wall_distance < 230))
 		{
 			PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
-			
-			uint8_t wall_front = (front_wall_distance < 300);
-			uint8_t wall_left = (left_wall_distance < 300);
-			uint8_t wall_right = (right_wall_distance < 300);
-			
+			is_sending = 0;
 			/* Update map stuff */
 			move_map_position_forward();
 			set_walls(wall_front, wall_left, wall_right);
@@ -234,16 +245,21 @@ void navigate_state()
 		/* Drive one square */
 		int16_t last_distance_travelled = distance_travelled;
 		
-		set_desired_engine_speed(SUPER_SPEED);
-		
 		for (;;)
 		{
 			int16_t square_diff = distance_travelled - last_distance_travelled;
+			
+			if (intersection)
+				set_desired_engine_speed(INTERSECTION_SPEED);
+			else
+				set_desired_engine_speed(SUPER_SPEED);
+				
 			_delay_ms(1);
 			
-			if (square_diff > 400 || (square_diff > 150 && front_wall_distance < 230))
+			if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
 			{
 				PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+				is_sending = 0;
 				move_map_position_forward();
 				break;
 			}
