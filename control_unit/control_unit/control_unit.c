@@ -282,12 +282,26 @@ void return_state()
 /* Grab package state */
 void grab_package_state()
 {
+	open_claw();
+	_delay_ms(500);
+	//Move forward just a little...
+	//set_desired_engine_speed(?);
+	//set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	close_claw();
+	_delay_ms(500);
+	
+	//next_state = return_state;
 	next_state = end_state;
 }
 
 /* Drop package state */
 void drop_package_state()
 {
+	open_claw();
+	_delay_ms(500);
+	//back off 
+	//set_desired_engine_speed(?);
+	//set_desired_engine_direction(?);
 	next_state = end_state;
 }
 
