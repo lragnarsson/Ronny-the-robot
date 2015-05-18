@@ -24,7 +24,7 @@ void init_control_system()
 	DDRD = (0<<DDD0)|(1<<DDD7);
 	
 	TCCR2A = (1<<COM2A1) | (0<<COM2A0) | (0<<WGM21) | (1<<WGM20);
-	TCCR2B = (0<<WGM22) | (1<<CS22) | (0<<CS21) | (0<<CS20);
+	TCCR2B = (0<<WGM22) | (1<<CS22) | (0<<CS21) | (1<<CS20);
 	
 	//OCR2A = 200;
 	

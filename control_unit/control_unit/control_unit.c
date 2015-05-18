@@ -77,8 +77,8 @@ void test_mode()
 	/*close_claw();
 	_delay_ms(1000);
 	open_claw();
-	_delay_ms(1000);
-	*/
+	_delay_ms(1000);*/
+
 	grab_package_state();
 	_delay_ms(1000);
 	drop_package_state();
