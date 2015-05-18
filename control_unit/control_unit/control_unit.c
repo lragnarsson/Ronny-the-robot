@@ -74,11 +74,15 @@ void test_mode()
 	flood_fill_to_unmapped();
 	*/
 	
-	close_claw();
-	_delay_ms(500);
+	/*close_claw();
+	_delay_ms(1000);
 	open_claw();
-	_delay_ms(500);
-	
+	_delay_ms(1000);
+	*/
+	grab_package_state();
+	_delay_ms(1000);
+	drop_package_state();
+	_delay_ms(1000);
 }
 
 /* Search state */
@@ -283,25 +287,40 @@ void return_state()
 void grab_package_state()
 {
 	open_claw();
-	_delay_ms(500);
-	//Move forward just a little...
-	//set_desired_engine_speed(?);
-	//set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+
+	_delay_ms(600);
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(250);
+	set_desired_engine_speed(100);
+	int16_t old_distance = distance_travelled;
+	while (distance_travelled - old_distance < 100){_delay_ms(1);}
+	set_desired_engine_speed(0);
+	_delay_ms(250);
 	close_claw();
 	_delay_ms(500);
+	rotate_180();
+	_delay_ms(250);
 	
-	//next_state = return_state;
-	next_state = end_state;
+	next_state = end_state; //return state
 }
 
 /* Drop package state */
 void drop_package_state()
 {
 	open_claw();
-	_delay_ms(500);
-	//back off 
-	//set_desired_engine_speed(?);
-	//set_desired_engine_direction(?);
+
+	_delay_ms(250);
+	set_desired_engine_direction(ENGINE_DIRECTION_BACKWARD);
+	_delay_ms(250);
+	set_desired_engine_speed(100);
+	int16_t old_distance = distance_travelled;
+	while (old_distance - distance_travelled < 100){_delay_ms(1);}
+	set_desired_engine_speed(0);
+	_delay_ms(250);
+	close_claw();
+	_delay_ms(250);
+	rotate_180();
+
 	next_state = end_state;
 }
 
