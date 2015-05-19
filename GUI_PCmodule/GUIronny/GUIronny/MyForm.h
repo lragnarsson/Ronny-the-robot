@@ -60,9 +60,9 @@ namespace GUIronny {
 			findPorts();
 
 			createarray(image1);
-			
-			/*//1
-			data_recieved_buffer[0] = 0x40;
+
+			/*data_recieved_buffer[0] = 0x33;
+
 			data_recieved_buffer[1] = 16;
 			data_recieved_buffer[2] = 16;
 			data_recieved_buffer[3] = 45;
@@ -86,11 +86,12 @@ namespace GUIronny {
 			count = 17;
 			//header = WALL;
 			//handlebyte();
-			myrecievedata('h');*/
+
 			
 			/*
 			//1
 			data_recieved_buffer[0] = 16;
+
 			data_recieved_buffer[1] = 16;
 			header = DRIVABLE_SQUARE;
 			handlebyte();
@@ -144,6 +145,10 @@ namespace GUIronny {
 			data_recieved_buffer[0] = 15;
 			data_recieved_buffer[1] = 15;
 			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 12;
+			data_recieved_buffer[1] = 6;
+			header = ABSOLUTEVALUE;
 			handlebyte();*/
 
 			/*data_recieved_buffer[0] = 16;
@@ -208,10 +213,15 @@ namespace GUIronny {
 			handlebyte();
 			data_recieved_buffer[0] = 12;
 			data_recieved_buffer[1] = 5;
-			header = WALL;*/
+			header = WALL;
+			handlebyte();
+			data_recieved_buffer[0] = 12;
+			data_recieved_buffer[1] = 6;
+			header = ABSOLUTEVALUE;
+			handlebyte();*/
 
 
-			
+
 			//initvalues();
 
 			//
@@ -247,22 +257,16 @@ namespace GUIronny {
 		static unsigned int rear_right = 0;
 		static unsigned int front_right = 0;
 		static unsigned int front = 0;
-		static unsigned int x_recieved_current = 16;
-		static unsigned int y_recieved_current = 16;
 		static unsigned int x_start = 0;
 		static unsigned int y_start = 8;
-		static unsigned int x_GUIcurrent = 16;
-		static unsigned int y_GUIcurrent = 8;
 		static unsigned int xpos_wall = 0;
 		static unsigned int ypos_wall = 0;
-		static int drivable_cell = 0;
-
-		static int wall_cell = 0;
 		static int squaresize = 35;
 
 		bool Header = false;
 		bool Recieved_all_bytes = false;
-		static bool first_square  =true;
+		static bool current_robot = false;
+		static bool first_square = true;
 
 
 		//Data received
@@ -840,9 +844,10 @@ private: static System::ComponentModel::IContainer^  components;
 			this->PerformLayout();
 
 		}
+
 #pragma endregion
 
-		// find available ports
+			 // find available ports
 	private: void findPorts(void);
 
 			 // Keypressevents & click
@@ -855,10 +860,10 @@ private: static System::ComponentModel::IContainer^  components;
 	private: System::Void Reset_Click(System::Object^  sender, System::EventArgs^  e);
 			 static System::Void Reset_Map();
 			 //Data recieved from serialport.
-	private: delegate void myrecievedata_delegate(/*SerialPort^ sender,*/ char status);
+	private: delegate void myrecievedata_delegate(char status);
 	private: delegate void hanldebyte(unsigned char byte);
 	private: System::Void serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e);
-	private: static void myrecievedata(/*SerialPort^ sender,*/ char status);
+	private: static void myrecievedata(char status);
 	private: static void handleheader(unsigned char byte);
 	private: static void handlebyte();
 
@@ -871,8 +876,6 @@ private: static System::ComponentModel::IContainer^  components;
 	private: static void createarray(Bitmap^ image1);
 	private: static void move_grid(unsigned int x_newrecieved, unsigned int y_newrecieved);
 	private: static void update_map();
-	//private: static void change_coordinates(int unsigned newrecieved_x, unsigned int newrecieved_y, int status);
-	//private: static void move_squares(int unsigned x_new, unsigned int y_new);
 	private: static void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status);
 	private: static void Show_Map();
 
@@ -880,11 +883,13 @@ private: static System::ComponentModel::IContainer^  components;
 	private: delegate void sensorvaluesDelegate(int byte1, int byte2, int byte3, int byte4, int byte5);
 	private: static void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5);
 
-	
+
 	private: System::Void change_control_Click(System::Object^  sender, System::EventArgs^  e);
+
 
 
 private: System::Void calibration_Click(System::Object^  sender, System::EventArgs^  e);
 private: System::Void change_motor_Click(System::Object^  sender, System::EventArgs^  e);
 };
+
 }
