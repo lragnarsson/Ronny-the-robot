@@ -10,7 +10,8 @@
 void init_bus_communication() {
 	i2c_init(atmega20br, atmega20pc, CONTROL_UNIT);
 	
-	last_manual_command = M_FORWARD;
+	last_manual_command = DO_NOTHING;
+	last_manual_command_updated = 0;
 	
 	tape_square = 0;
 	
@@ -147,27 +148,42 @@ void handle_received_message() {
 			break;
 		case DRIVE_FORWARD:
 			last_manual_command = M_FORWARD;
-			P_COEFFICIENT += 50;
+			last_manual_command_updated = 1;
 			break;
 		case TURN_RIGHT:
 			last_manual_command = M_RIGHT;
-			D_COEFFICIENT += 50;
+			last_manual_command_updated = 1;
 			break;
 		case TURN_LEFT:
 			last_manual_command = M_LEFT;
-			D_COEFFICIENT -= 50;
+			last_manual_command_updated = 1;
 			break;
 		case DRIVE_FORWARD_RIGHT:
 			last_manual_command = M_FORWARD_RIGHT;
-			motor_trim += 1;
+			last_manual_command_updated = 1;
 			break;
 		case DRIVE_FORWARD_LEFT:
 			last_manual_command = M_FORWARD_LEFT;
-			motor_trim -= 1;
+			last_manual_command_updated = 1;
 			break;
 		case DRIVE_BACKWARD:
 			last_manual_command = M_BACKWARD;
-			P_COEFFICIENT -= 50;
+			last_manual_command_updated = 1;
+			break;
+		case AUTONOMOUS_MODE:
+			current_mode = AUTONOMOUS;
+			break;
+		case MANUAL_MODE:
+			current_mode = MANUAL;
+			break;
+		case P_PARAMETER:
+			P_COEFFICIENT = busbuffer[1];
+			break;
+		case D_PARAMETER:
+			D_COEFFICIENT = busbuffer[1];
+			break;
+		case MOTOR_TRIM:
+			motor_trim = busbuffer[1];
 			break;
 		default:
 			break;

@@ -37,8 +37,8 @@ void init_control_system()
 /* Service routine for handling acceleration */
 ISR(TIMER1_COMPA_vect)
 {
-	/*if (current_mode == MANUAL)
-		return;*/
+	if (current_mode == MANUAL)
+		return;
 		
 	/* Acceleration */
 	if(desired_engine_speed > current_engine_speed)
@@ -65,7 +65,7 @@ ISR(TIMER1_COMPA_vect)
 	MultiSU16X16to32(d, current_derivative_error, D_COEFFICIENT);
 	int16_t control_speed = (p + d)>>16;
 	
-	if (desired_engine_direction == ENGINE_DIRECTION_LEFT || desired_engine_direction == ENGINE_DIRECTION_RIGHT)
+	if (desired_engine_direction != ENGINE_DIRECTION_FORWARD)
 		control_speed = 0;
 	
 	int16_t trim_speed = (int8_t)current_engine_speed * motor_trim;
