@@ -8,13 +8,13 @@
 
 int main(void)
 {
-	current_mode = TEST;
+	current_mode = AUTONOMOUS;
 	next_state = search_state;
 	init_map();
 	init_bus_communication();
 	init_control_system();
 	DDRD |= (1<<DDD1)|(1<<DDD2); // LED output
-	PORTD ^= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
+	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
 	sei();
 	
 	while (PIND & (1<<PIND0))
@@ -45,49 +45,61 @@ void autonomous_mode()
 
 void test_mode()
 {
-	/*
-	map[16][15] = WALL;
-	map[15][15] = WALL;
-	map[14][15] = WALL;
-	map[13][16] = WALL;
-	map[13][17] = WALL;
-	map[13][18] = WALL;
-	map[14][19] = WALL;
-	map[15][19] = WALL;
-	map[16][19] = WALL;
-	map[17][18] = WALL;
-	map[17][17] = WALL;
-	map[17][16] = WALL;
-	map[15][17] = WALL;
+	map[13][13] = WALL;
+	map[14][13] = WALL;
+	map[15][13] = WALL;
+	map[16][13] = WALL;
+	map[17][13] = WALL;
 	
-	map[16][16] = NOT_WALL;
-	map[15][16] = NOT_WALL;
+	map[13][14] = WALL;
+	map[14][14] = NOT_WALL;
+	map[15][14] = NOT_WALL;
+	map[16][14] = NOT_WALL;
+	map[17][14] = WALL;
+	
+	map[13][15] = WALL;
+	map[14][15] = NOT_WALL;
+	map[15][15] = WALL;
+	map[16][15] = NOT_WALL;
+	map[17][15] = WALL;
+	
+	map[13][16] = WALL;
 	map[14][16] = NOT_WALL;
+	map[15][16] = NOT_WALL;
+	map[16][16] = NOT_WALL;
+	map[17][16] = WALL;
+
+	map[13][17] = WALL;
 	map[14][17] = NOT_WALL;
+	map[15][17] = WALL;
+	map[16][17] = WALL;
+	map[17][17] = UNMAPPED;
+	
+	map[13][18] = WALL;
 	map[14][18] = NOT_WALL;
 	map[15][18] = NOT_WALL;
-	map[16][18] = NOT_WALL;
-	map[16][17] = NOT_WALL;
+	map[16][18] = UNMAPPED;
+	map[17][18] = UNMAPPED;
+
+	map[13][19] = WALL;
+	map[14][19] = WALL;
+	map[15][19] = WALL;
+	map[16][19] = UNMAPPED;
+	map[17][19] = UNMAPPED;
+
 	
 	current_position = (coordinate){16, 16};
-	current_direction = WEST;
-	flood_fill_to_unmapped();
-	*/
 	
-	/*close_claw();
-	_delay_ms(1000);
-	open_claw();
-	_delay_ms(1000);*/
-
-	grab_package_state();
-	_delay_ms(1000);
-	drop_package_state();
-	_delay_ms(1000);
+	flood_fill_to_destination((coordinate){15,18});
+	navigate_state();
 }
 
 /* Search state */
 void search_state()
 {
+	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
+	PORTD |= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
+	
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
 	_delay_ms(500);
 	
@@ -148,8 +160,9 @@ void search_state()
 		
 		if (sqaure_diff > 400 || (sqaure_diff > 100 && front_wall_distance < 230))
 		{
-			PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+			//PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 			is_sending = 0;
+			
 			/* Update map stuff */
 			move_map_position_forward();
 			set_walls(wall_front, wall_left, wall_right);
@@ -219,6 +232,9 @@ void search_state()
 
 void navigate_state()
 {
+	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
+	PORTD |= (0<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+	
 	set_desired_engine_speed(0);
 	_delay_ms(500);
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
@@ -262,7 +278,7 @@ void navigate_state()
 			
 			if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
 			{
-				PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+				//PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 				is_sending = 0;
 				move_map_position_forward();
 				break;
@@ -280,7 +296,71 @@ void navigate_state()
 /* Return state */
 void return_state()
 {
-	next_state = end_state;
+	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
+	PORTD |= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+	
+	set_desired_engine_speed(0);
+	_delay_ms(500);
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	_delay_ms(500);
+	
+	while (!(current_position.x == START_POSITION_X && current_position.y == START_POSITION_Y))
+	{
+		flood_fill_home_optimistic();
+		direction next_direction = current_route[0];
+		
+		/* Decide what turn to make based on current direction and next direction in route */
+		uint8_t next_turn = (current_direction - next_direction) & 3;
+		switch (next_turn)
+		{
+			case LEFT:
+				rotate_left_90();
+				break;
+			case RIGHT:
+				rotate_right_90();
+				break;
+			case BACKWARD:
+				rotate_180();
+				break;
+			default:
+				break;
+		}
+		
+		/* Drive forward one square and map */
+		int16_t last_distance_travelled = distance_travelled;
+		
+		set_desired_engine_speed(MAPPING_SPEED);
+		
+		for (;;)
+		{
+			int16_t square_diff = distance_travelled - last_distance_travelled;
+			
+			if (intersection)
+				set_desired_engine_speed(INTERSECTION_SPEED);
+			else
+				set_desired_engine_speed(MAPPING_SPEED);
+			
+			_delay_ms(1);
+			
+			if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
+			{
+				//PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+				is_sending = 0;
+				
+				/* Update map stuff */
+				move_map_position_forward();
+				set_walls(wall_front, wall_left, wall_right);
+				
+				/* Decide what to do */
+				break;
+			}
+		}
+	}
+	
+	set_desired_engine_speed(0);
+	
+	current_route[0] = ROUTE_END;
+	next_state = grab_package_state;
 }
 
 /* Grab package state */
@@ -301,7 +381,10 @@ void grab_package_state()
 	rotate_180();
 	_delay_ms(250);
 	
-	next_state = end_state; //return state
+	flood_fill_to_destination(goal_position);
+
+	next_state = navigate_state;
+	follow_up_state = drop_package_state;
 }
 
 /* Drop package state */
@@ -321,12 +404,20 @@ void drop_package_state()
 	_delay_ms(250);
 	rotate_180();
 
-	next_state = end_state;
+	flood_fill_to_destination(start_position);
+
+	next_state = navigate_state;
+	follow_up_state = end_state;
 }
 
 /* End state */
 void end_state()
 {
+	set_desired_engine_speed(0);
+	
+	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
+	PORTD |= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
+	
 	while (1)
 	{
 		PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
@@ -555,7 +646,7 @@ uint8_t drive_and_map() {
 			find_closest_unmapped |= !map_surroundings(1);
 			if (find_closest_unmapped)  // Update map coordinates  and update map with surrounding walls and rotate if needed, else return 0 to navigate to closest unmapped
 			{
-				/*uint8_t msg[2] = {0xFF, 0xFF};
+				uint8_t msg[2] = {0xFF, 0xFF};
 				i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
 				stop_engines();
 				return goal_found;
@@ -576,7 +667,7 @@ void search_state() {
 	
 	
 	
-	/*
+	
 	if(drive_and_map()) { //The goal was found
 		current_task = RETRIEVE;
 		state_speed = SUPER_SPEED;
