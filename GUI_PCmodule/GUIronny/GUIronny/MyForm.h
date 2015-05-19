@@ -30,6 +30,8 @@ TODO v17:
 #define WHEELENCODERS 0x41
 #define TEJP_FOUND 0x42
 #define TEJP_REF 0x70
+#define CALIBRATE_SENSORS 0xD0
+#define MOTOR_TRIMM 0XC9
 
 namespace GUIronny {
 
@@ -60,24 +62,32 @@ namespace GUIronny {
 			createarray(image1);
 			
 			/*//1
-			data_recieved_buffer[0] = 0x33;
+			data_recieved_buffer[0] = 0x40;
 			data_recieved_buffer[1] = 16;
 			data_recieved_buffer[2] = 16;
+			data_recieved_buffer[3] = 45;
+			data_recieved_buffer[4] = 465;
+			data_recieved_buffer[5] = 654;
+			data_recieved_buffer[6] = 654;
+			data_recieved_buffer[7] = 65;
+			data_recieved_buffer[8] = 5654;
+			data_recieved_buffer[9] = 654;
+			data_recieved_buffer[10] = 623;
 			//header =
 			//handlebyte();
-			data_recieved_buffer[3] = 0x34;
-			data_recieved_buffer[4] = 16;
-			data_recieved_buffer[5] = 17;
+			data_recieved_buffer[11] = 0x34;
+			data_recieved_buffer[12] = 16;
+			data_recieved_buffer[13] = 17;
 			//header = WALL;
 			//handlebyte();
-			data_recieved_buffer[6] = 0x34;
-			data_recieved_buffer[7] = 16;
-			data_recieved_buffer[8] = 15;
-			count = 9;
+			data_recieved_buffer[14] = 0x34;
+			data_recieved_buffer[15] = 16;
+			data_recieved_buffer[16] = 15;
+			count = 17;
 			//header = WALL;
 			//handlebyte();
-			myrecievedata('h');
-			*/
+			myrecievedata('h');*/
+			
 			/*
 			//1
 			data_recieved_buffer[0] = 16;
@@ -231,7 +241,7 @@ namespace GUIronny {
 		static unsigned int distressedfound_ypos = 0;
 		static unsigned int wall_xpos = 0;
 		static unsigned int wall_ypos = 0;
-		static unsigned int tejp_ref_value = 0;
+		static Byte tejp_ref_value = 0;
 		static unsigned int rear_left = 0;
 		static unsigned int front_left = 0;
 		static unsigned int rear_right = 0;
@@ -256,8 +266,8 @@ namespace GUIronny {
 
 
 		//Data received
-		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(100);
-		static array < System::Byte >^ remaining_buffer = gcnew array < System::Byte >(100);
+		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(1000);
+		static array < System::Byte >^ remaining_buffer = gcnew array < System::Byte >(1000);
 		static int write_position = 0;
 		static int expected_length = 0;
 		static bool automode = false;
@@ -276,10 +286,7 @@ namespace GUIronny {
 		static int vinkel = 0;
 
 		//Others
-		int w = 0;
-		int d = 0;
 private: static System::Windows::Forms::Button^  Reset;
-protected:
 private: static System::Windows::Forms::Label^  label3;
 private: static System::Windows::Forms::Label^  label4;
 private: static System::Windows::Forms::TextBox^  Kp_value;
@@ -288,21 +295,21 @@ private: static System::Windows::Forms::TextBox^  Ki_value;
 private: static System::Windows::Forms::Button^  change_control;
 private: static System::Windows::Forms::Label^  label6;
 private: static System::Windows::Forms::TextBox^  totaldistance;
-private: static System::ComponentModel::BackgroundWorker^  backgroundWorker1;
+private: static System::Windows::Forms::TextBox^  motor;
+private: static System::Windows::Forms::Label^  label7;
+private: static System::Windows::Forms::Button^  change_motor;
+private: static System::Windows::Forms::Button^  calibration;
 
-	protected:
-		int en = 0;
-
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		~MyForm()
-		{
-			if (components)
-			{
-				delete components;
-			}
-		}
+		 /// <summary>
+		 /// Clean up any resources being used.
+		 /// </summary>
+		 ~MyForm()
+		 {
+			 if (components)
+			 {
+				 delete components;
+			 }
+		 }
 private: static System::Windows::Forms::PictureBox^  Ronny_robot;
 protected:
 private: static System::Windows::Forms::Label^  Sensorvärden;
@@ -315,13 +322,11 @@ private: static System::Windows::Forms::PictureBox^  Uparrow_pressed;
 private: static System::Windows::Forms::PictureBox^  Downarrow_pressed;
 private: static System::Windows::Forms::PictureBox^  Rightarrow_pressed;
 public: static System::Windows::Forms::TextBox^  IRsensor_VF;
-private:
 public: static System::Windows::Forms::TextBox^  IRsensor_VB;
 public: static System::Windows::Forms::TextBox^  IRsensor_HF;
 public: static System::Windows::Forms::TextBox^  IRsensor_HB;
 public: static System::Windows::Forms::TextBox^  IRsensor_Front;
 private: static System::IO::Ports::SerialPort^  serialPort1;
-public:
 private: static System::Windows::Forms::Button^  button3;
 private: static System::Windows::Forms::Button^  button4;
 private: static System::Windows::Forms::TextBox^  Kommandon;
@@ -381,7 +386,10 @@ private: static System::ComponentModel::IContainer^  components;
 			this->change_control = (gcnew System::Windows::Forms::Button());
 			this->label6 = (gcnew System::Windows::Forms::Label());
 			this->totaldistance = (gcnew System::Windows::Forms::TextBox());
-			this->backgroundWorker1 = (gcnew System::ComponentModel::BackgroundWorker());
+			this->calibration = (gcnew System::Windows::Forms::Button());
+			this->motor = (gcnew System::Windows::Forms::TextBox());
+			this->label7 = (gcnew System::Windows::Forms::Label());
+			this->change_motor = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Ronny_robot))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_unpressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_pressed))->BeginInit();
@@ -660,7 +668,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->Reset->Name = L"Reset";
 			this->Reset->Size = System::Drawing::Size(81, 38);
 			this->Reset->TabIndex = 24;
-			this->Reset->Text = L"Reset";
+			this->Reset->Text = L"Reset Map";
 			this->Reset->UseVisualStyleBackColor = true;
 			this->Reset->Click += gcnew System::EventHandler(this, &MyForm::Reset_Click);
 			// 
@@ -707,7 +715,7 @@ private: static System::ComponentModel::IContainer^  components;
 			// 
 			// change_control
 			// 
-			this->change_control->Location = System::Drawing::Point(968, 183);
+			this->change_control->Location = System::Drawing::Point(969, 183);
 			this->change_control->Name = L"change_control";
 			this->change_control->Size = System::Drawing::Size(76, 47);
 			this->change_control->TabIndex = 30;
@@ -733,10 +741,41 @@ private: static System::ComponentModel::IContainer^  components;
 			this->totaldistance->Size = System::Drawing::Size(114, 20);
 			this->totaldistance->TabIndex = 32;
 			// 
-			// backgroundWorker1
+			// calibration
 			// 
-			this->backgroundWorker1->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &MyForm::backgroundWorker1_DoWork);
-			//this->backgroundWorker1->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &MyForm::backgroundWorker1_RunWorkerCompleted);
+			this->calibration->Location = System::Drawing::Point(955, 380);
+			this->calibration->Name = L"calibration";
+			this->calibration->Size = System::Drawing::Size(97, 40);
+			this->calibration->TabIndex = 33;
+			this->calibration->Text = L"Calibrate Tejpreference";
+			this->calibration->UseVisualStyleBackColor = true;
+			this->calibration->Click += gcnew System::EventHandler(this, &MyForm::calibration_Click);
+			// 
+			// motor
+			// 
+			this->motor->Location = System::Drawing::Point(978, 263);
+			this->motor->Name = L"motor";
+			this->motor->Size = System::Drawing::Size(56, 20);
+			this->motor->TabIndex = 34;
+			// 
+			// label7
+			// 
+			this->label7->AutoSize = true;
+			this->label7->Location = System::Drawing::Point(975, 247);
+			this->label7->Name = L"label7";
+			this->label7->Size = System::Drawing::Size(65, 13);
+			this->label7->TabIndex = 35;
+			this->label7->Text = L"Motor Trimm";
+			// 
+			// change_motor
+			// 
+			this->change_motor->Location = System::Drawing::Point(974, 289);
+			this->change_motor->Name = L"change_motor";
+			this->change_motor->Size = System::Drawing::Size(66, 25);
+			this->change_motor->TabIndex = 36;
+			this->change_motor->Text = L"Change";
+			this->change_motor->UseVisualStyleBackColor = true;
+			this->change_motor->Click += gcnew System::EventHandler(this, &MyForm::change_motor_Click);
 			// 
 			// MyForm
 			// 
@@ -744,6 +783,10 @@ private: static System::ComponentModel::IContainer^  components;
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::White;
 			this->ClientSize = System::Drawing::Size(1081, 652);
+			this->Controls->Add(this->change_motor);
+			this->Controls->Add(this->label7);
+			this->Controls->Add(this->motor);
+			this->Controls->Add(this->calibration);
 			this->Controls->Add(this->totaldistance);
 			this->Controls->Add(this->label6);
 			this->Controls->Add(this->change_control);
@@ -841,7 +884,7 @@ private: static System::ComponentModel::IContainer^  components;
 	private: System::Void change_control_Click(System::Object^  sender, System::EventArgs^  e);
 
 
-private: System::Void backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e);
-//private: System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e);
+private: System::Void calibration_Click(System::Object^  sender, System::EventArgs^  e);
+private: System::Void change_motor_Click(System::Object^  sender, System::EventArgs^  e);
 };
 }

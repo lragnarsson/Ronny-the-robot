@@ -70,8 +70,8 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 	auto datarforwardright = gcnew array < System::Byte > { 0xC5 };
 	auto dataforwardleft = gcnew array < System::Byte > { 0xC6 };
 
-	if (!automode)
-	{
+	//if (!automode)
+	//{
 
 		switch (e->KeyChar){
 
@@ -79,7 +79,7 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 
 			this->Kommandon->Text = "sväng vänster 1100 0011";
 			this->serialPort1->Write(dataleft, 0, dataleft->Length);
-			d = d - 1;
+			
 			//Console::WriteLine("d=" + d);
 			break;
 
@@ -87,7 +87,7 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 
 			this->Kommandon->Text = "bakåt 1100 0100";
 			this->serialPort1->Write(databack, 0, databack->Length);
-			w = w - 1;
+			
 			//Console::WriteLine("w=" + w);
 			break;
 
@@ -95,7 +95,7 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 
 			this->Kommandon->Text = "framåt 1100 0001";
 			this->serialPort1->Write(dataforward, 0, dataforward->Length);
-			w = w + 1;
+			
 			//Console::WriteLine("w =" + w);
 			break;
 
@@ -103,7 +103,7 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 
 			this->Kommandon->Text = "sväng höger1100 0010";
 			this->serialPort1->Write(dataright, 0, dataright->Length);
-			d = d + 1;
+			
 			//Console::WriteLine("d = " + d);
 
 			break;
@@ -116,7 +116,7 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 		case 'e':
 			this->Kommandon->Text = "sväng höger-fram 1100 0101";
 			this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
-			en = en + 1;
+			
 			//Console::WriteLine("speed = " + en);
 			break;
 		default:
@@ -124,11 +124,11 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 			break;
 		}
 	}
-	else
-	{
-		this->Kommandon->Text = "Autonomt läge";
-	}
-}
+	//else
+	//{
+//		this->Kommandon->Text = "Autonomt läge";
+	//}
+//}
 System::Void MyForm::button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
 	auto data = gcnew array < System::Byte > { 12 };
 	//if (!this->serialPort1->IsOpen){
@@ -171,11 +171,23 @@ System::Void MyForm::change_control_Click(System::Object^  sender, System::Event
 	serialPort1->Write(kivalue, 0, kivalue->Length);
 	}*/
 }
-
+System::Void MyForm::calibration_Click(System::Object^  sender, System::EventArgs^  e){
+	auto tejpref = gcnew array < System::Byte > { CALIBRATE_SENSORS };
+	this->serialPort1->Write(tejpref, 0, 1);
+}
 System::Void MyForm::Reset_Map(){
 	createarray(image1);
 }
-
+System::Void MyForm::change_motor_Click(System::Object^  sender, System::EventArgs^  e){
+	if (motor->Text->Length == 0){
+		motor->Text = "set motor-trim value";
+	}
+	else
+	{
+		auto motor_trim_value = gcnew array < System::Byte > { 0xC9,(System::Byte)Convert::ToSByte(motor->Text) };
+		this->serialPort1->Write(motor_trim_value, 0, 2);
+	}
+}
 
 
 //Serialport
@@ -187,8 +199,6 @@ System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System:
 		count = serialPort1->BytesToRead;
 		int initial = count;
 		int recievedcount = serialPort1->Read(data_recieved_buffer, 0, count);
-		SetText("buffer: " + Convert::ToString(initial) + Convert::ToString(data_recieved_buffer[initial]), Kommandon);
-		
 		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&MyForm::myrecievedata);
 		this->Invoke(d, gcnew array < Object^ > { 'h' });
 		Console::WriteLine("----------- END-----------");
@@ -291,18 +301,13 @@ System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 					}
 
 				}
-
-
-				//handlebyte();
 				bufferlength = bufferlength - expected_length;
-
 				write_position = 0;
 				expected_length = 0;
 			}
 			else
 			{
 				int x = count - bufferlength;
-				SetText("FEL : " + Convert::ToString(x), totaldistance);
 				finished = true;
 				bufferindex = 0;
 			}
@@ -321,39 +326,6 @@ System::Void MyForm::myrecievedata(/*SerialPort^ sender,*/ char status){
 //serialPort1->BaseStream->ReadAsync(data_recieved_buffer, 0, expected_length - 1);
 //Console::WriteLine("buffer" + data_recieved_buffer[0] + data_recieved_buffer[1]);
 
-System::Void MyForm::backgroundWorker1_DoWork(System::Object^  sender, System::ComponentModel::DoWorkEventArgs^  e){
-	Console::WriteLine("backgroundworker doing work");
-	BackgroundWorker^ worker = dynamic_cast<BackgroundWorker^>(sender);
-	/*for (int i = 0; i <= data_recieved_buffer->Length; i++)
-	{
-	Worker_buffer->Add(data_recieved_buffer[i]);
-	}*/
-	int bufferlength = data_recieved_buffer->Length;
-	bool finished = false;
-	int bufferindex = 0;
-	while (!finished)
-	{
-		if (bufferlength > 0){
-			handleheader(data_recieved_buffer[bufferindex]);
-			if (bufferlength > expected_length)
-			{
-				handlebyte();
-				bufferlength = expected_length - 1;
-				bufferindex = bufferindex + expected_length;
-			}
-			else
-			{
-				finished = true;
-				bufferindex = 0;
-			}
-		}
-	}
-	Console::WriteLine("backgroundworker FINISHED");
-}
-/*System::Void backgroundWorker1_RunWorkerCompleted(System::Object^  sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e){
-	Console::WriteLine("RunWorkerCompleted...");
-	}*/
-
 System::Void MyForm::handleheader(unsigned char byte){
 
 	if (write_position == 0)  //If readposition = 0 we have a header. 
@@ -369,10 +341,13 @@ System::Void MyForm::handleheader(unsigned char byte){
 		case AUTOMODE: //Auto mode
 			write_position = 0;
 			automode = true;
+			finished = true;
 			break;
 		case MANUALMODE: //Manual mode
 			write_position = 0;
 			automode = false;
+			finished = true;
+			SetText("manualmode", Kommandon);
 			break;
 		case DRIVABLE_SQUARE: //drivalbe square
 			Console::WriteLine("Header: DRIVALBE_SQUARE ");
@@ -429,8 +404,8 @@ System::Void MyForm::handlebyte(){
 	switch (header)
 	{
 	case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
-		current_xpos = data_recieved_buffer[0];
-		current_ypos = data_recieved_buffer[1];
+		current_xpos = data_recieved_buffer[bufferindex + 1];
+		current_ypos = data_recieved_buffer[bufferindex + 2];
 		Console::WriteLine("ABSOLUTEVALUE:  X " + current_xpos + "Y " + current_ypos);
 		//fillkarta(image1, current_xpos, current_ypos, ABSOLUTEVALUE);
 		break;
@@ -458,8 +433,8 @@ System::Void MyForm::handlebyte(){
 		//Show_Map();
 		break;
 	case DISTRESSEDFOUND: //Nödställd funnen
-		distressedfound_xpos = data_recieved_buffer[0];
-		distressedfound_ypos = data_recieved_buffer[1];
+		distressedfound_xpos = data_recieved_buffer[bufferindex + 1];
+		distressedfound_ypos = data_recieved_buffer[bufferindex + 2];
 		map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
 		move_grid(distressedfound_xpos, distressedfound_ypos);
 		update_map();
@@ -487,21 +462,21 @@ System::Void MyForm::handlebyte(){
 
 	case SENSOR_VALUES:  //Dealing with sensorvalues
 	{
-		rear_left = data_recieved_buffer[0];
+		rear_left = data_recieved_buffer[bufferindex + 1];
 		rear_left = rear_left << 8;
-		rear_left |= data_recieved_buffer[1];
+		rear_left |= data_recieved_buffer[bufferindex + 2];
 
-		front_left = data_recieved_buffer[2] << 8;
-		front_left |= data_recieved_buffer[3];
+		front_left = data_recieved_buffer[bufferindex + 3] << 8;
+		front_left |= data_recieved_buffer[bufferindex + 4];
 
-		rear_right = data_recieved_buffer[4] << 8;
-		rear_right |= data_recieved_buffer[5];
+		rear_right = data_recieved_buffer[bufferindex + 5] << 8;
+		rear_right |= data_recieved_buffer[bufferindex + 6];
 
-		front_right = data_recieved_buffer[6] << 8;
-		front_right |= data_recieved_buffer[7];
+		front_right = data_recieved_buffer[bufferindex + 7] << 8;
+		front_right |= data_recieved_buffer[bufferindex + 8];
 
-		front = data_recieved_buffer[8] << 8;
-		front |= data_recieved_buffer[9];
+		front = data_recieved_buffer[bufferindex + 9] << 8;
+		front |= data_recieved_buffer[bufferindex + 10];
 
 		Console::WriteLine(front + " " + front_left + " " + front_right + " " + rear_right + " " + rear_left);
 		SetText(Convert::ToString(front), IRsensor_Front);
@@ -518,7 +493,7 @@ System::Void MyForm::handlebyte(){
 	}
 		break;
 	case WHEELENCODERS:
-		added_distance = data_recieved_buffer[0];
+		added_distance = data_recieved_buffer[bufferindex + 1];
 		current_distance = current_distance + added_distance;
 		SetText(Convert::ToString(current_distance), totaldistance);
 		break;
@@ -528,7 +503,9 @@ System::Void MyForm::handlebyte(){
 		//fillkarta(image1, current_xpos, current_ypos, DISTRESSEDFOUND);
 		//break;
 	case TEJP_REF: //Referensvärde tejp
-		//tejp_ref_value = data_recieved_buffer[0];
+		
+		tejp_ref_value = data_recieved_buffer[bufferindex +1];
+		SetText("tejpref =" + tejp_ref_value, Kommandon);
 		break;
 
 	default:
@@ -872,3 +849,4 @@ System::Void MyForm::sensorvalues(int byte1, int byte2, int byte3, int byte4, in
 		sensorwindow->dataGridView1->Rows->Add();
 	}
 }
+
