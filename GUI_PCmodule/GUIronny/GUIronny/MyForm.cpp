@@ -178,30 +178,29 @@ System::Void MyForm::change_motor_Click(System::Object^  sender, System::EventAr
 
 //Serialport
 System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-	Console::WriteLine("EVENTRAISED");
+	//Console::WriteLine("EVENTRAISED");
 	if (serialPort1->BytesToRead > 0){
-		Console::WriteLine("--------------BEGIN ------------");
-		Console::WriteLine("Initial buffer: " + serialPort1->BytesToRead);
+	//	Console::WriteLine("--------------BEGIN ------------");
+	//	Console::WriteLine("Initial buffer: " + serialPort1->BytesToRead);
 		count = serialPort1->BytesToRead;
 		int initial = count;
 		int recievedcount = serialPort1->Read(data_recieved_buffer, 0, count);
 
 		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&MyForm::myrecievedata);
 		this->Invoke(d, gcnew array < Object^ > { 'h' });
-		Console::WriteLine("----------- END-----------");
+	//	Console::WriteLine("----------- END-----------");
 	}
 }
 
 
 System::Void MyForm::myrecievedata(char status){
-	Console::WriteLine("invoke");
+	//Console::WriteLine("invoke");
 	int bufferlength = count;
 	Console::WriteLine("----------- in while -> handling byte" + " " + bufferlength + "-----------");
 	while (!finished)
 	{
 		if (bufferlength > 0){
 			handleheader(data_recieved_buffer[bufferindex]);
-
 			if ((bufferlength >= expected_length) && !finished)
 			{
 				handlebyte();
@@ -213,36 +212,49 @@ System::Void MyForm::myrecievedata(char status){
 			}
 			else if (bufferlength < expected_length && bufferlength > 0 && !finished)
 			{
-				while (bufferlength < expected_length)
+				int index = 1;
+				int index_remaining = expected_length - bufferlength;
+				Console::WriteLine("looping buffer..." + bufferlength + "index_remaining = " + index_remaining);
+				while (bufferlength < expected_length )
 				{
 					if (serialPort1->BytesToRead > 0){
 						serialPort1->Read(remaining_buffer, 0, 1);
-						bufferindex = bufferindex + 1;
-						data_recieved_buffer[bufferindex] = remaining_buffer[0];
+						int index_remaining_before = expected_length - bufferlength;
+						data_recieved_buffer[bufferindex + bufferlength ] = remaining_buffer[0];
+						Console::WriteLine("added value from loop: " + remaining_buffer[0] + " absoluteindex: " + bufferlength);
 						bufferlength = bufferlength + 1;
-						bufferindex = bufferindex + 1;
+						
+						index++;
 					}
 
 				}
+				Console::WriteLine("Buffer index 1: " + bufferindex + " bufferlength " + bufferlength);
+				handlebyte();
 				bufferlength = bufferlength - expected_length;
+				Console::WriteLine("Buffer index: " + bufferindex + " bufferlength " + bufferlength);
 				write_position = 0;
 				expected_length = 0;
+				bufferindex = 0;
+				finished = true;
 			}
 			else
 			{
-				int x = count - bufferlength;
+				write_position = 0;
+				expected_length = 0;
 				finished = true;
 				bufferindex = 0;
 			}
 		}
 		else
 		{
+			write_position = 0;
+			expected_length = 0;
 			finished = true;
 			bufferindex = 0;
 		}
 	}
 	finished = false;
-	Console::WriteLine("----------- Finished While-----------");
+	//Console::WriteLine("----------- Finished While-----------");
 }
 
 
@@ -281,7 +293,7 @@ System::Void MyForm::handleheader(unsigned char byte){
 			header = byte;
 			break;
 		case SENSOR_VALUES: //Sensorvalues
-			Console::WriteLine("Header: SENSORVALUES ");
+			//Console::WriteLine("Header: SENSORVALUES ");
 			expected_length = 11;
 			header = byte;
 			++write_position;
@@ -325,11 +337,12 @@ System::Void MyForm::handlebyte(){
 	switch (header)
 	{
 	case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
+		Console::WriteLine("ABSOLUTEVALUE PREV:  X " + current_xpos + "Y " + current_ypos);
 		current_xpos = data_recieved_buffer[bufferindex + 1];
 		current_ypos = data_recieved_buffer[bufferindex + 2];
 
 		Console::WriteLine("ABSOLUTEVALUE:  X " + current_xpos + "Y " + current_ypos);
-		map_squares[current_xpos, current_ypos] = 'C';
+		//map_squares[current_xpos, current_ypos] = 'C';
 		move_grid(current_xpos, current_ypos);
 		update_map();
 		current_robot = false;
@@ -381,7 +394,7 @@ System::Void MyForm::handlebyte(){
 		front = data_recieved_buffer[bufferindex + 9] << 8;
 		front |= data_recieved_buffer[bufferindex + 10];
 
-		Console::WriteLine(front + " " + front_left + " " + front_right + " " + rear_right + " " + rear_left);
+	//	Console::WriteLine(front + " " + front_left + " " + front_right + " " + rear_right + " " + rear_left);
 		SetText(Convert::ToString(front), IRsensor_Front);
 		SetText(Convert::ToString(front_left), IRsensor_VF);
 		SetText(Convert::ToString(front_right), IRsensor_HF);
@@ -405,7 +418,6 @@ System::Void MyForm::handlebyte(){
 		//Console::WriteLine("TEJP FOUND:  X " + current_xpos + "Y " + current_ypos);
 		//break;
 	case TEJP_REF: //Referensvärde tejp
-<<<<<<< HEAD
 		
 		tejp_ref_value = data_recieved_buffer[bufferindex +1];
 		SetText("tejpref =" + tejp_ref_value, Kommandon);

@@ -242,11 +242,11 @@ namespace GUIronny {
 
 		static array <char, 2 >^ map_squares = gcnew array < char, 2>(33, 33);
 
-		static unsigned int current_xpos = 0;
-		static unsigned int current_ypos = 0;
+		static unsigned int current_xpos = 16;
+		static unsigned int current_ypos = 16;
 		static unsigned int current_angle = 0;
-		static unsigned int drivablesquare_xpos = 0;
-		static unsigned int drivablesquare_ypos = 0;
+		static unsigned int drivablesquare_xpos = 16;
+		static unsigned int drivablesquare_ypos = 16;
 		static unsigned int distressedfound_xpos = 0;
 		static unsigned int distressedfound_ypos = 0;
 		static unsigned int wall_xpos = 0;
@@ -769,7 +769,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->label7->Name = L"label7";
 			this->label7->Size = System::Drawing::Size(65, 13);
 			this->label7->TabIndex = 35;
-			this->label7->Text = L"Motor Trimm";
+			this->label7->Text = L"Motor Trim";
 			// 
 			// change_motor
 			// 
