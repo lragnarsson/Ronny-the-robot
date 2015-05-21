@@ -290,9 +290,40 @@ void return_state()
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
 	_delay_ms(500);
 	
+	// Do we already know the best route?
+	flood_fill_home_optimistic(current_position);
+	uint8_t optimistic_distance_from_goal = ff_map[start_position.x][start_position.y];
+	flood_fill_to_destination(start_position);
+	uint8_t known_distance = ff_map[start_position.x][start_position.y];
+	
+	if(known_distance <= optimistic_distance_from_goal)
+	{
+		next_state = navigate_state;
+		follow_up_state = grab_package_state;
+		tape_square = 0;
+		current_route[0] = ROUTE_END;
+		
+		return;
+	}
+	
+	
 	while (!(current_position.x == START_POSITION_X && current_position.y == START_POSITION_Y))
 	{
-		flood_fill_home_optimistic();
+		flood_fill_home_optimistic(goal_position);
+		optimistic_distance_from_goal = ff_map[start_position.x][start_position.y];
+		
+		flood_fill_to_destination(goal_position);
+		uint8_t distance_to_goal = ff_map[goal_position.x][goal_position.y];
+		
+		flood_fill_home_optimistic(current_position);
+		uint8_t optimistic_distance_from_current_position = ff_map[start_position.x][start_position.y];
+		
+		// Have we moved in the wrong direction? Then start over from goal position.
+		if (optimistic_distance_from_goal - distance_to_goal < optimistic_distance_from_current_position)
+		{
+			flood_fill_to_destination(goal_position);
+		}
+		
 		direction next_direction = current_route[0];
 		
 		/* Decide what turn to make based on current direction and next direction in route */
@@ -503,8 +534,6 @@ void end_state()
 	set_desired_engine_speed(0);
 	_delay_ms(200);
 
-	force_engine_direction(ENGINE_DIRECTION_LEFT);
-	set_desired_engine_speed(TURN_SPEED);
 	while (1)
 	{
 		PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);

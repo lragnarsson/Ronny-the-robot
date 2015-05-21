@@ -233,9 +233,9 @@ void flood_fill_to_unmapped() {
 	}
 }
 
-void flood_fill_home_optimistic() {
+void flood_fill_home_optimistic(coordinate origin) {
 	reset_flood_fill_values();
-	*current_wavefront = current_position;
+	*current_wavefront = origin;
 	current_wavefront_size = 1;
 	uint8_t distance = 0;
 	uint8_t duplicate = 0;
