@@ -43,6 +43,9 @@ static const uint8_t INTERSECTION_SPEED = 135;
 
 volatile int8_t motor_trim;
 
+typedef enum { MANUAL, AUTONOMOUS, TEST } mode;
+mode current_mode;
+
 typedef enum {
 	ENGINE_DIRECTION_FORWARD = (1<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION),
 	ENGINE_DIRECTION_LEFT = (0<<ENGINE_LEFT_DIRECTION)|(1<<ENGINE_RIGHT_DIRECTION),

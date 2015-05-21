@@ -44,6 +44,10 @@ void handle_received_message() {
 		case TAPE_FOUND:
 			Send_to_PC(busbuffer[0]);
 			break;
+		case TAPE_SENSOR_VALUE:
+			Send_to_PC(busbuffer[0]);
+			Send_to_PC(busbuffer[1]);
+			break;
 		case ABSOLUTE_X_Y:
 		case MAPPED_SQUARE:
 		case MAPPED_WALL:
@@ -54,7 +58,7 @@ void handle_received_message() {
 			}
 			break;
 		case SENSOR_READINGS:
-			/*if (sensor_count == 25) {
+			if (sensor_count == 5) {
 				for(uint8_t j=0; j<11; j++) {
 					Send_to_PC(busbuffer[j]);
 					
@@ -63,7 +67,7 @@ void handle_received_message() {
 			}
 			else {
 				++sensor_count;
-			}*/
+			}
 			break;
 		default:
 			Send_to_PC('F');
@@ -80,6 +84,7 @@ int main(void) {
 	//init_personality();
 	while(1) {
 		_delay_ms(50);
+		is_sending = 0;
 		if(UART_not_empty()) {
 			switch(buffer[0]) {
 				//Correct byte
@@ -112,6 +117,7 @@ int main(void) {
 					break;
 				case P_PARAMETER:
 				case D_PARAMETER:
+				case MOTOR_TRIM:
 					i2c_write(CONTROL_UNIT, buffer, 2);
 					break;
 				default:

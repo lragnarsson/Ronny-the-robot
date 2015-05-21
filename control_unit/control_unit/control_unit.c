@@ -8,8 +8,7 @@
 
 int main(void)
 {
-	current_mode = AUTONOMOUS;
-	next_state = search_state;
+	next_state = enter_map_state;
 	init_map();
 	init_bus_communication();
 	init_control_system();
@@ -22,11 +21,22 @@ int main(void)
 		_delay_ms(1);
 	}
 	
+	if (PIND & (1<<PIND3))
+	{
+		current_mode = AUTONOMOUS;
+		i2c_write_byte(COMMUNICATION_UNIT, AUTONOMOUS_MODE);
+	}
+	else
+	{
+		current_mode = MANUAL;
+		i2c_write_byte(COMMUNICATION_UNIT, MANUAL_MODE);
+	}
+	
 	_delay_ms(100);
 	
 	while (1) {
 		if(current_mode == MANUAL)
-			;//manual_mode();
+			manual_mode();
 		else if(current_mode == AUTONOMOUS)
 			autonomous_mode();
 		else if (current_mode == TEST)
@@ -34,7 +44,7 @@ int main(void)
 	}
 }
 
-/* Autonomous drive */
+/* Autonomous mode */
 void autonomous_mode()
 {
 	while (current_mode == AUTONOMOUS)
@@ -43,55 +53,30 @@ void autonomous_mode()
 	}
 }
 
+/* Test mode */
 void test_mode()
 {
-	map[13][13] = WALL;
-	map[14][13] = WALL;
-	map[15][13] = WALL;
-	map[16][13] = WALL;
-	map[17][13] = WALL;
-	
-	map[13][14] = WALL;
-	map[14][14] = NOT_WALL;
-	map[15][14] = NOT_WALL;
-	map[16][14] = NOT_WALL;
-	map[17][14] = WALL;
-	
-	map[13][15] = WALL;
-	map[14][15] = NOT_WALL;
-	map[15][15] = WALL;
-	map[16][15] = NOT_WALL;
-	map[17][15] = WALL;
-	
-	map[13][16] = WALL;
-	map[14][16] = NOT_WALL;
-	map[15][16] = NOT_WALL;
-	map[16][16] = NOT_WALL;
-	map[17][16] = WALL;
 
-	map[13][17] = WALL;
-	map[14][17] = NOT_WALL;
-	map[15][17] = WALL;
-	map[16][17] = WALL;
-	map[17][17] = UNMAPPED;
-	
-	map[13][18] = WALL;
-	map[14][18] = NOT_WALL;
-	map[15][18] = NOT_WALL;
-	map[16][18] = UNMAPPED;
-	map[17][18] = UNMAPPED;
+}
 
-	map[13][19] = WALL;
-	map[14][19] = WALL;
-	map[15][19] = WALL;
-	map[16][19] = UNMAPPED;
-	map[17][19] = UNMAPPED;
-
+/* Enter map state */
+void enter_map_state()
+{
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	set_desired_engine_speed(MAPPING_SPEED);
+	int16_t last_distance_travelled = distance_travelled;
 	
-	current_position = (coordinate){16, 16};
-	
-	flood_fill_to_destination((coordinate){15,18});
-	navigate_state();
+	for (;;)
+	{
+		int16_t square_diff = distance_travelled - last_distance_travelled;
+		_delay_ms(1);
+		
+		if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
+			break;
+	}
+	set_desired_engine_speed(0);
+	tape_square = 0;
+	next_state = search_state;
 }
 
 /* Search state */
@@ -171,6 +156,7 @@ void search_state()
 			if (tape_square)
 			{
 				set_desired_engine_speed(0);
+				set_current_sqaure_not_wall();
 				
 				goal_position = current_position;
 				next_state = return_state;
@@ -350,6 +336,7 @@ void return_state()
 				/* Update map stuff */
 				move_map_position_forward();
 				set_walls(wall_front, wall_left, wall_right);
+				set_current_sqaure_not_wall();
 				
 				/* Decide what to do */
 				break;
@@ -359,6 +346,7 @@ void return_state()
 	
 	set_desired_engine_speed(0);
 	
+	tape_square = 0;
 	current_route[0] = ROUTE_END;
 	next_state = grab_package_state;
 }
@@ -366,20 +354,58 @@ void return_state()
 /* Grab package state */
 void grab_package_state()
 {
-	open_claw();
+	uint8_t next_turn = (current_direction - SOUTH) & 3;
+	switch (next_turn)
+	{
+		case LEFT:
+			rotate_left_90();
+			break;
+		case RIGHT:
+			rotate_right_90();
+			break;
+		case BACKWARD:
+			rotate_180();
+			break;
+		default:
+			break;
+	}
 
-	_delay_ms(600);
+	open_claw();
+	_delay_ms(250);
+	
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
-	_delay_ms(250);
-	set_desired_engine_speed(100);
-	int16_t old_distance = distance_travelled;
-	while (distance_travelled - old_distance < 100){_delay_ms(1);}
+	set_desired_engine_speed(MAPPING_SPEED);
+	int16_t last_distance_travelled = distance_travelled;
+	int16_t square_diff = distance_travelled - last_distance_travelled;
+	
+	for (;;)
+	{
+		square_diff = distance_travelled - last_distance_travelled;
+		_delay_ms(1);
+		
+		if (square_diff > 400)
+			break;
+	}
+	
 	set_desired_engine_speed(0);
-	_delay_ms(250);
-	close_claw();
+
 	_delay_ms(500);
+	close_claw();
+	_delay_ms(250);
 	rotate_180();
 	_delay_ms(250);
+	
+	last_distance_travelled = distance_travelled;
+	set_desired_engine_speed(MAPPING_SPEED);
+	for (;;)
+	{
+		square_diff = distance_travelled - last_distance_travelled;
+		_delay_ms(1);
+		
+		if (square_diff > 400)
+			break;
+	}
+	set_desired_engine_speed(0);
 	
 	flood_fill_to_destination(goal_position);
 
@@ -390,19 +416,46 @@ void grab_package_state()
 /* Drop package state */
 void drop_package_state()
 {
-	open_claw();
+	_delay_ms(500);
+	force_engine_direction(ENGINE_DIRECTION_BACKWARD);
+	set_desired_engine_speed(MAPPING_SPEED);
+	int16_t last_distance_travelled = distance_travelled;
+	
+	for (;;)
+	{
+		int16_t square_diff = distance_travelled - last_distance_travelled;
 
-	_delay_ms(250);
-	set_desired_engine_direction(ENGINE_DIRECTION_BACKWARD);
-	_delay_ms(250);
-	set_desired_engine_speed(100);
-	int16_t old_distance = distance_travelled;
-	while (old_distance - distance_travelled < 100){_delay_ms(1);}
+		_delay_ms(1);
+		
+		if (square_diff < -100)
+			break;
+	}
+	
 	set_desired_engine_speed(0);
+
+	open_claw();
 	_delay_ms(250);
+
+	last_distance_travelled = distance_travelled;
+	set_desired_engine_speed(MAPPING_SPEED);
+	for (;;)
+	{
+		int16_t square_diff = distance_travelled - last_distance_travelled;
+
+		_delay_ms(1);
+		
+		if (square_diff < -250)
+			break;
+	}
+
+	set_desired_engine_speed(0);
+
 	close_claw();
 	_delay_ms(250);
-	rotate_180();
+
+	current_direction = (current_direction + 2) & 3;
+	move_map_position_forward();
+	current_direction = (current_direction + 2) & 3;
 
 	flood_fill_to_destination(start_position);
 
@@ -418,6 +471,40 @@ void end_state()
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
 	PORTD |= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	
+	uint8_t next_turn = (current_direction - SOUTH) & 3;
+	switch (next_turn)
+	{
+		case LEFT:
+		rotate_left_90();
+		break;
+		case RIGHT:
+		rotate_right_90();
+		break;
+		case BACKWARD:
+		rotate_180();
+		break;
+		default:
+		break;
+	}
+
+	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
+	set_desired_engine_speed(MAPPING_SPEED);
+	int16_t last_distance_travelled = distance_travelled;
+	int16_t square_diff = distance_travelled - last_distance_travelled;
+
+	for (;;)
+	{
+		square_diff = distance_travelled - last_distance_travelled;
+		_delay_ms(1);
+		
+		if (square_diff > 400)
+		break;
+	}
+	set_desired_engine_speed(0);
+	_delay_ms(200);
+
+	force_engine_direction(ENGINE_DIRECTION_LEFT);
+	set_desired_engine_speed(TURN_SPEED);
 	while (1)
 	{
 		PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
@@ -509,6 +596,120 @@ void rotate_180()
 	_delay_ms(250);
 	force_engine_direction(ENGINE_DIRECTION_FORWARD);
 	_delay_ms(250);
+}
+
+/* Manual mode */
+void manual_mode()
+{
+	while (current_mode == MANUAL)
+	{
+		last_manual_command_updated = 0;
+		
+		switch (last_manual_command)
+		{
+			case DO_NOTHING:
+			force_engine_speed(0);
+			break;
+			case M_FORWARD:
+			{
+				force_engine_direction(ENGINE_DIRECTION_FORWARD);
+				set_manual_forward_engine_speed();
+				
+				int16_t last_distance_travelled = distance_travelled;
+				while (distance_travelled - last_distance_travelled < 50)
+				{
+					_delay_ms(1);
+				}
+				
+				if (!last_manual_command_updated)
+				last_manual_command = DO_NOTHING;
+				
+				break;
+			}
+			case M_BACKWARD:
+			{
+				force_engine_direction(ENGINE_DIRECTION_BACKWARD);
+				set_manual_forward_engine_speed();
+				
+				int16_t last_distance_travelled = distance_travelled;
+				while (distance_travelled - last_distance_travelled > -50)
+				{
+					_delay_ms(1);
+				}
+				
+				if (!last_manual_command_updated)
+				last_manual_command = DO_NOTHING;
+				
+				break;
+			}
+			case M_LEFT:
+			{
+				force_engine_direction(ENGINE_DIRECTION_LEFT);
+				set_manual_turn_engine_speed();
+				
+				int16_t last_absolute_rotation = absolute_rotation;
+				while (absolute_rotation - last_absolute_rotation < 20)
+				{
+					_delay_ms(1);
+				}
+				
+				if (!last_manual_command_updated)
+				last_manual_command = DO_NOTHING;
+				
+				break;
+			}
+			case M_RIGHT:
+			{
+				force_engine_direction(ENGINE_DIRECTION_RIGHT);
+				set_manual_turn_engine_speed();
+				
+				int16_t last_absolute_rotation = absolute_rotation;
+				while (absolute_rotation - last_absolute_rotation > -20)
+				{
+					_delay_ms(1);
+				}
+				
+				if (!last_manual_command_updated)
+				last_manual_command = DO_NOTHING;
+				
+				break;
+			}
+			case M_FORWARD_LEFT:
+			{
+				force_engine_direction(ENGINE_DIRECTION_FORWARD);
+				set_manual_forward_left_engine_speed();
+				
+				int16_t last_distance_travelled = distance_travelled;
+				while (distance_travelled - last_distance_travelled < 50)
+				{
+					_delay_ms(1);
+				}
+				
+				if (!last_manual_command_updated)
+				last_manual_command = DO_NOTHING;
+				
+				break;
+			}
+			case M_FORWARD_RIGHT:
+			{
+				force_engine_direction(ENGINE_DIRECTION_FORWARD);
+				set_manual_forward_right_engine_speed();
+				
+				int16_t last_distance_travelled = distance_travelled;
+				while (distance_travelled - last_distance_travelled < 50)
+				{
+					_delay_ms(1);
+				}
+				
+				if (!last_manual_command_updated)
+				last_manual_command = DO_NOTHING;
+				
+				break;
+			}
+			default:
+			break;
+		}
+	}
 }
 
 

@@ -20,6 +20,7 @@
 typedef enum { M_FORWARD, M_LEFT, M_RIGHT, M_FORWARD_LEFT, M_FORWARD_RIGHT, M_BACKWARD, DO_NOTHING } manual_command;
 
 volatile manual_command last_manual_command;
+volatile uint8_t last_manual_command_updated;
 
 volatile uint8_t tape_square;
 

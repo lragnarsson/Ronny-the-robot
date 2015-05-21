@@ -25,11 +25,10 @@ typedef void (*state_function)();
 state_function next_state;
 state_function follow_up_state;
 
-typedef enum { MANUAL, AUTONOMOUS, TEST } mode;
-mode current_mode;
-
 void autonomous_mode();
 void test_mode();
+void manual_mode();
+void enter_map_state();
 void search_state();
 void navigate_state();
 void return_state();
