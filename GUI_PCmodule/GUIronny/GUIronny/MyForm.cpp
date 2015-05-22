@@ -141,6 +141,11 @@ System::Void MyForm::Reset_Click(System::Object^  sender, System::EventArgs^  e)
 	createarray(image1);
 	x_start = 0;
 	y_start = 8;
+	for (int i = 0; i < 33; ++i){
+		for (int j = 0; j < 33; ++j){
+			map_squares[i, j] = 0;
+		}
+	}
 }
 System::Void MyForm::change_control_Click(System::Object^  sender, System::EventArgs^  e){
 	/* sending given controlvalues to robot */
@@ -310,9 +315,6 @@ System::Void MyForm::handleheader(unsigned char byte){
 		case TEJP_FOUND: //Tejpbit funnen.
 			Console::WriteLine("TEJP FOUND");
 			finished = true;
-			/*map_squares[drivablesquare_xpos, drivablesquare_ypos] = '';
-			move_grid(drivablesquare_xpos, drivablesquare_ypos);
-			update_map();*/
 			write_position = 0;
 			tejp_found = true;
 			break;
@@ -339,7 +341,6 @@ System::Void MyForm::handlebyte(){
 		current_ypos = data_recieved_buffer[bufferindex + 2];
 
 		Console::WriteLine("ABSOLUTEVALUE:  X " + current_xpos + "Y " + current_ypos);
-		//map_squares[current_xpos, current_ypos] = 'C';
 		move_grid(current_xpos, current_ypos);
 		update_map();
 		current_robot = false;
@@ -348,10 +349,6 @@ System::Void MyForm::handlebyte(){
 	case DRIVABLE_SQUARE: //Körbar ruta x,y
 		drivablesquare_xpos = data_recieved_buffer[bufferindex + 1];
 		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
-		/*if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos){
-
-		}*/
-		//map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
 		move_grid(drivablesquare_xpos, drivablesquare_ypos);
 		update_map();
 		Console::WriteLine("DRIVBLE_SQUARE: X-pos " + drivablesquare_xpos + "Y-pos " + drivablesquare_ypos);

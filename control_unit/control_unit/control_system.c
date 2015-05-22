@@ -31,7 +31,7 @@ void init_control_system()
 	P_COEFFICIENT = 0x0C80;//BB8;//A00;
 	D_COEFFICIENT = 0x1220;//0F00;
 	
-	motor_trim = -4;
+	motor_trim = -8;
 }
 
 /* Service routine for handling acceleration */
