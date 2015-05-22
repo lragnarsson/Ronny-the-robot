@@ -24,7 +24,10 @@ void MyForm::findPorts(void)
 }
 
 //Keypressevents and clicks
+
 System::Void MyForm::MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+	/*Function to make the keys "light up" when pressed*/
+	
 	switch (e->KeyCode){
 	case Keys::A:
 		this->Leftarrow_unpressed->Visible = false;
@@ -44,6 +47,7 @@ System::Void MyForm::MyForm_KeyDown(System::Object^  sender, System::Windows::Fo
 	}
 }
 System::Void MyForm::MyForm_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+	/*Function to make the keys "light up" when pressed*/
 	switch (e->KeyCode){
 	case Keys::A:
 		this->Leftarrow_unpressed->Visible = true;
@@ -63,6 +67,8 @@ System::Void MyForm::MyForm_KeyUp(System::Object^  sender, System::Windows::Form
 	}
 }
 System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
+	/*Controles the steering, sending the correct headers to the robot*/
+	
 	auto dataleft = gcnew array < System::Byte > { 0xC3 };
 	auto databack = gcnew array < System::Byte > { 0xC4 };
 	auto dataforward = gcnew array < System::Byte > { 0xC1 };
@@ -70,101 +76,93 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 	auto datarforwardright = gcnew array < System::Byte > { 0xC5 };
 	auto dataforwardleft = gcnew array < System::Byte > { 0xC6 };
 
-	//if (!automode)
-	//{
+	if (!automode) //Steering is only possible if in manualmode!
+	{
 
 		switch (e->KeyChar){
 
 		case 'a':
-
-			this->Kommandon->Text = "sväng vänster 1100 0011";
+			this->Kommandon->Text = "turn left";
 			this->serialPort1->Write(dataleft, 0, dataleft->Length);
-
 			break;
 
 		case 's':
-
-			this->Kommandon->Text = "bakåt 1100 0100";
+			this->Kommandon->Text = "backwards";
 			this->serialPort1->Write(databack, 0, databack->Length);
-
 			break;
 
 		case 'w':
-
-			this->Kommandon->Text = "framåt 1100 0001";
+			this->Kommandon->Text = "forward";
 			this->serialPort1->Write(dataforward, 0, dataforward->Length);
-
-
 			break;
 
 		case 'd':
-
-			this->Kommandon->Text = "sväng höger1100 0010";
+			this->Kommandon->Text = "turn forward";
 			this->serialPort1->Write(dataright, 0, dataright->Length);
-
 			break;
 
 		case 'q':
-			this->Kommandon->Text = "sväng vänster-fram 1100 0110 ";
+			this->Kommandon->Text = "turn left-forward";
 			this->serialPort1->Write(dataforward, 0, dataforwardleft->Length);
 			break;
 
 		case 'e':
-			this->Kommandon->Text = "sväng höger-fram 1100 0101";
+			this->Kommandon->Text = "turn right-forward";
 			this->serialPort1->Write(datarforwardright, 0, datarforwardright->Length);
 
 			break;
 		default:
-			this->Kommandon->Text = "fel styrkommando";
+			this->Kommandon->Text = "wrong command";
 			break;
 		}
 	}
-	//else
-	//{
-//		this->Kommandon->Text = "Autonomt läge";
-	//}
-//}
+	else
+	{
+		this->Kommandon->Text = "Autonomous mode";
+	}
+}
 System::Void MyForm::button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
+	/*Opening the serialport when button pressed */
 	auto data = gcnew array < System::Byte > { 12 };
 	this->serialPort1->PortName = this->comboBox1->Text;
 	this->open_closed->Text = "port openeing, waiting";
 	this->serialPort1->Open();
 	this->open_closed->Text = "port open";
 }
-
 System::Void MyForm::button4_Click_1(System::Object^  sender, System::EventArgs^  e) {
+	/* Closing connection if open when button pressed */
 	if (this->serialPort1->IsOpen){
 		this->serialPort1->Close();
 		this->open_closed->Text = "connection closed";
 	}
 }
-System::Void MyForm::Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e) {
-	showing_sensor_window = true;
-	sensorwindow->Show();
-	sensorvalues(10, 10, 10, 10, 10);
-}
 System::Void MyForm::Reset_Click(System::Object^  sender, System::EventArgs^  e) {
+	/*reset the map and matrix with mapinfo*/
 	createarray(image1);
 	x_start = 0;
 	y_start = 8;
 }
 System::Void MyForm::change_control_Click(System::Object^  sender, System::EventArgs^  e){
-	/*if (!Kp_value->Text->Empty && !Ki_value->Text->Empty && !automode)
+	/* sending given controlvalues to robot */
+	if (!Kp_value->Text->Empty && !Ki_value->Text->Empty && !automode)
 	{
-	auto kpvalue = gcnew array < System::Byte > {"some hex value" };
-	auto kivalue = gcnew array < System::Byte > { "some hex value"};
+	auto kpvalue = gcnew array < System::Byte > {};
+	auto kivalue = gcnew array < System::Byte > {};
 	serialPort1->Write(kpvalue, 0,  kpvalue->Length);
 	serialPort1->Write(kivalue, 0, kivalue->Length);
-	}*/
+	}
 }
 System::Void MyForm::calibration_Click(System::Object^  sender, System::EventArgs^  e){
+	/*sends request to robot to calibrate the reflexsensor*/
 	auto tejpref = gcnew array < System::Byte > { CALIBRATE_SENSORS };
 	this->serialPort1->Write(tejpref, 0, 1);
 }
 System::Void MyForm::Reset_Map(){
+	/*reset map*/
 	createarray(image1);
 }
 System::Void MyForm::change_motor_Click(System::Object^  sender, System::EventArgs^  e){
+	/*function to trim the motor*/
 	if (motor->Text->Length == 0){
 		motor->Text = "set motor-trim value";
 	}
@@ -178,66 +176,66 @@ System::Void MyForm::change_motor_Click(System::Object^  sender, System::EventAr
 
 //Serialport
 System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-	//Console::WriteLine("EVENTRAISED");
-	if (serialPort1->BytesToRead > 0){
-	//	Console::WriteLine("--------------BEGIN ------------");
-	//	Console::WriteLine("Initial buffer: " + serialPort1->BytesToRead);
-		count = serialPort1->BytesToRead;
-		int initial = count;
-		int recievedcount = serialPort1->Read(data_recieved_buffer, 0, count);
 
+	/*--------------------****serialport function*****--------------------------
+	|	If there are any bytes to read, find how many and read all of them.		|
+	|	call the myrecievedata function to handle the bytes and allow new		|
+	|	events to be raised! (Invoke is a pointer to a function)				|
+	---------------------------------------------------------------------------*/
+
+	if (serialPort1->BytesToRead > 0){
+		count = serialPort1->BytesToRead;
+		serialPort1->Read(data_recieved_buffer, 0, count);
 		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&MyForm::myrecievedata);
 		this->Invoke(d, gcnew array < Object^ > { 'h' });
-	//	Console::WriteLine("----------- END-----------");
 	}
 }
 
 
 System::Void MyForm::myrecievedata(char status){
-	//Console::WriteLine("invoke");
-	int bufferlength = count;
-	Console::WriteLine("----------- in while -> handling byte" + " " + bufferlength + "-----------");
+	/*------------------****my recieved data function*****----------------------
+	|	The first byte is always a header. Call handle headerfunction to 		|
+	|	see what header it is and how many bytes tp expect. Then if buffer		|
+	|	consists of enough bytes to read all of them handlebyte and	count 		|
+	|	up buffer index and buffer length. If not enough bytes mask them out	|
+	---------------------------------------------------------------------------*/
+
+	int bufferlength = count; //buffer length is the ammount of bytes collected
 	while (!finished)
 	{
-		if (bufferlength > 0){
+		if (bufferlength > 0){ 
 			handleheader(data_recieved_buffer[bufferindex]);
-			if ((bufferlength >= expected_length) && !finished)
+			if ((bufferlength >= expected_length) && !finished) //makes sure that we have enough bytes and that we
+																//didn't recieve a header without any following bytes
 			{
 				handlebyte();
-				bufferindex = bufferindex + expected_length;
-				bufferlength = bufferlength - expected_length;
+				bufferindex = bufferindex + expected_length;  //count up the index if not all bytes are handled
+				bufferlength = bufferlength - expected_length; //take away the bytes just hanled.
 
-				write_position = 0;
+				write_position = 0;  //reset writeposition and expected length.
 				expected_length = 0;
 			}
-			else if (bufferlength < expected_length && bufferlength > 0 && !finished)
+			else if (bufferlength < expected_length && bufferlength > 0 && !finished) //if not enough bytes in buffer
 			{
-				int index = 1;
-				int index_remaining = expected_length - bufferlength;
-				Console::WriteLine("looping buffer..." + bufferlength + "index_remaining = " + index_remaining);
-				while (bufferlength < expected_length )
+				int index = 1; //help index for adding masked bytes into the original buffer without counting up the used buffer index
+				while (bufferlength < expected_length)
 				{
-					if (serialPort1->BytesToRead > 0){
+					if (serialPort1->BytesToRead > 0){ //mask out bytes if there are bytes to read
 						serialPort1->Read(remaining_buffer, 0, 1);
-						int index_remaining_before = expected_length - bufferlength;
-						data_recieved_buffer[bufferindex + bufferlength ] = remaining_buffer[0];
-						Console::WriteLine("added value from loop: " + remaining_buffer[0] + " absoluteindex: " + bufferlength);
-						bufferlength = bufferlength + 1;
-						
+						data_recieved_buffer[bufferindex + bufferlength] = remaining_buffer[0]; //put the masked byte into the buffer
+						bufferlength = bufferlength + 1; //count up the bufferlength
 						index++;
 					}
 
 				}
-				Console::WriteLine("Buffer index 1: " + bufferindex + " bufferlength " + bufferlength);
-				handlebyte();
+				handlebyte(); //handle the message
 				bufferlength = bufferlength - expected_length;
-				Console::WriteLine("Buffer index: " + bufferindex + " bufferlength " + bufferlength);
 				write_position = 0;
 				expected_length = 0;
 				bufferindex = 0;
 				finished = true;
 			}
-			else
+			else 
 			{
 				write_position = 0;
 				expected_length = 0;
@@ -245,7 +243,7 @@ System::Void MyForm::myrecievedata(char status){
 				bufferindex = 0;
 			}
 		}
-		else
+		else //if buffer is 0 then finished
 		{
 			write_position = 0;
 			expected_length = 0;
@@ -254,7 +252,6 @@ System::Void MyForm::myrecievedata(char status){
 		}
 	}
 	finished = false;
-	//Console::WriteLine("----------- Finished While-----------");
 }
 
 
