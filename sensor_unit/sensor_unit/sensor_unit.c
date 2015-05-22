@@ -244,5 +244,5 @@ uint8_t send_odometry_readings()
 	int8_t rotation = (int8_t)(scaled_rotation>>8);
 	
 	int8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, distance, rotation };
-	return i2c_write(CONTROL_UNIT, msg, sizeof(msg));
+	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
 }
