@@ -125,9 +125,13 @@ ISR(ANALOG_COMP_vect)
 	{
 		tape_found = 1;
 
-		i2c_write_byte(GENERAL_CALL, TAPE_FOUND);
+		for (uint8_t i = 0; i < 3; ++i)
+		{
+			if (i2c_write_byte(GENERAL_CALL, TAPE_FOUND))
+				break;
+			_delay_ms(1);
+		}
 
-		_delay_us(500);
 		ACSR |= (1<<ACI); // Avoid double interrupt, requires delay	
 	}
 }
