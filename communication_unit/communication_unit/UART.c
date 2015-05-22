@@ -9,33 +9,54 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "UART.h"
-volatile int i=0;
+#include "I2C.h"
 
 volatile uint8_t StrRxFlag=0;
 ISR(USART0_RX_vect)
 {
+	static uint8_t i = 0;
+	static uint8_t expected_length = 1;
+	
 	buffer[i]=UDR0;
-	StrRxFlag = 1;
-	/*if(buffer[i++]=='\r')
+	switch (buffer[i])
 	{
-		StrRxFlag=1;
-		buffer[i-1]=0x00;
-		i=0;
-	}*/
+		case DRIVE_FORWARD:
+		case DRIVE_BACKWARD:
+		case TURN_LEFT:
+		case TURN_RIGHT:
+		case DRIVE_FORWARD_LEFT:
+		case DRIVE_FORWARD_RIGHT:
+			expected_length = 1;
+			break;
+		case P_PARAMETER:
+		case D_PARAMETER:
+		case MOTOR_TRIM:
+			expected_length = 2;
+			break;
+		default:
+			break;
+	}
+	
+	if (++i == expected_length)
+	{
+		StrRxFlag = 1;
+		i = 0;
+		expected_length = 1;
+	}
 }
 
 void UART_Flush() {
 	buffer[0] = '\0';
 }
 
-uint8_t UART_not_empty(void) {
+uint8_t UART_not_empty() {
 	return StrRxFlag;
 }
 
 void UART_empty(void) {
 	cli();
 	StrRxFlag = 0;
-	for(uint8_t j=0; j<20; j++) {
+	for(uint8_t j=0; j<8; j++) {
 		buffer[j] = 0x00;
 	}
 	sei();
