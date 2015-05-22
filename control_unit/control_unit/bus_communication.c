@@ -97,12 +97,12 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	
 	current_derivative_error = current_derivative_left + current_derivative_right;
 	
+	intersection = (current_derivative_front_left > 350 || current_derivative_front_right > 350);
+	
 	//PORTD &= ~(1<<DEBUG_LED_RED);
 	//PORTD |= (1<<DEBUG_LED_GREEN);
 	
 	/* Ignore bad values */
-	intersection = 0;
-	
 	if (abs(current_derivative_left) > 350 || abs(current_derivative_right) > 350 || rear_left > 300 || front_left > 300 || rear_right > 300 || front_right > 300)
 	{
 		//PORTD &= ~(1<<DEBUG_LED_GREEN);
@@ -129,7 +129,6 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 		{
 			current_distance_error = 0;
 			current_derivative_error = 0;
-			intersection = 1;
 		}
 	}
 }

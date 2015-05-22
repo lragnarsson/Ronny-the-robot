@@ -97,6 +97,10 @@ void search_state()
 	{
 		set_desired_engine_speed(0);
 		
+		uint8_t msg[] = { MAPPED_GOAL, current_position.x, current_position.y};
+		i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+		_delay_ms(10);
+		
 		goal_position = current_position;
 		next_state = return_state;
 		
@@ -157,6 +161,10 @@ void search_state()
 			{
 				set_desired_engine_speed(0);
 				set_current_sqaure_not_wall();
+				
+				uint8_t msg[] = { MAPPED_GOAL, current_position.x, current_position.y};
+				i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+				_delay_ms(10);
 				
 				goal_position = current_position;
 				next_state = return_state;
@@ -254,16 +262,21 @@ void navigate_state()
 		
 		/* Drive one square */
 		int16_t last_distance_travelled = distance_travelled;
+		uint8_t corner_correction = 0;
 		
 		for (;;)
 		{
 			int16_t square_diff = distance_travelled - last_distance_travelled;
+			if (!corner_correction && intersection && square_diff > 130)
+			{
+				int8_t square_diff_error = 190 - square_diff;
+				last_distance_travelled -= square_diff_error;
+				square_diff = distance_travelled - last_distance_travelled;
+				corner_correction = 1;
+			}
 			
-			if (intersection)
-				set_desired_engine_speed(INTERSECTION_SPEED);
-			else
-				set_desired_engine_speed(SUPER_SPEED);
-				
+			set_desired_engine_speed(MAPPING_SPEED);
+			
 			_delay_ms(1);
 			
 			if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
