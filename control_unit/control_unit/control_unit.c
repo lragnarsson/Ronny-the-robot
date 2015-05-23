@@ -372,11 +372,6 @@ void return_state()
 		{
 			int16_t square_diff = distance_travelled - last_distance_travelled;
 			
-			if (intersection)
-				set_desired_engine_speed(INTERSECTION_SPEED);
-			else
-				set_desired_engine_speed(MAPPING_SPEED);
-			
 			_delay_ms(1);
 			
 			if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
@@ -554,6 +549,26 @@ void end_state()
 	}
 	set_desired_engine_speed(0);
 	_delay_ms(200);
+
+	//Send all map data again
+	for(uint8_t i = 0; i<MAP_SIZE; ++i)
+	{
+		for(uint8_t j = 0; j<MAP_SIZE; ++j)
+		{
+			if(map[i][j] == WALL)
+			{
+				uint8_t msg[] = {MAPPED_WALL, i, j};
+				while(!i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg))){_delay_ms(1);}
+				_delay_ms(100);	
+			}
+			if(map[i][j] == NOT_WALL)
+			{
+				uint8_t msg[] = {MAPPED_SQUARE, i, j};
+				while(!i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg))){_delay_ms(1);}
+				_delay_ms(100);
+			}
+		}
+	}
 
 	while (1)
 	{
