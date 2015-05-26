@@ -121,7 +121,7 @@ System::Void PC_unit::PC_unit_KeyPress(System::Object^  sender, System::Windows:
 		this->Kommandon->Text = "Autonomous mode";
 	}
 }
-System::Void PC_unit::button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
+System::Void PC_unit::open_Click(System::Object^  sender, System::EventArgs^  e) {
 	/*Opening the serialport when button pressed */
 	auto data = gcnew array < System::Byte > { 12 };
 	this->serialPort1->PortName = this->comboBox1->Text;
@@ -129,7 +129,7 @@ System::Void PC_unit::button3_Click_1(System::Object^  sender, System::EventArgs
 	this->serialPort1->Open();
 	this->open_closed->Text = "port open";
 }
-System::Void PC_unit::button4_Click_1(System::Object^  sender, System::EventArgs^  e) {
+System::Void PC_unit::close_Click(System::Object^  sender, System::EventArgs^  e) {
 	/* Closing connection if open when button pressed */
 	if (this->serialPort1->IsOpen){
 		this->serialPort1->Close();
@@ -145,16 +145,6 @@ System::Void PC_unit::Reset_Click(System::Object^  sender, System::EventArgs^  e
 		for (int j = 0; j < 33; ++j){
 			map_squares[i, j] = 0;
 		}
-	}
-}
-System::Void PC_unit::change_control_Click(System::Object^  sender, System::EventArgs^  e){
-	/* sending given controlvalues to robot */
-	if (!Kp_value->Text->Empty && !Ki_value->Text->Empty && !automode)
-	{
-	auto kpvalue = gcnew array < System::Byte > {};
-	auto kivalue = gcnew array < System::Byte > {};
-	serialPort1->Write(kpvalue, 0,  kpvalue->Length);
-	serialPort1->Write(kivalue, 0, kivalue->Length);
 	}
 }
 System::Void PC_unit::calibration_Click(System::Object^  sender, System::EventArgs^  e){
@@ -177,27 +167,40 @@ System::Void PC_unit::change_motor_Click(System::Object^  sender, System::EventA
 		this->serialPort1->Write(motor_trim_value, 0, 2);
 	}
 }
+System::Void PC_unit::change_Kp_Click(System::Object^  sender, System::EventArgs^  e) {
+	if (Kp_value->Text->Length != 0)
+	{
+		auto kpvalue = gcnew array < System::Byte > {P_PARAMETER, (Byte)Convert::ToSByte(Kp_value)};
+		serialPort1->Write(kpvalue, 0, kpvalue->Length);
+	}
 
+}
+System::Void PC_unit::change_Kd_Click(System::Object^  sender, System::EventArgs^  e) {
+	if (Kd_value->Text->Length != 0)
+	{
+		auto kdvalue = gcnew array < System::Byte > {D_PARAMETER, (Byte)Convert::ToSByte(Kd_value)};
+		serialPort1->Write(kdvalue, 0, kdvalue->Length);
+	}
+}
 
 //Serialport
-System::Void PC_unit::serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
+System::Void PC_unit::serialPort1_DataReceived(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
 
 	/*--------------------****serialport function*****--------------------------
 	|	If there are any bytes to read, find how many and read all of them.		|
-	|	call the myrecievedata function to handle the bytes and allow new		|
+	|	call the recievedata function to handle the bytes and allow new		|
 	|	events to be raised! (Invoke is a pointer to a function)				|
 	---------------------------------------------------------------------------*/
 
 	if (serialPort1->BytesToRead > 0){
 		count = serialPort1->BytesToRead;
 		serialPort1->Read(data_recieved_buffer, 0, count);
-		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&PC_unit::myrecievedata);
+		recievedata_delegate^ d = gcnew recievedata_delegate(&PC_unit::recievedata);
 		this->Invoke(d, gcnew array < Object^ > { 'h' });
 	}
 }
 
-
-System::Void PC_unit::myrecievedata(char status){
+System::Void PC_unit::recievedata(char status){
 	/*------------------****my recieved data function*****----------------------
 	|	The first byte is always a header. Call handle headerfunction to 		|
 	|	see what header it is and how many bytes tp expect. Then if buffer		|
@@ -259,7 +262,6 @@ System::Void PC_unit::myrecievedata(char status){
 	finished = false;
 }
 
-
 System::Void PC_unit::handleheader(unsigned char byte){
 
 	if (write_position == 0)  //If readposition = 0 we have a header. 
@@ -267,30 +269,31 @@ System::Void PC_unit::handleheader(unsigned char byte){
 		switch (byte)
 		{
 		case ABSOLUTEVALUE: //Absolutevalue x,y (position)
-			Console::WriteLine("Header: ABSOLUTEVALUE ");
+			//Console::WriteLine("Header: ABSOLUTEVALUE ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
 		case AUTOMODE: //Auto mode
+			SetText("Auto mode", Kommandon);
 			write_position = 0;
 			automode = true;
 			finished = true;
 			break;
 		case MANUALMODE: //Manual mode
+			SetText("Manual mode", Kommandon);
 			write_position = 0;
 			automode = false;
 			finished = true;
-			SetText("manualmode", Kommandon);
 			break;
 		case DRIVABLE_SQUARE: //drivalbe square
-			Console::WriteLine("Header: DRIVALBE_SQUARE ");
+			//Console::WriteLine("Header: DRIVALBE_SQUARE ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
 		case DISTRESSEDFOUND: //Distressed found
-			Console::WriteLine("Header: DISTRESSEDFOUND");
+			//Console::WriteLine("Header: DISTRESSEDFOUND");
 			expected_length = 3;
 			header = byte;
 			break;
@@ -300,19 +303,19 @@ System::Void PC_unit::handleheader(unsigned char byte){
 			++write_position;
 			break;
 		case WALL:
-			Console::WriteLine("Header: WALL ");
+			//Console::WriteLine("Header: WALL ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
 		case WHEELENCODERS://Wheelencodervärden
-			Console::WriteLine("Header: WHEELENCODERS ");
+			//Console::WriteLine("Header: WHEELENCODERS ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
 		case TEJP_FOUND: //Tejpbit funnen.
-			Console::WriteLine("TEJP FOUND");
+			//Console::WriteLine("TEJP FOUND");
 			finished = true;
 			write_position = 0;
 			tejp_found = true;
@@ -323,7 +326,6 @@ System::Void PC_unit::handleheader(unsigned char byte){
 			++write_position;
 			break;
 		default:
-			Console::WriteLine("Header: WIIIEEERRRDOOO HEADER!!!! ");
 			finished = true;
 			break;
 		}
@@ -335,10 +337,8 @@ System::Void PC_unit::handlebyte(){
 	switch (header)
 	{
 	case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
-		Console::WriteLine("ABSOLUTEVALUE PREV:  X " + current_xpos + "Y " + current_ypos);
 		current_xpos = data_recieved_buffer[bufferindex + 1];
 		current_ypos = data_recieved_buffer[bufferindex + 2];
-		Console::WriteLine("ABSOLUTEVALUE:  X " + current_xpos + "Y " + current_ypos);
 		move_grid(current_xpos, current_ypos);
 		update_map();
 		current_robot = false;
@@ -348,7 +348,6 @@ System::Void PC_unit::handlebyte(){
 		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
 		move_grid(drivablesquare_xpos, drivablesquare_ypos);
 		update_map();
-		Console::WriteLine("DRIVBLE_SQUARE: X-pos " + drivablesquare_xpos + "Y-pos " + drivablesquare_ypos);
 		break;
 	case DISTRESSEDFOUND: //Nödställd funnen
 		distressedfound_xpos = data_recieved_buffer[bufferindex + 1];
@@ -356,7 +355,6 @@ System::Void PC_unit::handlebyte(){
 		map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
 		move_grid(distressedfound_xpos, distressedfound_ypos);
 		update_map();
-		Console::WriteLine("DISTRESSEDFOUND: X-pos " + wall_xpos + "Y-pos " + wall_ypos);
 		break;
 	case WALL:
 		wall_xpos = data_recieved_buffer[bufferindex + 1];
@@ -364,7 +362,6 @@ System::Void PC_unit::handlebyte(){
 		map_squares[wall_xpos, wall_ypos] = 'W';
 		move_grid(wall_xpos, wall_ypos);
 		update_map();
-		Console::WriteLine("WALL: X-pos " + wall_xpos + "Y-pos " + wall_ypos);
 		break;
 	case SENSOR_VALUES:  //Dealing with sensorvalues
 	{
@@ -394,36 +391,18 @@ System::Void PC_unit::handlebyte(){
 		break;
 	case WHEELENCODERS:
 		added_distance = data_recieved_buffer[bufferindex + 1];
+		added_distance_conveted = (int)added_distance;
 		current_distance = current_distance + added_distance;
 		SetText(Convert::ToString(current_distance), totaldistance);
 		break;
 	case TEJP_REF: //Referensvärde tejp
 		tejp_ref_value = data_recieved_buffer[bufferindex +1];
-		SetText("tejpref =" + tejp_ref_value, Kommandon);
 		break;
 	default:
 		break;
 	}
 }
 
-//using data from serialport
-System::Void PC_unit::changeIR(unsigned int front, unsigned int front_left, unsigned int front_right, unsigned int rear_left, unsigned int rear_right){
-
-	String^ s_front = Convert::ToString(front);
-	this->IRsensor_Front->Text = s_front;
-
-	String^ s_front_left = Convert::ToString(front_left);
-	this->IRsensor_VF->Text = s_front_left;
-
-	String^ s_front_right = Convert::ToString(front_right);
-	this->IRsensor_HF->Text = s_front_right;
-
-	String^ s_rear_left = Convert::ToString(rear_left);
-	this->IRsensor_VB->Text = s_rear_left;
-
-	String^ s_rear_right = Convert::ToString(rear_left);
-	this->IRsensor_HB->Text = s_rear_right;
-}
 System::Void PC_unit::SetText(String^ text, TextBox^ textbox){
 	if (textbox->InvokeRequired){
 		SetTextDelegate^ d = gcnew SetTextDelegate(&PC_unit::SetText);
@@ -478,8 +457,7 @@ System::Void PC_unit::move_grid(unsigned int x_newrecieved, unsigned int y_newre
 		y_start = y_newrecieved;
 	}
 	else if (x_newrecieved < x_start){
-		Console::Write("Impossible coordinates" + x_newrecieved); // dels kommer vi inte kunna få koord mindre än 0 (från början) 
-		//o har vi flyttat ned gridet kommer vi aldrig kunna komma utanför uppåt! 
+		Console::Write("Impossible coordinates" + x_newrecieved);  
 	}
 	else{
 		return;
