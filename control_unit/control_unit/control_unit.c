@@ -149,7 +149,7 @@ void search_state()
 		
 		if (sqaure_diff > 400 || (sqaure_diff > 100 && front_wall_distance < 230))
 		{
-			//PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+			PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 			is_sending = 0;
 			
 			/* Update map stuff */
@@ -281,7 +281,7 @@ void navigate_state()
 			
 			if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
 			{
-				//PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+				PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 				is_sending = 0;
 				move_map_position_forward();
 				break;
@@ -300,7 +300,7 @@ void navigate_state()
 void return_state()
 {
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
-	PORTD |= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+	PORTD |= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	
 	/*
 	set_desired_engine_speed(0);
@@ -376,7 +376,7 @@ void return_state()
 			
 			if (square_diff > 400 || (square_diff > 100 && front_wall_distance < 230))
 			{
-				//PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
+				PORTD ^= (1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 				is_sending = 0;
 				
 				/* Update map stuff */
@@ -551,9 +551,9 @@ void end_state()
 	_delay_ms(200);
 
 	//Send all map data again
-	for(uint8_t i = 0; i<MAP_SIZE; ++i)
+	for(uint8_t i = 1; i<MAP_SIZE-1; ++i)
 	{
-		for(uint8_t j = 0; j<MAP_SIZE; ++j)
+		for(uint8_t j = 1; j<MAP_SIZE-1; ++j)
 		{
 			if(map[i][j] == WALL)
 			{
@@ -638,7 +638,7 @@ void rotate_180()
 		force_engine_direction(ENGINE_DIRECTION_RIGHT);
 		_delay_ms(250);
 		force_engine_speed(TURN_SPEED);
-		while (absolute_rotation - last_absolute_rotation > -200)
+		while (absolute_rotation - last_absolute_rotation > -190)
 		{
 			_delay_ms(1);
 		}
@@ -649,7 +649,7 @@ void rotate_180()
 		force_engine_direction(ENGINE_DIRECTION_LEFT);
 		_delay_ms(250);
 		force_engine_speed(TURN_SPEED);
-		while (absolute_rotation - last_absolute_rotation < 200)
+		while (absolute_rotation - last_absolute_rotation < 190)
 		{
 			_delay_ms(1);
 		}

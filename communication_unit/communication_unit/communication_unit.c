@@ -13,7 +13,7 @@
 #include "UART.h"
 #include "I2C.h"
 //#include "sound.c"
-
+int8_t moved_distance = 0;
 void init_personality() {
 	TCCR1A = (0<<WGM11)|(0<<WGM10)|(1<<COM1A1)|(0<<COM1A0);
 	TCCR1B = (1<<WGM13)|(0<<WGM12)|(0<<CS12)|(1<<CS11)|(0<<CS10);
@@ -52,9 +52,16 @@ void handle_received_message() {
 		case MAPPED_SQUARE:
 		case MAPPED_WALL:
 		case MAPPED_GOAL:
-		case MOVED_DISTANCE_AND_ANGLE:
 			for(uint8_t j=0; j<3; j++) {
 				Send_to_PC(busbuffer[j]);
+			}
+			break;
+		case MOVED_DISTANCE_AND_ANGLE:
+			moved_distance += (int8_t*)busbuffer[1];
+			if (abs(moved_distance) >= 100) {
+				Send_to_PC(busbuffer[0]);
+				Send_to_PC(moved_distance);
+				moved_distance = 0;
 			}
 			break;
 		case SENSOR_READINGS:

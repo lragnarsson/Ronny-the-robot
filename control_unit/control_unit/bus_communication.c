@@ -97,7 +97,7 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	
 	current_derivative_error = current_derivative_left + current_derivative_right;
 	
-	intersection = (current_derivative_front_left > 350 || current_derivative_front_right > 350);
+	intersection = 0;// (current_derivative_front_left > 350 || current_derivative_front_right > 350);
 	
 	//PORTD &= ~(1<<DEBUG_LED_RED);
 	//PORTD |= (1<<DEBUG_LED_GREEN);
