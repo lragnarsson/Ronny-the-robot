@@ -1,21 +1,21 @@
-#include "MyForm.h"
+#include "PC_unit.h"
 
 
 using namespace System;
 using namespace System::Windows::Forms;
-using namespace GUIronny;
+using namespace PC_unit_namespace;
 [STAThread]
 
 void main(array<String^>^args)
 {
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);
-	GUIronny::MyForm form;
+	PC_unit_namespace::PC_unit form;
 	Application::Run(%form);
 
 }
 
-void MyForm::findPorts(void)
+void PC_unit::findPorts(void)
 {
 	// get port names
 	array<Object^>^ objectArray = SerialPort::GetPortNames();
@@ -25,7 +25,7 @@ void MyForm::findPorts(void)
 
 //Keypressevents and clicks
 
-System::Void MyForm::MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+System::Void PC_unit::PC_unit_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 	/*Function to make the keys "light up" when pressed*/
 	
 	switch (e->KeyCode){
@@ -46,7 +46,7 @@ System::Void MyForm::MyForm_KeyDown(System::Object^  sender, System::Windows::Fo
 		break;
 	}
 }
-System::Void MyForm::MyForm_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+System::Void PC_unit::PC_unit_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 	/*Function to make the keys "light up" when pressed*/
 	switch (e->KeyCode){
 	case Keys::A:
@@ -66,7 +66,7 @@ System::Void MyForm::MyForm_KeyUp(System::Object^  sender, System::Windows::Form
 		break;
 	}
 }
-System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
+System::Void PC_unit::PC_unit_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
 	/*Controles the steering, sending the correct headers to the robot*/
 	
 	auto dataleft = gcnew array < System::Byte > { 0xC3 };
@@ -121,7 +121,7 @@ System::Void MyForm::MyForm_KeyPress(System::Object^  sender, System::Windows::F
 		this->Kommandon->Text = "Autonomous mode";
 	}
 }
-System::Void MyForm::button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
+System::Void PC_unit::button3_Click_1(System::Object^  sender, System::EventArgs^  e) {
 	/*Opening the serialport when button pressed */
 	auto data = gcnew array < System::Byte > { 12 };
 	this->serialPort1->PortName = this->comboBox1->Text;
@@ -129,14 +129,14 @@ System::Void MyForm::button3_Click_1(System::Object^  sender, System::EventArgs^
 	this->serialPort1->Open();
 	this->open_closed->Text = "port open";
 }
-System::Void MyForm::button4_Click_1(System::Object^  sender, System::EventArgs^  e) {
+System::Void PC_unit::button4_Click_1(System::Object^  sender, System::EventArgs^  e) {
 	/* Closing connection if open when button pressed */
 	if (this->serialPort1->IsOpen){
 		this->serialPort1->Close();
 		this->open_closed->Text = "connection closed";
 	}
 }
-System::Void MyForm::Reset_Click(System::Object^  sender, System::EventArgs^  e) {
+System::Void PC_unit::Reset_Click(System::Object^  sender, System::EventArgs^  e) {
 	/*reset the map and matrix with mapinfo*/
 	createarray(image1);
 	x_start = 0;
@@ -147,7 +147,7 @@ System::Void MyForm::Reset_Click(System::Object^  sender, System::EventArgs^  e)
 		}
 	}
 }
-System::Void MyForm::change_control_Click(System::Object^  sender, System::EventArgs^  e){
+System::Void PC_unit::change_control_Click(System::Object^  sender, System::EventArgs^  e){
 	/* sending given controlvalues to robot */
 	if (!Kp_value->Text->Empty && !Ki_value->Text->Empty && !automode)
 	{
@@ -157,16 +157,16 @@ System::Void MyForm::change_control_Click(System::Object^  sender, System::Event
 	serialPort1->Write(kivalue, 0, kivalue->Length);
 	}
 }
-System::Void MyForm::calibration_Click(System::Object^  sender, System::EventArgs^  e){
+System::Void PC_unit::calibration_Click(System::Object^  sender, System::EventArgs^  e){
 	/*sends request to robot to calibrate the reflexsensor*/
 	auto tejpref = gcnew array < System::Byte > { CALIBRATE_SENSORS };
 	this->serialPort1->Write(tejpref, 0, 1);
 }
-System::Void MyForm::Reset_Map(){
+System::Void PC_unit::Reset_Map(){
 	/*reset map*/
 	createarray(image1);
 }
-System::Void MyForm::change_motor_Click(System::Object^  sender, System::EventArgs^  e){
+System::Void PC_unit::change_motor_Click(System::Object^  sender, System::EventArgs^  e){
 	/*function to trim the motor*/
 	if (motor->Text->Length == 0){
 		motor->Text = "set motor-trim value";
@@ -180,7 +180,7 @@ System::Void MyForm::change_motor_Click(System::Object^  sender, System::EventAr
 
 
 //Serialport
-System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
+System::Void PC_unit::serialPort1_DataReceived_1(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
 
 	/*--------------------****serialport function*****--------------------------
 	|	If there are any bytes to read, find how many and read all of them.		|
@@ -191,13 +191,13 @@ System::Void MyForm::serialPort1_DataReceived_1(System::Object^  sender, System:
 	if (serialPort1->BytesToRead > 0){
 		count = serialPort1->BytesToRead;
 		serialPort1->Read(data_recieved_buffer, 0, count);
-		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&MyForm::myrecievedata);
+		myrecievedata_delegate^ d = gcnew myrecievedata_delegate(&PC_unit::myrecievedata);
 		this->Invoke(d, gcnew array < Object^ > { 'h' });
 	}
 }
 
 
-System::Void MyForm::myrecievedata(char status){
+System::Void PC_unit::myrecievedata(char status){
 	/*------------------****my recieved data function*****----------------------
 	|	The first byte is always a header. Call handle headerfunction to 		|
 	|	see what header it is and how many bytes tp expect. Then if buffer		|
@@ -260,7 +260,7 @@ System::Void MyForm::myrecievedata(char status){
 }
 
 
-System::Void MyForm::handleheader(unsigned char byte){
+System::Void PC_unit::handleheader(unsigned char byte){
 
 	if (write_position == 0)  //If readposition = 0 we have a header. 
 	{
@@ -331,7 +331,7 @@ System::Void MyForm::handleheader(unsigned char byte){
 		return;
 	}
 }
-System::Void MyForm::handlebyte(){
+System::Void PC_unit::handlebyte(){
 
 	switch (header)
 	{
@@ -395,11 +395,6 @@ System::Void MyForm::handlebyte(){
 		SetText(Convert::ToString(rear_left), IRsensor_VB);
 		SetText(Convert::ToString(rear_right), IRsensor_HB);
 
-		if (showing_sensor_window)
-		{
-			sensorvalues(front, front_left, front_right, rear_right, rear_left);
-		}
-
 	}
 		break;
 	case WHEELENCODERS:
@@ -427,7 +422,7 @@ System::Void MyForm::handlebyte(){
 }
 
 //using data from serialport
-System::Void MyForm::changeIR(unsigned int front, unsigned int front_left, unsigned int front_right, unsigned int rear_left, unsigned int rear_right){
+System::Void PC_unit::changeIR(unsigned int front, unsigned int front_left, unsigned int front_right, unsigned int rear_left, unsigned int rear_right){
 
 	String^ s_front = Convert::ToString(front);
 	this->IRsensor_Front->Text = s_front;
@@ -444,9 +439,9 @@ System::Void MyForm::changeIR(unsigned int front, unsigned int front_left, unsig
 	String^ s_rear_right = Convert::ToString(rear_left);
 	this->IRsensor_HB->Text = s_rear_right;
 }
-System::Void MyForm::SetText(String^ text, TextBox^ textbox){
+System::Void PC_unit::SetText(String^ text, TextBox^ textbox){
 	if (textbox->InvokeRequired){
-		SetTextDelegate^ d = gcnew SetTextDelegate(&MyForm::SetText);
+		SetTextDelegate^ d = gcnew SetTextDelegate(&PC_unit::SetText);
 		textbox->Invoke(d, gcnew array < Object^ > { text, textbox });
 	}
 	else {
@@ -455,7 +450,7 @@ System::Void MyForm::SetText(String^ text, TextBox^ textbox){
 }
 
 //Map
-System::Void MyForm::createarray(Bitmap^ image1){
+System::Void PC_unit::createarray(Bitmap^ image1){
 
 	for (int y = 0; y < 17; y++)
 	{
@@ -487,7 +482,7 @@ System::Void MyForm::createarray(Bitmap^ image1){
 	pictureBox1->Image = image1;
 }
 
-System::Void MyForm::move_grid(unsigned int x_newrecieved, unsigned int y_newrecieved){
+System::Void PC_unit::move_grid(unsigned int x_newrecieved, unsigned int y_newrecieved){
 	if (x_newrecieved > x_start + 16){
 		x_start = x_newrecieved - 16;
 	}
@@ -506,7 +501,7 @@ System::Void MyForm::move_grid(unsigned int x_newrecieved, unsigned int y_newrec
 	}
 }
 
-System::Void MyForm::update_map(){
+System::Void PC_unit::update_map(){
 	if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos){
 		map_squares[current_xpos, current_ypos] = 'C';
 	}
@@ -522,7 +517,7 @@ System::Void MyForm::update_map(){
 	}
 }
 
-System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status){
+System::Void PC_unit::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status){
 
 	switch (status)
 	{
@@ -627,24 +622,7 @@ System::Void MyForm::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status){
 	}
 	Show_Map();
 }
-System::Void MyForm::Show_Map(){
+System::Void PC_unit::Show_Map(){
 	pictureBox1->Image = image1;
-}
-
-//Grafer_data
-System::Void MyForm::sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5){
-	//Grafer_data^ grafer = gcnew Grafer_data();
-	if (sensorwindow->dataGridView1->InvokeRequired){
-		sensorvaluesDelegate^ d = gcnew sensorvaluesDelegate(&MyForm::sensorvalues);
-		sensorwindow->dataGridView1->Invoke(d, gcnew array < Object^ > {byte1, byte2, byte3, byte4, byte5 });
-	}
-	else{
-		sensorwindow->dataGridView1->Rows[0]->Cells[2]->Value = byte1;
-		sensorwindow->dataGridView1->Rows[0]->Cells[3]->Value = byte2;
-		sensorwindow->dataGridView1->Rows[0]->Cells[4]->Value = byte3;
-		sensorwindow->dataGridView1->Rows[0]->Cells[5]->Value = byte4;
-		sensorwindow->dataGridView1->Rows[0]->Cells[6]->Value = byte5;
-		sensorwindow->dataGridView1->Rows->Add();
-	}
 }
 

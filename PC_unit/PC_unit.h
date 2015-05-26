@@ -1,5 +1,4 @@
 #pragma once
-#include "Grafer_data.h"
 #include <windows.h>
 //#include <stdafx.h>
 //#pragma comment (lib, "th32.lib")
@@ -33,7 +32,7 @@ TODO v17:
 #define CALIBRATE_SENSORS 0xD0
 #define MOTOR_TRIMM 0XC9
 
-namespace GUIronny {
+namespace PC_unit_namespace {
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -48,12 +47,12 @@ namespace GUIronny {
 	using namespace System::Collections::Generic;
 
 	/// <summary>
-	/// Summary for MyForm
+	/// Summary for PC_unit
 	/// </summary>
-	public ref class MyForm : public System::Windows::Forms::Form
+	public ref class PC_unit : public System::Windows::Forms::Form
 	{
 	public:
-		MyForm(void)
+		PC_unit(void)
 		{
 			//CheckForIllegalCrossThreadCalls = false;
 			InitializeComponent();
@@ -283,12 +282,6 @@ namespace GUIronny {
 		static bool finished = false;
 		static int bufferindex = 0;
 
-		//Sensor window
-		static Grafer_data^ sensorwindow = (gcnew Grafer_data());
-		static bool showing_sensor_window = false;
-		static int stracka = 0;
-		static int vinkel = 0;
-
 		//Others
 private: static System::Windows::Forms::Button^  Reset;
 private: static System::Windows::Forms::Label^  label3;
@@ -307,7 +300,7 @@ private: static System::Windows::Forms::Button^  calibration;
 		 /// <summary>
 		 /// Clean up any resources being used.
 		 /// </summary>
-		 ~MyForm()
+		 ~PC_unit()
 		 {
 			 if (components)
 			 {
@@ -355,7 +348,7 @@ private: static System::ComponentModel::IContainer^  components;
 		void InitializeComponent(void)
 		{
 			this->components = (gcnew System::ComponentModel::Container());
-			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(MyForm::typeid));
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(PC_unit::typeid));
 			this->Ronny_robot = (gcnew System::Windows::Forms::PictureBox());
 			this->Sensorvärden = (gcnew System::Windows::Forms::Label());
 			this->Leftarrow_unpressed = (gcnew System::Windows::Forms::PictureBox());
@@ -569,7 +562,7 @@ private: static System::ComponentModel::IContainer^  components;
 			// 
 			this->serialPort1->BaudRate = 115200;
 			this->serialPort1->PortName = L"COM3";
-			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &MyForm::serialPort1_DataReceived_1);
+			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &PC_unit::serialPort1_DataReceived_1);
 			// 
 			// button3
 			// 
@@ -579,7 +572,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->button3->TabIndex = 15;
 			this->button3->Text = L"Open";
 			this->button3->UseVisualStyleBackColor = true;
-			this->button3->Click += gcnew System::EventHandler(this, &MyForm::button3_Click_1);
+			this->button3->Click += gcnew System::EventHandler(this, &PC_unit::button3_Click_1);
 			// 
 			// button4
 			// 
@@ -589,7 +582,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->button4->TabIndex = 16;
 			this->button4->Text = L"Close";
 			this->button4->UseVisualStyleBackColor = true;
-			this->button4->Click += gcnew System::EventHandler(this, &MyForm::button4_Click_1);
+			this->button4->Click += gcnew System::EventHandler(this, &PC_unit::button4_Click_1);
 			// 
 			// Kommandon
 			// 
@@ -611,7 +604,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->Sensordata->TabIndex = 18;
 			this->Sensordata->Text = L"Sensordata";
 			this->Sensordata->UseVisualStyleBackColor = true;
-			this->Sensordata->Click += gcnew System::EventHandler(this, &MyForm::Sensordata_Click_1);
+			//this->Sensordata->Click += gcnew System::EventHandler(this, &PC_unit::Sensordata_Click_1);
 			// 
 			// label1
 			// 
@@ -674,7 +667,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->Reset->TabIndex = 24;
 			this->Reset->Text = L"Reset Map";
 			this->Reset->UseVisualStyleBackColor = true;
-			this->Reset->Click += gcnew System::EventHandler(this, &MyForm::Reset_Click);
+			this->Reset->Click += gcnew System::EventHandler(this, &PC_unit::Reset_Click);
 			// 
 			// label3
 			// 
@@ -725,7 +718,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->change_control->TabIndex = 30;
 			this->change_control->Text = L"Change parameteres";
 			this->change_control->UseVisualStyleBackColor = true;
-			this->change_control->Click += gcnew System::EventHandler(this, &MyForm::change_control_Click);
+			this->change_control->Click += gcnew System::EventHandler(this, &PC_unit::change_control_Click);
 			// 
 			// label6
 			// 
@@ -753,7 +746,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->calibration->TabIndex = 33;
 			this->calibration->Text = L"Calibrate Tejpreference";
 			this->calibration->UseVisualStyleBackColor = true;
-			this->calibration->Click += gcnew System::EventHandler(this, &MyForm::calibration_Click);
+			this->calibration->Click += gcnew System::EventHandler(this, &PC_unit::calibration_Click);
 			// 
 			// motor
 			// 
@@ -779,9 +772,9 @@ private: static System::ComponentModel::IContainer^  components;
 			this->change_motor->TabIndex = 36;
 			this->change_motor->Text = L"Change";
 			this->change_motor->UseVisualStyleBackColor = true;
-			this->change_motor->Click += gcnew System::EventHandler(this, &MyForm::change_motor_Click);
+			this->change_motor->Click += gcnew System::EventHandler(this, &PC_unit::change_motor_Click);
 			// 
-			// MyForm
+			// PC_unit
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
@@ -825,11 +818,11 @@ private: static System::ComponentModel::IContainer^  components;
 			this->Controls->Add(this->Leftarrow_unpressed);
 			this->Controls->Add(this->Leftarrow_pressed);
 			this->KeyPreview = true;
-			this->Name = L"MyForm";
+			this->Name = L"PC_unit";
 			this->Text = L"GUI Ronny";
-			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &MyForm::MyForm_KeyDown);
-			this->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &MyForm::MyForm_KeyPress);
-			this->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &MyForm::MyForm_KeyUp);
+			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &PC_unit::PC_unit_KeyDown);
+			this->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &PC_unit::PC_unit_KeyPress);
+			this->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &PC_unit::PC_unit_KeyUp);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Ronny_robot))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_unpressed))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_pressed))->EndInit();
@@ -851,12 +844,12 @@ private: static System::ComponentModel::IContainer^  components;
 	private: void findPorts(void);
 
 			 // Keypressevents & click
-	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
-	private: System::Void MyForm_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
-	private: System::Void MyForm_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e);
+	private: System::Void PC_unit_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
+	private: System::Void PC_unit_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
+	private: System::Void PC_unit_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e);
 	private: System::Void button3_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void button4_Click_1(System::Object^  sender, System::EventArgs^  e);
-	private: System::Void Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e);
+	//private: System::Void Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void Reset_Click(System::Object^  sender, System::EventArgs^  e);
 			 static System::Void Reset_Map();
 			 //Data recieved from serialport.
@@ -881,7 +874,7 @@ private: static System::ComponentModel::IContainer^  components;
 
 			 //Grafer_data
 	private: delegate void sensorvaluesDelegate(int byte1, int byte2, int byte3, int byte4, int byte5);
-	private: static void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5);
+	//private: static void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5);
 
 
 	private: System::Void change_control_Click(System::Object^  sender, System::EventArgs^  e);

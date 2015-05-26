@@ -14,7 +14,8 @@
     <ProjectGuid>{287A03E9-7F05-468B-A99A-0FB6B2BC423F}</ProjectGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
-    <RootNamespace>GUIronny</RootNamespace>
+    <RootNamespace>PC_unit_namespace</RootNamespace>
+    <ProjectName>PC_unit</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -79,23 +80,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Grafer_data.cpp" />
-    <ClCompile Include="MyForm.cpp" />
+    <ClCompile Include="PC_unit.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Grafer_data.h">
-      <FileType>CppForm</FileType>
-    </ClInclude>
-    <ClInclude Include="MyForm.h">
+    <ClInclude Include="PC_unit.h">
       <FileType>CppForm</FileType>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Grafer_data.resx">
-      <DependentUpon>Grafer_data.h</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MyForm.resx">
-      <DependentUpon>MyForm.h</DependentUpon>
+    <EmbeddedResource Include="PC_unit.resx">
+      <DependentUpon>PC_unit.h</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
