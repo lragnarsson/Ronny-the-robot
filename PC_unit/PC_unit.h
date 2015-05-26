@@ -54,178 +54,10 @@ namespace PC_unit_namespace {
 	public:
 		PC_unit(void)
 		{
-			//CheckForIllegalCrossThreadCalls = false;
 			InitializeComponent();
 			findPorts();
 
 			createarray(image1);
-
-			/*data_recieved_buffer[0] = 0x33;
-
-			data_recieved_buffer[1] = 16;
-			data_recieved_buffer[2] = 16;
-			data_recieved_buffer[3] = 45;
-			data_recieved_buffer[4] = 465;
-			data_recieved_buffer[5] = 654;
-			data_recieved_buffer[6] = 654;
-			data_recieved_buffer[7] = 65;
-			data_recieved_buffer[8] = 5654;
-			data_recieved_buffer[9] = 654;
-			data_recieved_buffer[10] = 623;
-			//header =
-			//handlebyte();
-			data_recieved_buffer[11] = 0x34;
-			data_recieved_buffer[12] = 16;
-			data_recieved_buffer[13] = 17;
-			//header = WALL;
-			//handlebyte();
-			data_recieved_buffer[14] = 0x34;
-			data_recieved_buffer[15] = 16;
-			data_recieved_buffer[16] = 15;
-			count = 17;
-			//header = WALL;
-			//handlebyte();
-
-			
-			/*
-			//1
-			data_recieved_buffer[0] = 16;
-
-			data_recieved_buffer[1] = 16;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 16;
-			data_recieved_buffer[1] = 17;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 16;
-			data_recieved_buffer[1] = 15;
-			header = WALL;
-			handlebyte();
-			//2
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 16;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 15;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 17;
-			header = WALL;
-			handlebyte();
-			//3
-			data_recieved_buffer[0] = 14;
-			data_recieved_buffer[1] = 16;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 14;
-			data_recieved_buffer[1] = 17;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 13;
-			data_recieved_buffer[1] = 16;
-			header = WALL;
-			handlebyte();
-			//4
-			data_recieved_buffer[0] = 14;
-			data_recieved_buffer[1] = 15;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 13;
-			data_recieved_buffer[1] = 15;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 14;
-			data_recieved_buffer[1] = 14;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 15;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 12;
-			data_recieved_buffer[1] = 6;
-			header = ABSOLUTEVALUE;
-			handlebyte();*/
-
-			/*data_recieved_buffer[0] = 16;
-			data_recieved_buffer[1] = 16;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 17;
-			data_recieved_buffer[1] = 16;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 15;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 14;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 13;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 12;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 11;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 10;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 9;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 15;
-			data_recieved_buffer[1] = 8;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 14;
-			data_recieved_buffer[1] = 8;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 13;
-			data_recieved_buffer[1] = 8;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 13;
-			data_recieved_buffer[1] = 7;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 13;
-			data_recieved_buffer[1] = 6;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 12;
-			data_recieved_buffer[1] = 6;
-			header = DRIVABLE_SQUARE;
-			handlebyte();
-			data_recieved_buffer[0] = 12;
-			data_recieved_buffer[1] = 5;
-			header = WALL;
-			handlebyte();
-			data_recieved_buffer[0] = 12;
-			data_recieved_buffer[1] = 6;
-			header = ABSOLUTEVALUE;
-			handlebyte();*/
-
-
-
-			//initvalues();
-
-			//
-			//TODO: Add the constructor code here
-			//
 		}
 
 
@@ -244,10 +76,10 @@ namespace PC_unit_namespace {
 		static unsigned int current_xpos = 16;
 		static unsigned int current_ypos = 16;
 		static unsigned int current_angle = 0;
-		static unsigned int drivablesquare_xpos = 16;
-		static unsigned int drivablesquare_ypos = 16;
 		static unsigned int distressedfound_xpos = 0;
 		static unsigned int distressedfound_ypos = 0;
+		static unsigned int drivablesquare_xpos = 0;
+		static unsigned int drivablesquare_ypos = 0;
 		static unsigned int wall_xpos = 0;
 		static unsigned int wall_ypos = 0;
 		static Byte tejp_ref_value = 0;
@@ -281,21 +113,36 @@ namespace PC_unit_namespace {
 		static int count = 0;
 		static bool finished = false;
 		static int bufferindex = 0;
+	private: System::Windows::Forms::Button^  Reset;
+	protected:
+	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::Label^  label4;
+	private: System::Windows::Forms::TextBox^  Kp_value;
+	private: System::Windows::Forms::Label^  label5;
+	private: System::Windows::Forms::TextBox^  Ki_value;
+	private: System::Windows::Forms::Button^  change_control;
+	private: System::Windows::Forms::Label^  label6;
+	private: System::Windows::Forms::TextBox^  totaldistance;
+	private: System::Windows::Forms::TextBox^  motor;
+	private: System::Windows::Forms::Label^  label7;
+	private: System::Windows::Forms::Button^  change_motor;
+	private: System::Windows::Forms::Button^  button1;
+	private: System::Windows::Forms::Button^  calibration;
 
 		//Others
-private: static System::Windows::Forms::Button^  Reset;
-private: static System::Windows::Forms::Label^  label3;
-private: static System::Windows::Forms::Label^  label4;
-private: static System::Windows::Forms::TextBox^  Kp_value;
-private: static System::Windows::Forms::Label^  label5;
-private: static System::Windows::Forms::TextBox^  Ki_value;
-private: static System::Windows::Forms::Button^  change_control;
-private: static System::Windows::Forms::Label^  label6;
-private: static System::Windows::Forms::TextBox^  totaldistance;
-private: static System::Windows::Forms::TextBox^  motor;
-private: static System::Windows::Forms::Label^  label7;
-private: static System::Windows::Forms::Button^  change_motor;
-private: static System::Windows::Forms::Button^  calibration;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		 /// <summary>
 		 /// Clean up any resources being used.
@@ -307,33 +154,60 @@ private: static System::Windows::Forms::Button^  calibration;
 				 delete components;
 			 }
 		 }
-private: static System::Windows::Forms::PictureBox^  Ronny_robot;
+	private: System::Windows::Forms::PictureBox^  Ronny_robot;
+	private: System::Windows::Forms::Label^  Sensorvärden;
+	private: System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Leftarrow_pressed;
+	private: System::Windows::Forms::PictureBox^  Uparrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Downarrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
+	private: System::Windows::Forms::PictureBox^  Uparrow_pressed;
+	private: System::Windows::Forms::PictureBox^  Downarrow_pressed;
+	private: System::Windows::Forms::PictureBox^  Rightarrow_pressed;
+	public: System::Windows::Forms::TextBox^  IRsensor_VF;
+	private:
+	public: System::Windows::Forms::TextBox^  IRsensor_VB;
+	public: System::Windows::Forms::TextBox^  IRsensor_HF;
+	public: System::Windows::Forms::TextBox^  IRsensor_HB;
+	public: System::Windows::Forms::TextBox^  IRsensor_Front;
+	private: System::IO::Ports::SerialPort^  serialPort1;
+	public:
+	private: System::Windows::Forms::Button^  button3;
+	private: System::Windows::Forms::Button^  button4;
+	private: System::Windows::Forms::TextBox^  Kommandon;
+	private: System::Windows::Forms::Label^  label1;
+	private: System::Windows::Forms::ComboBox^  comboBox1;
+	private: System::Windows::Forms::Label^  label2;
+	private: System::Windows::Forms::TextBox^  open_closed;
+	private: System::Windows::Forms::PictureBox^  pictureBox1;
+	private: System::ComponentModel::IContainer^  components;
+
 protected:
-private: static System::Windows::Forms::Label^  Sensorvärden;
-private: static System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
-private: static System::Windows::Forms::PictureBox^  Leftarrow_pressed;
-private: static System::Windows::Forms::PictureBox^  Uparrow_unpressed;
-private: static System::Windows::Forms::PictureBox^  Downarrow_unpressed;
-private: static System::Windows::Forms::PictureBox^  Rightarrow_unpressed;
-private: static System::Windows::Forms::PictureBox^  Uparrow_pressed;
-private: static System::Windows::Forms::PictureBox^  Downarrow_pressed;
-private: static System::Windows::Forms::PictureBox^  Rightarrow_pressed;
-public: static System::Windows::Forms::TextBox^  IRsensor_VF;
-public: static System::Windows::Forms::TextBox^  IRsensor_VB;
-public: static System::Windows::Forms::TextBox^  IRsensor_HF;
-public: static System::Windows::Forms::TextBox^  IRsensor_HB;
-public: static System::Windows::Forms::TextBox^  IRsensor_Front;
-private: static System::IO::Ports::SerialPort^  serialPort1;
-private: static System::Windows::Forms::Button^  button3;
-private: static System::Windows::Forms::Button^  button4;
-private: static System::Windows::Forms::TextBox^  Kommandon;
-private: static System::Windows::Forms::Button^  Sensordata;
-private: static System::Windows::Forms::Label^  label1;
-private: static System::Windows::Forms::ComboBox^  comboBox1;
-private: static System::Windows::Forms::Label^  label2;
-private: static System::Windows::Forms::TextBox^  open_closed;
-private: static System::Windows::Forms::PictureBox^  pictureBox1;
-private: static System::ComponentModel::IContainer^  components;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		/// <summary>
 		/// Required designer variable.
@@ -368,7 +242,6 @@ private: static System::ComponentModel::IContainer^  components;
 			this->button3 = (gcnew System::Windows::Forms::Button());
 			this->button4 = (gcnew System::Windows::Forms::Button());
 			this->Kommandon = (gcnew System::Windows::Forms::TextBox());
-			this->Sensordata = (gcnew System::Windows::Forms::Button());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
 			this->label2 = (gcnew System::Windows::Forms::Label());
@@ -387,6 +260,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->motor = (gcnew System::Windows::Forms::TextBox());
 			this->label7 = (gcnew System::Windows::Forms::Label());
 			this->change_motor = (gcnew System::Windows::Forms::Button());
+			this->button1 = (gcnew System::Windows::Forms::Button());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Ronny_robot))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_unpressed))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->Leftarrow_pressed))->BeginInit();
@@ -594,18 +468,6 @@ private: static System::ComponentModel::IContainer^  components;
 			this->Kommandon->Size = System::Drawing::Size(133, 13);
 			this->Kommandon->TabIndex = 17;
 			// 
-			// Sensordata
-			// 
-			this->Sensordata->BackColor = System::Drawing::Color::Gainsboro;
-			this->Sensordata->FlatAppearance->BorderColor = System::Drawing::Color::Black;
-			this->Sensordata->Location = System::Drawing::Point(12, 154);
-			this->Sensordata->Name = L"Sensordata";
-			this->Sensordata->Size = System::Drawing::Size(90, 28);
-			this->Sensordata->TabIndex = 18;
-			this->Sensordata->Text = L"Sensordata";
-			this->Sensordata->UseVisualStyleBackColor = true;
-			//this->Sensordata->Click += gcnew System::EventHandler(this, &PC_unit::Sensordata_Click_1);
-			// 
 			// label1
 			// 
 			this->label1->AutoSize = true;
@@ -697,7 +559,7 @@ private: static System::ComponentModel::IContainer^  components;
 			// label5
 			// 
 			this->label5->AutoSize = true;
-			this->label5->Location = System::Drawing::Point(955, 160);
+			this->label5->Location = System::Drawing::Point(956, 176);
 			this->label5->Name = L"label5";
 			this->label5->Size = System::Drawing::Size(16, 13);
 			this->label5->TabIndex = 28;
@@ -705,18 +567,18 @@ private: static System::ComponentModel::IContainer^  components;
 			// 
 			// Ki_value
 			// 
-			this->Ki_value->Location = System::Drawing::Point(978, 157);
+			this->Ki_value->Location = System::Drawing::Point(978, 173);
 			this->Ki_value->Name = L"Ki_value";
 			this->Ki_value->Size = System::Drawing::Size(56, 20);
 			this->Ki_value->TabIndex = 29;
 			// 
 			// change_control
 			// 
-			this->change_control->Location = System::Drawing::Point(969, 183);
+			this->change_control->Location = System::Drawing::Point(1054, 121);
 			this->change_control->Name = L"change_control";
-			this->change_control->Size = System::Drawing::Size(76, 47);
+			this->change_control->Size = System::Drawing::Size(81, 25);
 			this->change_control->TabIndex = 30;
-			this->change_control->Text = L"Change parameteres";
+			this->change_control->Text = L"Change Kp";
 			this->change_control->UseVisualStyleBackColor = true;
 			this->change_control->Click += gcnew System::EventHandler(this, &PC_unit::change_control_Click);
 			// 
@@ -760,7 +622,7 @@ private: static System::ComponentModel::IContainer^  components;
 			this->label7->AutoSize = true;
 			this->label7->Location = System::Drawing::Point(975, 247);
 			this->label7->Name = L"label7";
-			this->label7->Size = System::Drawing::Size(65, 13);
+			this->label7->Size = System::Drawing::Size(57, 13);
 			this->label7->TabIndex = 35;
 			this->label7->Text = L"Motor Trim";
 			// 
@@ -774,12 +636,22 @@ private: static System::ComponentModel::IContainer^  components;
 			this->change_motor->UseVisualStyleBackColor = true;
 			this->change_motor->Click += gcnew System::EventHandler(this, &PC_unit::change_motor_Click);
 			// 
+			// button1
+			// 
+			this->button1->Location = System::Drawing::Point(1054, 169);
+			this->button1->Name = L"button1";
+			this->button1->Size = System::Drawing::Size(81, 24);
+			this->button1->TabIndex = 37;
+			this->button1->Text = L"Change Ki";
+			this->button1->UseVisualStyleBackColor = true;
+			// 
 			// PC_unit
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::Color::White;
-			this->ClientSize = System::Drawing::Size(1081, 652);
+			this->ClientSize = System::Drawing::Size(1147, 652);
+			this->Controls->Add(this->button1);
 			this->Controls->Add(this->change_motor);
 			this->Controls->Add(this->label7);
 			this->Controls->Add(this->motor);
@@ -798,7 +670,6 @@ private: static System::ComponentModel::IContainer^  components;
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->comboBox1);
 			this->Controls->Add(this->label1);
-			this->Controls->Add(this->Sensordata);
 			this->Controls->Add(this->Kommandon);
 			this->Controls->Add(this->button4);
 			this->Controls->Add(this->button3);
@@ -849,7 +720,6 @@ private: static System::ComponentModel::IContainer^  components;
 	private: System::Void PC_unit_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e);
 	private: System::Void button3_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void button4_Click_1(System::Object^  sender, System::EventArgs^  e);
-	//private: System::Void Sensordata_Click_1(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void Reset_Click(System::Object^  sender, System::EventArgs^  e);
 			 static System::Void Reset_Map();
 			 //Data recieved from serialport.
@@ -862,7 +732,6 @@ private: static System::ComponentModel::IContainer^  components;
 
 			 //using data from serialport
 	private: delegate void SetTextDelegate(String^ text, TextBox^ textbox);
-	private: System::Void changeIR(unsigned int front, unsigned int front_left, unsigned int front_right, unsigned int rear_left, unsigned int rear_right);
 	private: static void SetText(String^ text, TextBox^ textbox);
 
 			 //Map
@@ -871,11 +740,6 @@ private: static System::ComponentModel::IContainer^  components;
 	private: static void update_map();
 	private: static void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status);
 	private: static void Show_Map();
-
-			 //Grafer_data
-	private: delegate void sensorvaluesDelegate(int byte1, int byte2, int byte3, int byte4, int byte5);
-	//private: static void sensorvalues(int byte1, int byte2, int byte3, int byte4, int byte5);
-
 
 	private: System::Void change_control_Click(System::Object^  sender, System::EventArgs^  e);
 

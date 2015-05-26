@@ -295,7 +295,6 @@ System::Void PC_unit::handleheader(unsigned char byte){
 			header = byte;
 			break;
 		case SENSOR_VALUES: //Sensorvalues
-			//Console::WriteLine("Header: SENSORVALUES ");
 			expected_length = 11;
 			header = byte;
 			++write_position;
@@ -339,13 +338,11 @@ System::Void PC_unit::handlebyte(){
 		Console::WriteLine("ABSOLUTEVALUE PREV:  X " + current_xpos + "Y " + current_ypos);
 		current_xpos = data_recieved_buffer[bufferindex + 1];
 		current_ypos = data_recieved_buffer[bufferindex + 2];
-
 		Console::WriteLine("ABSOLUTEVALUE:  X " + current_xpos + "Y " + current_ypos);
 		move_grid(current_xpos, current_ypos);
 		update_map();
 		current_robot = false;
 		break;
-
 	case DRIVABLE_SQUARE: //Körbar ruta x,y
 		drivablesquare_xpos = data_recieved_buffer[bufferindex + 1];
 		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
@@ -369,7 +366,6 @@ System::Void PC_unit::handlebyte(){
 		update_map();
 		Console::WriteLine("WALL: X-pos " + wall_xpos + "Y-pos " + wall_ypos);
 		break;
-
 	case SENSOR_VALUES:  //Dealing with sensorvalues
 	{
 		rear_left = data_recieved_buffer[bufferindex + 1];
@@ -388,7 +384,6 @@ System::Void PC_unit::handlebyte(){
 		front = data_recieved_buffer[bufferindex + 9] << 8;
 		front |= data_recieved_buffer[bufferindex + 10];
 
-	//	Console::WriteLine(front + " " + front_left + " " + front_right + " " + rear_right + " " + rear_left);
 		SetText(Convert::ToString(front), IRsensor_Front);
 		SetText(Convert::ToString(front_left), IRsensor_VF);
 		SetText(Convert::ToString(front_right), IRsensor_HF);
@@ -402,23 +397,13 @@ System::Void PC_unit::handlebyte(){
 		current_distance = current_distance + added_distance;
 		SetText(Convert::ToString(current_distance), totaldistance);
 		break;
-
-		//case TEJP_FOUND: //Tejpbit funnen.
-		//Console::WriteLine("TEJP FOUND:  X " + current_xpos + "Y " + current_ypos);
-		//break;
 	case TEJP_REF: //Referensvärde tejp
-		
 		tejp_ref_value = data_recieved_buffer[bufferindex +1];
 		SetText("tejpref =" + tejp_ref_value, Kommandon);
 		break;
-
 	default:
 		break;
 	}
-
-	//write_position = 0;
-	//expected_length = 0;
-
 }
 
 //using data from serialport
