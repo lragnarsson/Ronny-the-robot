@@ -1,12 +1,22 @@
-﻿/*
+﻿/* 
  * bus_communication.c
- *
+ * Ronny-the-robot/control_unit
+ * ------------------------------
+ * This file contains the function handle_recieved_messages() which ich called when messages are recieved on the I2C-bus.
+ * It also parses the sensor data recieved and calculates control errors.
+ * ------------------------------ 
+ * Author: L. Ragnarsson, E. Sköld
  */ 
+
+#include <stdlib.h>
+
 #include "bus_communication.h"
 #include "control_system.h"
 #include "control_unit.h"
-#include <stdlib.h>
 
+/* 
+ * Inits the bus communication and sets variables to a known state.
+ */
 void init_bus_communication() {
 	i2c_init(atmega20br, atmega20pc, CONTROL_UNIT);
 	
@@ -32,6 +42,9 @@ void init_bus_communication() {
 	intersection = 0;
 }
 
+/*
+ * Updates wall distances and calculates control error.
+ */
 void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t front_left_h, uint8_t front_left_l,
 							uint8_t rear_right_h, uint8_t rear_right_l, uint8_t front_right_h, uint8_t front_right_l, uint8_t front_h, uint8_t front_l) {
 	
@@ -80,9 +93,9 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	left_wall_count = CLAMP(left_wall_count - 1 + (uint8_t)(left_wall_distance < 300) * 2, 0, 5);
 	right_wall_count = CLAMP(right_wall_count - 1 + (uint8_t)(right_wall_distance < 300) * 2, 0, 5);
 	front_wall_count = CLAMP(front_wall_count - 1 + (uint8_t)(front_wall_distance < 300) * 2, 0, 5);
-	wall_left = (uint8_t)(left_wall_distance < 300);//(uint8_t)(left_wall_count > 3);
-	wall_right = (uint8_t)(right_wall_distance < 300);//(uint8_t)(right_wall_count > 3);
-	wall_front = (uint8_t)(front_wall_distance < 300);//(uint8_t)(front_wall_count > 3);
+	wall_left = (uint8_t)(left_wall_distance < 300);
+	wall_right = (uint8_t)(right_wall_distance < 300);
+	wall_front = (uint8_t)(front_wall_distance < 300);
 
 	/* Calculate control errors */
 	current_distance_error = left_wall_distance - right_wall_distance;
@@ -97,17 +110,11 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	
 	current_derivative_error = current_derivative_left + current_derivative_right;
 	
-	intersection = 0;// (current_derivative_front_left > 350 || current_derivative_front_right > 350);
-	
-	//PORTD &= ~(1<<DEBUG_LED_RED);
-	//PORTD |= (1<<DEBUG_LED_GREEN);
+	intersection = 0;
 	
 	/* Ignore bad values */
 	if (abs(current_derivative_left) > 350 || abs(current_derivative_right) > 350 || rear_left > 300 || front_left > 300 || rear_right > 300 || front_right > 300)
-	{
-		//PORTD &= ~(1<<DEBUG_LED_GREEN);
-		//PORTD |= (1<<DEBUG_LED_RED);
-		
+	{	
 		if (abs(current_derivative_left) < 350 && rear_left < 300 && front_left < 300)
 		{
 			current_distance_error = left_wall_distance - (200 - 60);
@@ -116,15 +123,7 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 		{
 			current_distance_error = 200 - 60 - right_wall_distance;
 			current_derivative_error = current_derivative_right * 2;
-		} /*else if (current_derivative_rear_left < 350 && current_derivative_rear_right < 350 && rear_left < 300 && rear_right < 300)
-		{
-			current_distance_error = rear_left - rear_right;
-			current_derivative_error = ( current_derivative_rear_left + current_derivative_rear_right ) * 2;
-		} else if (current_derivative_front_left < 350 && current_derivative_front_right < 350 && front_left < 300 && front_right < 300)
-		{
-			current_distance_error = front_left - front_right;
-			current_derivative_error = ( current_derivative_front_left + current_derivative_front_right ) * 2;
-		}*/
+		}
 		else
 		{
 			current_distance_error = 0;
@@ -133,6 +132,9 @@ void update_sensor_readings(uint8_t rear_left_h, uint8_t rear_left_l, uint8_t fr
 	}
 }
 
+/*
+ * Decides what to do with a recieved message from the I2C-bus.
+ */
 void handle_received_message() {
 	switch(busbuffer[0]) {
 		case SENSOR_READINGS:

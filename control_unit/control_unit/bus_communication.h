@@ -1,7 +1,12 @@
-﻿/*
+﻿/* 
  * bus_communication.h
- *
- */ 
+ * Ronny-the-robot/control_unit
+ * ------------------------------
+ * This file contains the function handle_recieved_messages() which ich called when messages are recieved on the I2C-bus.
+ * It also parses the sensor data recieved and calculates control errors.
+ * ------------------------------ 
+ * Author: L. Ragnarsson, E. Sköld
+ */  
 
 #ifndef F_CPU
 #define F_CPU 20000000UL

@@ -2,9 +2,9 @@
  * control_unit.c
  * main() function for the control unit and high level logic state machine.
  */
+
 #include "control_unit.h"
 #include "flood_fill.h"
-
 
 int main(void)
 {
@@ -86,13 +86,12 @@ void search_state()
 	PORTD |= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
-	//_delay_ms(500);
 	
 	/* Handle unawareness of initial surroundings */
 	set_walls(wall_front, wall_left, wall_right);
 	set_current_sqaure_not_wall();
 	
-	// We might end up in tape square directly from navigate
+	/* We might end up in tape square directly from navigate */
 	if (tape_square)
 	{
 		set_desired_engine_speed(0);
@@ -107,7 +106,7 @@ void search_state()
 		return;
 	}
 	
-	// Or we might end up in an intersection...
+	/* Or we might end up in an intersection... */
 	if (wall_front)
 	{
 		if (!wall_left)
@@ -229,13 +228,6 @@ void navigate_state()
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
 	PORTD |= (0<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED);
 	
-	/*
-	set_desired_engine_speed(0);
-	_delay_ms(500);
-	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
-	_delay_ms(500);
-	*/
-	
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
 	
 	uint8_t route_index = 0;
@@ -302,16 +294,9 @@ void return_state()
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
 	PORTD |= (1<<DEBUG_LED_GREEN)|(0<<DEBUG_LED_RED);
 	
-	/*
-	set_desired_engine_speed(0);
-	_delay_ms(500);
-	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
-	_delay_ms(500);
-	*/
-	
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
 	
-	// Do we already know the best route?
+	/* Do we already know the best route? */
 	flood_fill_home_optimistic(current_position);
 	uint8_t optimistic_distance_from_goal = ff_map[start_position.x][start_position.y];
 	flood_fill_to_destination(start_position);
@@ -338,7 +323,7 @@ void return_state()
 		flood_fill_home_optimistic(current_position);
 		uint8_t optimistic_distance_from_current_position = ff_map[start_position.x][start_position.y];
 		
-		// Have we moved in the wrong direction? Then start over from goal position.
+		/* Have we moved in the wrong direction? Then start over from goal position. */
 		if (optimistic_distance_from_goal - distance_to_goal < optimistic_distance_from_current_position)
 		{
 			flood_fill_to_destination(goal_position);
@@ -417,7 +402,6 @@ void grab_package_state()
 	}
 
 	open_claw();
-	//_delay_ms(250);
 	
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
 	set_desired_engine_speed(MAPPING_SPEED);
@@ -439,7 +423,6 @@ void grab_package_state()
 	close_claw();
 	_delay_ms(250);
 	rotate_180();
-	//_delay_ms(250);
 	
 	last_distance_travelled = distance_travelled;
 	set_desired_engine_speed(MAPPING_SPEED);
@@ -498,7 +481,6 @@ void drop_package_state()
 	set_desired_engine_speed(0);
 
 	close_claw();
-	//_delay_ms(250);
 
 	current_direction = (current_direction + 2) & 3;
 	move_map_position_forward();
@@ -550,7 +532,7 @@ void end_state()
 	set_desired_engine_speed(0);
 	_delay_ms(200);
 
-	//Send all map data again
+	/* Send all map data again */
 	for(uint8_t i = 1; i<MAP_SIZE-1; ++i)
 	{
 		for(uint8_t j = 1; j<MAP_SIZE-1; ++j)

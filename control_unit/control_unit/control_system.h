@@ -1,7 +1,11 @@
-﻿/*
+﻿/* 
  * control_system.h
- *
- */ 
+ * Ronny-the-robot/control_unit
+ * ------------------------------
+ * This file contains the functions for controlling the motors.
+ * ------------------------------ 
+ * Author: L. Ragnarsson, E. Sköld
+ */  
 
 #ifndef F_CPU
 #define F_CPU 20000000UL
@@ -12,6 +16,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+
 #include "bus_communication.h"
 
 #define ENGINE_LEFT_SPEED OCR0A
