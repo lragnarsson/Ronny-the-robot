@@ -3,15 +3,15 @@
  *
  */ 
 
-#include <avr/io.h>
-
-#include "flood_fill.h"
-#include "I2C.h"
-
 #ifndef F_CPU
 #define F_CPU 20000000UL
 #endif
+
+#include <avr/io.h>
 #include <util/delay.h>
+
+#include "flood_fill.h"
+#include "I2C.h"
 
 uint8_t current_wavefront_size;
 uint8_t new_wavefront_size;
@@ -40,7 +40,8 @@ void calculate_route(coordinate destination)
 	current_route[ff_map[destination.x][destination.y]] = ROUTE_END; 
 	for(uint8_t i = ff_map[destination.x][destination.y] - 1; i != 255; --i)
 	{
-		switch(current_route[i+1]) // Run straight ahead if possible
+		/* Run straight ahead if possible */
+		switch(current_route[i+1])
 		{
 			case NORTH:
 				if(ff_map[current_coordinate.x + 1][current_coordinate.y] == i)
@@ -78,7 +79,7 @@ void calculate_route(coordinate destination)
 				break;
 		}
 		
-		if(ff_map[current_coordinate.x + 1][current_coordinate.y] == i) // GO NORTH?
+		if(ff_map[current_coordinate.x + 1][current_coordinate.y] == i) // Go NORTH?
 		{
 			current_route[i] = NORTH;
 			++current_coordinate.x;	
@@ -139,7 +140,8 @@ void flood_fill_to_destination(coordinate destination) {
 				++new_wavefront_size;
 			}
 		}
-		if(new_wavefront_size == 0) // Route to destination not found
+		/* Route to destination not found */
+		if(new_wavefront_size == 0) 
 		{
 			current_route[0] = ROUTE_END;
 			return;
@@ -166,7 +168,8 @@ void flood_fill_to_unmapped() {
 			
 			ff_map[x_coord][y_coord] = distance;
 			
-			if (x_coord == 17 && y_coord == 16) // don't let the flood fill escape into the void!
+			/* Don't let the flood fill escape into the void! */
+			if (x_coord == 17 && y_coord == 16)
 				continue;
 			
 			if(map[x_coord][y_coord] == UNMAPPED)
@@ -196,35 +199,10 @@ void flood_fill_to_unmapped() {
 				++new_wavefront_size;
 			}
 		}
-		if(new_wavefront_size == 0) // Route to destination not found
+		/* Route to destination not found */
+		if(new_wavefront_size == 0) 
 		{
 			current_route[0] = ROUTE_END;
-			PORTD &= ~((1<<PORTD1)|(1<<PORTD2));
-			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (1<<PORTD1)|(0<<PORTD2);
-			_delay_ms(200);
-			
-			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
-			_delay_ms(200);
-			PORTD ^= (0<<PORTD1)|(1<<PORTD2);
-			_delay_ms(200);
 			return;
 		}
 		++distance;
@@ -315,7 +293,8 @@ void flood_fill_home_optimistic(coordinate origin) {
 				}
 			}
 		}
-		if(new_wavefront_size == 0) // Route to destination not found
+		/* Route to destination not found */
+		if(new_wavefront_size == 0) 
 		{
 			current_route[0] = ROUTE_END;
 			return;
