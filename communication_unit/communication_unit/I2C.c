@@ -9,8 +9,9 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "I2C.h"
 #include <string.h>
+
+#include "I2C.h"
 
 volatile uint8_t helpaddress;
 volatile uint8_t helpdata[16];

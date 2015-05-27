@@ -1,6 +1,12 @@
-/*
+/* 
  * UART.h
+ * Ronny-the-robot/communication_unit
+ * ------------------------------
+ * This file contains the functions required to send and receive data to and from the PC-module.
+ * ------------------------------ 
+ * Author: F. Östman
  */ 
+
 
 #ifndef UART_H_
 #define UART_H_

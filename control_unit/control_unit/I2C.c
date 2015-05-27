@@ -1,6 +1,6 @@
 /* 
  * I2C.c
- * Ronny-the-robot/communication_unit
+ * Ronny-the-robot/control_unit
  * ------------------------------
  * This file contains the functions required to use the I2C-bus.
  * ------------------------------ 
@@ -9,8 +9,9 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "I2C.h"
 #include <string.h>
+
+#include "I2C.h"
 
 volatile uint8_t helpaddress;
 volatile uint8_t helpdata[16];

@@ -1,8 +1,12 @@
-/*
+/* 
  * sensor_unit.c
- *
- * Created: 2015-03-24 09:43:41
- *  Author: Jesper
+ * Ronny-the-robot/sensor_unit
+ * ------------------------------
+ * This file contains all functionality available in the sensor unit, 
+ * including reading sensor values as well as sending and 
+ * receiving messages to and from other modules.
+ * ------------------------------ 
+ * Author: J. Otterholm
  */ 
 
 #include "sensor_unit.h"
@@ -18,21 +22,18 @@ int main(void)
 	
 	sei();
 	
-    while(1)
-    {
-		//uint8_t msg[] = { MOVED_DISTANCE_AND_ANGLE, 0x42 };
-		//i2c_write(communication_unit, msg, sizeof(msg));
-		//_delay_ms(100);
-    }
+    while(1) { }
 }
 
 
-// IR distance measurement routine
+/*
+ * IR distance measurement routine.
+ */
 ISR(TIMER1_COMPA_vect, ISR_NOBLOCK)
 {
 	static uint8_t sample_index = 0;
 	
-	// Short distance
+	/* Short distance sensors */
 	for (uint8_t i = 0; i < 4; ++i)
 	{
 		ADMUX = i;
@@ -50,7 +51,7 @@ ISR(TIMER1_COMPA_vect, ISR_NOBLOCK)
 			ir_sensors[i][sample_index] = pgm_read_byte(&ir_short_lut[adc - ir_short_lut_index_offset]) + ir_short_lut_value_offset;
 	}
 	
-	// Long distance
+	/* Long distance sensor */
 	ADMUX = 4;
 	ADCSRA |= (1<<ADSC);	// Start conversion
 	
@@ -71,7 +72,9 @@ ISR(TIMER1_COMPA_vect, ISR_NOBLOCK)
 	send_distance_readings();
 }
 
-// Wheel encoder counting routines
+/*
+ * Left wheel encoder counting routine.
+ */
 ISR(INT0_vect)
 {
 	if (PINB & (1<<ENC_L_B))
@@ -92,6 +95,9 @@ ISR(INT0_vect)
 	}
 }
 
+/*
+ * Right wheel encoder counting routine.
+ */
 ISR(INT1_vect)
 {	
 	if (PINB & (1<<ENC_R_B))
@@ -112,7 +118,9 @@ ISR(INT1_vect)
 	}
 }
 
-// Reflectance sensor routine
+/* 
+ * Reflectance sensor routine.
+ */
 ISR(ANALOG_COMP_vect)
 {
 	if (tape_found)
@@ -136,7 +144,9 @@ ISR(ANALOG_COMP_vect)
 	}
 }
 
-// Reflectance sensor calibration routine
+/* 
+ * Reflectance sensor calibration routine.
+ */
 uint8_t calibrate_reflectance_sensor()
 {
 	uint8_t inv_reflectance;
@@ -151,40 +161,44 @@ uint8_t calibrate_reflectance_sensor()
 		inv_reflectance = ADCH;
 		uint8_t threshold = ((0xFF - inv_reflectance) >> 1) + inv_reflectance;
 		
-		OCR0B = threshold;		// Set PWM
+		OCR0B = threshold;		// Set PWM 
 	}
 	
 	return inv_reflectance;
 }
 
-// Initialize IR sensors
+/*
+ * Initialize IR sensors.
+ */
 void init_ir()
 {
-	// ADC
 	ADCSRA = ADC_PRESCALE_128;
 	
-	// Timed interrupt at 25 hz
+	/* Timed interrupt at 25 hz */
 	TCCR1A = TIMER1_CLEAR_ON_MATCH_L;
 	TCCR1B = TIMER1_CLEAR_ON_MATCH_H | TIMER1_PRESCALE_64;
 	TIMSK1 = TIMER1_INTERRUPT_ENABLE;
 	OCR1A = TIMER1_MATCH_FREQUENCY_25HZ;
 }
 
-// Initialize reflectance sensor
+/*
+ * Initialize reflectance sensor.
+ */
 void init_reflectance()
 {
-	// AC
 	ACSR = AC_INTERRUPT_RISING_EDGE;
 	DDRB |= (1<<REFL_REF);
 	
-	// Reference value PWM
+	/* Reference value PWM */
 	TCCR0A = TIMER0_B_NON_INV | TIMER0_FAST_PWM_L;
 	TCCR0B = TIMER0_FAST_PWM_H | TIMER0_PRESCALE_1;
 	
 	calibrate_reflectance_sensor();
 }
 
-// Initialize wheel encoders
+/*
+ * Initialize wheel encoders.
+ */
 void init_wheel_encoder()
 {
 	EIMSK = INTERRUPT_INT0_INT1;
@@ -193,6 +207,9 @@ void init_wheel_encoder()
 	DDRB &= ~( (1<<ENC_L_B) | (1<<ENC_R_B) );
 }
 
+/*
+ * Decides what to do with a received message from the I2C-bus.
+ */
 void handle_received_message()
 {
 	switch (busbuffer[0])
@@ -207,6 +224,9 @@ void handle_received_message()
 	}
 }
 
+/*
+ * Send average of current and latest sensor reading for each sensor on the I2C-bus. 
+ */
 uint8_t send_distance_readings()
 {
 	uint16_t distances[] = {0, 0, 0, 0, 0};
@@ -235,6 +255,9 @@ uint8_t send_distance_readings()
 	return i2c_write(GENERAL_CALL, msg, sizeof(msg));
 }
 
+/*
+ * Send distance travelled since last time this message was sent.
+ */
 uint8_t send_odometry_readings()
 {
 	static uint8_t distance_trunc = 0;

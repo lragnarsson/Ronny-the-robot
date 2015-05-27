@@ -1,6 +1,12 @@
-/*
+/* 
  * I2C.h
+ * Ronny-the-robot/communication_unit
+ * ------------------------------
+ * This file contains the functions required to use the i2c-bus.
+ * ------------------------------ 
+ * Author: F. Östman
  */ 
+
 #ifndef I2C_H_
 #define I2C_H_
 
