@@ -676,7 +676,6 @@ namespace PC_unit_namespace {
 	private: System::Void open_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void close_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void Reset_Click(System::Object^  sender, System::EventArgs^  e);
-			 static System::Void Reset_Map();
 			 //Data recieved from serialport.
 	private: delegate void recievedata_delegate(char status);
 	private: delegate void hanldebyte(unsigned char byte);
