@@ -256,7 +256,7 @@ uint8_t send_distance_readings()
 }
 
 /*
- * Send distance traveled since last time this message was sent.
+ * Send distance travelled since last time this message was sent.
  */
 uint8_t send_odometry_readings()
 {
