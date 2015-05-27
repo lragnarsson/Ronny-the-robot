@@ -27,7 +27,6 @@ void PC_unit::findPorts(void)
 
 System::Void PC_unit::PC_unit_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 	/*Function to make the keys "light up" when pressed*/
-	
 	switch (e->KeyCode){
 	case Keys::A:
 		this->Leftarrow_unpressed->Visible = false;
@@ -67,8 +66,7 @@ System::Void PC_unit::PC_unit_KeyUp(System::Object^  sender, System::Windows::Fo
 	}
 }
 System::Void PC_unit::PC_unit_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-	/*Controles the steering, sending the correct headers to the robot*/
-	
+	/*Controls the steering, sending the correct headers to the robot*/
 	auto dataleft = gcnew array < System::Byte > { 0xC3 };
 	auto databack = gcnew array < System::Byte > { 0xC4 };
 	auto dataforward = gcnew array < System::Byte > { 0xC1 };
@@ -152,10 +150,7 @@ System::Void PC_unit::calibration_Click(System::Object^  sender, System::EventAr
 	auto tejpref = gcnew array < System::Byte > { CALIBRATE_SENSORS };
 	this->serialPort1->Write(tejpref, 0, 1);
 }
-System::Void PC_unit::Reset_Map(){
-	/*reset map*/
-	createarray(image1);
-}
+
 System::Void PC_unit::change_motor_Click(System::Object^  sender, System::EventArgs^  e){
 	/*function to trim the motor*/
 	if (motor->Text->Length == 0){
@@ -185,13 +180,11 @@ System::Void PC_unit::change_Kd_Click(System::Object^  sender, System::EventArgs
 
 //Serialport
 System::Void PC_unit::serialPort1_DataReceived(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-
-	/*--------------------****serialport function*****--------------------------
-	|	If there are any bytes to read, find how many and read all of them.		|
-	|	call the recievedata function to handle the bytes and allow new		|
-	|	events to be raised! (Invoke is a pointer to a function)				|
-	---------------------------------------------------------------------------*/
-
+	/*
+	 * If there are any bytes to read, find how many and read all of them.		
+	 * call the recievedata function to handle the bytes and allow new			
+	 * events to be raised! (Invoke is a pointer to a function)				
+	 */
 	if (serialPort1->BytesToRead > 0){
 		count = serialPort1->BytesToRead;
 		serialPort1->Read(data_recieved_buffer, 0, count);
@@ -201,13 +194,12 @@ System::Void PC_unit::serialPort1_DataReceived(System::Object^  sender, System::
 }
 
 System::Void PC_unit::recievedata(char status){
-	/*------------------****my recieved data function*****----------------------
-	|	The first byte is always a header. Call handle headerfunction to 		|
-	|	see what header it is and how many bytes tp expect. Then if buffer		|
-	|	consists of enough bytes to read all of them handlebyte and	count 		|
-	|	up buffer index and buffer length. If not enough bytes mask them out	|
-	---------------------------------------------------------------------------*/
-
+	/*
+	 * The first byte is always a header. Call handle headerfunction to 		
+	 * see what header it is and how many bytes tp expect. Then if buffer	
+	 * consists of enough bytes to read all of them handlebyte and	count 		
+	 * up buffer index and buffer length. If not enough bytes mask them out
+	 */
 	int bufferlength = count; //buffer length is the ammount of bytes collected
 	while (!finished)
 	{
@@ -277,14 +269,14 @@ System::Void PC_unit::handleheader(unsigned char byte){
 		case AUTOMODE: //Auto mode
 			SetText("Auto mode", Kommandon);
 			write_position = 0;
-			automode = true;
-			finished = true;
+			automode = true; 
+			finished = true; //only one byte -> finished.
 			break;
 		case MANUALMODE: //Manual mode
 			SetText("Manual mode", Kommandon);
 			write_position = 0;
 			automode = false;
-			finished = true;
+			finished = true; // only one byte->finished.
 			break;
 		case DRIVABLE_SQUARE: //drivalbe square
 			//Console::WriteLine("Header: DRIVALBE_SQUARE ");
@@ -316,7 +308,7 @@ System::Void PC_unit::handleheader(unsigned char byte){
 			break;
 		case TEJP_FOUND: //Tejpbit funnen.
 			//Console::WriteLine("TEJP FOUND");
-			finished = true;
+			finished = true; // only one byte->finished.
 			write_position = 0;
 			tejp_found = true;
 			break;
