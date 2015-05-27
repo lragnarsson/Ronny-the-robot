@@ -16,6 +16,14 @@
 #define SENSOR_UNIT 0x14
 #define COMMUNICATION_UNIT 0x16
 
+/* TWCR definitions */
+#define SEND 0xc5
+#define STOP 0xd5
+#define START 0xe5
+#define ACK 0xc5
+#define NACK 0x85
+#define RESET 0xc5
+
 /* Headers */
 #define ABSOLUTE_X_Y 0x30				// 3 bytes
 #define AUTONOMOUS_MODE 0x31
