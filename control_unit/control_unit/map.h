@@ -1,5 +1,10 @@
-﻿/*
+﻿/* 
  * map.h
+ * Ronny-the-robot/control_unit
+ * ------------------------------
+ * This file contains the map representation and flood fill map.
+ * ------------------------------ 
+ * Author: L. Ragnarsson, E. Sköld
  */
 
 #ifndef MAP_H_

@@ -1,10 +1,17 @@
-/*
+/* 
  * control_unit.h
- */
+ * Ronny-the-robot/control_unit
+ * ------------------------------
+ * This file is the entry point an backbone for the control unit. 
+ * The state machine for the completion of the mission is implemented here. 
+ * ------------------------------ 
+ * Author: L. Ragnarsson, E. Sköld
+ */ 
 
 #ifndef F_CPU
 #define F_CPU 20000000UL
 #endif
+
 #ifndef CONTROL_UNIT_H_
 #define CONTROL_UNIT_H_
 

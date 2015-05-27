@@ -1,7 +1,12 @@
-/*
+/* 
  * control_unit.c
- * main() function for the control unit and high level logic state machine.
- */
+ * Ronny-the-robot/control_unit
+ * ------------------------------
+ * This file is the entry point an backbone for the control unit. 
+ * The state machine for the completion of the mission is implemented here. 
+ * ------------------------------ 
+ * Author: L. Ragnarsson, E. Sköld
+ */ 
 
 #include "control_unit.h"
 #include "flood_fill.h"
@@ -44,7 +49,10 @@ int main(void)
 	}
 }
 
-/* Autonomous mode */
+/*
+ * Runs the state machine.
+ * next_state is a variable containing a function pointer.
+ */
 void autonomous_mode()
 {
 	while (current_mode == AUTONOMOUS)
@@ -53,13 +61,17 @@ void autonomous_mode()
 	}
 }
 
-/* Test mode */
+/*
+ * For development purposes 
+ */
 void test_mode()
 {
 
 }
 
-/* Enter map state */
+/*
+ * drive one square forward to enter the maze.
+ */
 void enter_map_state()
 {
 	set_desired_engine_direction(ENGINE_DIRECTION_FORWARD);
@@ -79,7 +91,9 @@ void enter_map_state()
 	next_state = search_state;
 }
 
-/* Search state */
+/*
+ * Searches the maze until the goal is found.
+ */
 void search_state()
 {
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
@@ -118,8 +132,9 @@ void search_state()
 			set_desired_engine_speed(0);
 			
 			flood_fill_to_unmapped();
-			if (current_route[0] == ROUTE_END) // no route found
+			if (current_route[0] == ROUTE_END)
 			{
+				/* No route found */
 				next_state = end_state;
 			}
 			else
@@ -175,8 +190,9 @@ void search_state()
 				set_desired_engine_speed(0);
 				
 				flood_fill_to_unmapped();	
-				if (current_route[0] == ROUTE_END) // no route found
+				if (current_route[0] == ROUTE_END)
 				{
+					/* No route found */
 					next_state = end_state;
 				}
 				else
@@ -202,8 +218,9 @@ void search_state()
 						set_desired_engine_speed(0);
 						
 						flood_fill_to_unmapped();
-						if (current_route[0] == ROUTE_END) // no route found
+						if (current_route[0] == ROUTE_END)
 						{
+							/* No route found */
 							next_state = end_state;
 						}
 						else
@@ -223,6 +240,9 @@ void search_state()
 	} // end for
 }
 
+/*
+ * Follows a route defined from the variable current_route.
+ */
 void navigate_state()
 {
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
@@ -288,7 +308,10 @@ void navigate_state()
 	set_desired_engine_speed(0);
 }
 
-/* Return state */
+/*
+ * When the goal id found, this state explores the maze (if necessary) to ensure the
+ * shortets path between start and goal is known and then returns to the start of the maze.
+ */
 void return_state()
 {
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
@@ -382,7 +405,9 @@ void return_state()
 	next_state = grab_package_state;
 }
 
-/* Grab package state */
+/* 
+ * Grabs the pachage from the start square and drives back to the start of the maze.
+ */
 void grab_package_state()
 {
 	uint8_t next_turn = (current_direction - SOUTH) & 3;
@@ -442,7 +467,9 @@ void grab_package_state()
 	follow_up_state = drop_package_state;
 }
 
-/* Drop package state */
+/*
+ * Drops the package in the goal square and backs up one square.
+ */
 void drop_package_state()
 {
 	set_desired_engine_speed(0);
@@ -492,7 +519,9 @@ void drop_package_state()
 	follow_up_state = end_state;
 }
 
-/* End state */
+/*
+ * Steps uot of the maze, sends all map data again and stops.
+ */
 void end_state()
 {
 	set_desired_engine_speed(0);
@@ -559,7 +588,9 @@ void end_state()
 	}
 }
 
-/* Rotate left 90 degrees */
+/*
+ * Turns the robot left 90 degrees. Is not a state in the state machine.
+ */
 void rotate_left_90()
 {
 	set_desired_engine_speed(0);
@@ -570,6 +601,7 @@ void rotate_left_90()
 	int16_t last_absolute_rotation = absolute_rotation;
 	force_engine_speed(TURN_SPEED);
 	
+	/* SIC! not an error */
 	while (absolute_rotation - last_absolute_rotation < 85)
 	{
 		_delay_ms(1);
@@ -583,7 +615,9 @@ void rotate_left_90()
 	_delay_ms(250);
 }
 
-/* Rotate right 90 degrees */
+/*
+ * Turns the robot right 90 degrees. Is not a state in the state machine.
+ */
 void rotate_right_90()
 {
 	set_desired_engine_speed(0);
@@ -594,6 +628,7 @@ void rotate_right_90()
 	int16_t last_absolute_rotation = absolute_rotation;
 	force_engine_speed(TURN_SPEED);
 	
+	/* SIC! not an error */
 	while (absolute_rotation - last_absolute_rotation > -85)
 	{
 		_delay_ms(1);
@@ -607,7 +642,9 @@ void rotate_right_90()
 	_delay_ms(250);
 }
 
-/* Rotate left or right 180 degrees */
+/*
+ * Turns the robot 180 degrees in the direction with the most clearance. Is not a state in the state machine.
+ */
 void rotate_180()
 {
 	set_desired_engine_speed(0);
@@ -620,6 +657,8 @@ void rotate_180()
 		force_engine_direction(ENGINE_DIRECTION_RIGHT);
 		_delay_ms(250);
 		force_engine_speed(TURN_SPEED);
+		
+		/* SIC! not an error */
 		while (absolute_rotation - last_absolute_rotation > -190)
 		{
 			_delay_ms(1);
@@ -631,6 +670,8 @@ void rotate_180()
 		force_engine_direction(ENGINE_DIRECTION_LEFT);
 		_delay_ms(250);
 		force_engine_speed(TURN_SPEED);
+		
+		/* SIC! not an error */
 		while (absolute_rotation - last_absolute_rotation < 190)
 		{
 			_delay_ms(1);
@@ -645,7 +686,9 @@ void rotate_180()
 	_delay_ms(250);
 }
 
-/* Manual mode */
+/*
+ * Controls the robots movements in manual mode.
+ */
 void manual_mode()
 {
 	while (current_mode == MANUAL)

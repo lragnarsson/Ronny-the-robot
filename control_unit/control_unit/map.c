@@ -1,13 +1,22 @@
-﻿/*
+﻿/* 
  * map.c
- */
+ * Ronny-the-robot/control_unit
+ * ------------------------------
+ * This file contains the map representation and flood fill map.
+ * ------------------------------ 
+ * Author: L. Ragnarsson, E. Sköld
+ */ 
 
 #include <avr/io.h>
+
 #include "map.h"
 #include "bus_communication.h"
 
 extern uint8_t map[MAP_SIZE][MAP_SIZE];
 
+/*
+ * Initiates the maps with default values.
+ */
 void init_map() {
 	
 	for (int i = 0; i < MAP_SIZE; ++i)
@@ -33,7 +42,9 @@ void init_map() {
 }
 
 
-/* Called when Ronny has moved one grid square in 'current_direction' to update position */
+/*
+ * Called when the robot has moved one grid square in current_direction to update position.
+ */
 void move_map_position_forward() {
 	switch(current_direction)
 	{
@@ -60,6 +71,9 @@ void move_map_position_forward() {
 	_delay_ms(10);
 }
 
+/*
+ * Updates the map with walls based on the robots direction and if walls are present left, right and front.
+ */
 void set_walls(uint8_t wall_front, uint8_t wall_left, uint8_t wall_right)
 {
 	coordinate front_wall = current_position;
@@ -123,13 +137,17 @@ void set_walls(uint8_t wall_front, uint8_t wall_left, uint8_t wall_right)
 	}
 }
 
-/* Is current square NOT_WALL? */
+/*
+ *Is current square NOT_WALL?
+ */
 uint8_t current_sqaure_not_wall()
 {
 	return (map[current_position.x][current_position.y] == NOT_WALL);
 }
 
-/* Set current square to NOT_WALL */
+/*
+ * Set current square to NOT_WALL
+ */
 void set_current_sqaure_not_wall()
 {
 	map[current_position.x][current_position.y] = NOT_WALL;
