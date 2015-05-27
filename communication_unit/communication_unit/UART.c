@@ -14,6 +14,9 @@
 #include "UART.h"
 #include "I2C.h"
 
+/*
+ *Interrupt vector used when communication_unit receives data from PC.
+ */
 ISR(USART0_RX_vect)
 {
 	static uint8_t i = 0;
@@ -55,6 +58,9 @@ uint8_t UART_not_empty() {
 	return UART_flag;
 }
 
+/*
+ * Empty the buffer used when receiving data from PC.
+ */
 void UART_empty(void) {
 	cli();
 	UART_flag = 0;
@@ -70,18 +76,24 @@ void UART_get_buffer(uint8_t* data) {
 	}
 }
 
+/*
+ * Init UART.
+ */
 void Init_UART(uint16_t baudrate) {
-	cli(); //Disable interrupts
+	cli();											//Disable interrupts
 	unsigned int baud = baudrate;
 	UBRR0H = (unsigned char)(baud >> 8);
 	UBRR0L |= (unsigned char)baud;
-	UCSR0B |= (1<<RXEN0)|(1<<TXEN0)|(1<<RXCIE0); //Enable RX, TX and Rx interrupt
-	UCSR0C |= (0<<USBS0)|(1<<UCSZ01)|(1<<UCSZ00); //Format 8 data bits and one stop bit
-	PORTB |= (1<<PB5); //input
+	UCSR0B |= (1<<RXEN0)|(1<<TXEN0)|(1<<RXCIE0);	//Enable RX, TX and Rx interrupt
+	UCSR0C |= (0<<USBS0)|(1<<UCSZ01)|(1<<UCSZ00);	//Format 8 data bits and one stop bit
+	PORTB |= (1<<PB5);
 	UART_Flush();
 	sei();
 }
 
+/*
+ * This function sends data to PC.
+ */
 void Send_to_PC(unsigned char data) {
 
 	while (!(UCSR0A & (1<<UDRE0)));
@@ -89,6 +101,9 @@ void Send_to_PC(unsigned char data) {
 	UDR0 = data;
 }
 
+/*
+ * This function receives data from PC.
+ */
 unsigned char Receive_from_PC(void) {
 	while (!(UCSR0A & (1<<RXC0)));
 	

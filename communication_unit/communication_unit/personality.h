@@ -1,10 +1,11 @@
-﻿/*
+﻿/* 
  * personality.h
- *
- * Created: 4/4/2015 12:21:55 AM
- *  Author: lagra033
+ * Ronny-the-robot/communication_unit
+ * ------------------------------
+ * This file contains the defines required for playing songs.
+ * ------------------------------ 
+ * Author: L. Ragnarsson, F. Östman
  */ 
-
 
 #ifndef PERSONALITY_H_
 #define PERSONALITY_H_
