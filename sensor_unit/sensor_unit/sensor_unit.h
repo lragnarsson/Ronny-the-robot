@@ -1,10 +1,13 @@
-﻿/*
+﻿/* 
  * sensor_unit.h
- *
- * Created: 4/13/2015 12:09:10 PM
- *  Author: erisk214
+ * Ronny-the-robot/sensor_unit
+ * ------------------------------
+ * This file contains all functionality available in the sensor unit, 
+ * including reading sensor values as well as sending and 
+ * receiving messages to and from other modules.
+ * ------------------------------ 
+ * Author: J. Otterholm
  */ 
-
 
 #ifndef SENSOR_UNIT_H_
 #define SENSOR_UNIT_H_
