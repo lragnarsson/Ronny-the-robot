@@ -21,11 +21,13 @@ int main(void)
 	PORTD &= ~((1<<DEBUG_LED_GREEN)|(1<<DEBUG_LED_RED));
 	sei();
 	
+	/* Wait for start button press */
 	while (PIND & (1<<PIND0))
 	{
 		_delay_ms(1);
 	}
 	
+	/* Switch in autonomous or manual? */
 	if (PIND & (1<<PIND3))
 	{
 		current_mode = AUTONOMOUS;
