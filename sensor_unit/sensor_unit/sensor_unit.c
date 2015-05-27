@@ -13,7 +13,7 @@ int main(void)
 	init_ir();
 	init_reflectance();
 	init_wheel_encoder();
-	i2c_init(atmega20br, atmega20pc, SENSOR_UNIT);
+	i2c_init(BITRATE_20MHZ, PRESCALER_20MHZ, SENSOR_UNIT);
 	DDRD = (0<<DDD0);
 	
 	sei();

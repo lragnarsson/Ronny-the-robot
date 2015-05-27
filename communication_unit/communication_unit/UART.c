@@ -11,7 +11,6 @@
 #include "UART.h"
 #include "I2C.h"
 
-volatile uint8_t StrRxFlag=0;
 ISR(USART0_RX_vect)
 {
 	static uint8_t i = 0;
@@ -39,7 +38,7 @@ ISR(USART0_RX_vect)
 	
 	if (++i == expected_length)
 	{
-		StrRxFlag = 1;
+		UART_flag = 1;
 		i = 0;
 		expected_length = 1;
 	}
@@ -50,12 +49,12 @@ void UART_Flush() {
 }
 
 uint8_t UART_not_empty() {
-	return StrRxFlag;
+	return UART_flag;
 }
 
 void UART_empty(void) {
 	cli();
-	StrRxFlag = 0;
+	UART_flag = 0;
 	for(uint8_t j=0; j<8; j++) {
 		buffer[j] = 0x00;
 	}
@@ -78,16 +77,6 @@ void Init_UART(uint16_t baudrate) {
 	PORTB |= (1<<PB5); //input
 	UART_Flush();
 	sei();
-}
-
-
-void UART_putstring(unsigned char* StringPtr) {
-// sends the characters from the string one at a time to the USART
-	while(*StringPtr != 0x00)
-	{
-		Send_to_PC(StringPtr);
-		StringPtr++;
-	}
 }
 
 void Send_to_PC(unsigned char data) {

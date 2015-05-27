@@ -9,10 +9,9 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "personality.h"
-
 #include "UART.h"
 #include "I2C.h"
-//#include "sound.c"
+
 int8_t moved_distance = 0;
 void init_personality() {
 	TCCR1A = (0<<WGM11)|(0<<WGM10)|(1<<COM1A1)|(0<<COM1A0);
@@ -87,14 +86,13 @@ void handle_received_message() {
 
 int main(void) {
 	Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
-	i2c_init(atmega18br, atmega18pc, COMMUNICATION_UNIT);
+	i2c_init(BITRATE_18MHZ, PRESCALER_18MHZ, COMMUNICATION_UNIT);
 	//init_personality();
 	while(1) {
 		_delay_ms(50);
 		is_sending = 0;
 		if(UART_not_empty()) {
 			switch(buffer[0]) {
-				//Correct byte
 				case DRIVE_FORWARD_LEFT:
 				case 'q':
 					i2c_write_byte(CONTROL_UNIT, (uint8_t)DRIVE_FORWARD_LEFT);

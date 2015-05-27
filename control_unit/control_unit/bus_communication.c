@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 void init_bus_communication() {
-	i2c_init(atmega20br, atmega20pc, CONTROL_UNIT);
+	i2c_init(BITRATE_20MHZ, PRESCALER_20MHZ, CONTROL_UNIT);
 	
 	last_manual_command = DO_NOTHING;
 	last_manual_command_updated = 0;
