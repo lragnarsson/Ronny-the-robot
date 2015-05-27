@@ -1,9 +1,12 @@
-/*
+/* 
  * UART.c
- *
- * Created: 2015-03-31
- *  Author: Filip
+ * Ronny-the-robot/communication_unit
+ * ------------------------------
+ * This file contains the functions required to send and receive data to and from the PC-module.
+ * ------------------------------ 
+ * Author: F. Östman
  */ 
+
 #include <avr/io.h>
 #define F_CPU 18432000UL
 #include <avr/interrupt.h>

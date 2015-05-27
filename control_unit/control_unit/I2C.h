@@ -1,19 +1,16 @@
 /*
  * I2C.h
- *
- * Created: 2015-03-31
- *  Author: Filip
  */ 
 #ifndef I2C_H_
 #define I2C_H_
 
-// Set SCL speed around 100kHz
-#define BITRATE_20MHZ 20 // scl freq 92593Hz 25
-#define BITRATE_18MHZ 18 // scl freq 93091Hz 91
-#define PRESCALER_20MHZ 0 // prescaler atmega 20kHz clock 1
-#define PRESCALER_18MHZ 0 // prescaler atmega 18.432kHz clock
+/* Set SCL speed around 400kHz */
+#define BITRATE_20MHZ 20
+#define BITRATE_18MHZ 18
+#define PRESCALER_20MHZ 0
+#define PRESCALER_18MHZ 0
 
-
+/* i2c addresses */
 #define GENERAL_CALL 0x00
 #define CONTROL_UNIT 0x12
 #define SENSOR_UNIT 0x14
@@ -42,25 +39,16 @@
 #define CALIBRATE_TAPE_SENSOR 0xD0
 
 
-
 volatile uint8_t busbuffer[16];
 volatile uint8_t receiverstart;
 volatile uint8_t receiverstop;
-
 volatile uint8_t is_sending;
 
-// Init
 void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t address);
-
-// START condition
 void i2c_start();
-
 void i2c_clear_buffer(void);
-
-// Write to I2C
 uint8_t i2c_write(uint8_t address, uint8_t* data, uint8_t length);
 uint8_t i2c_write_byte(uint8_t address, uint8_t data);
-
 void handle_received_message();
 
 #endif /* I2C_H_ */

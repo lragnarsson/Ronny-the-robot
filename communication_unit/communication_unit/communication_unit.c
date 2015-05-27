@@ -1,8 +1,10 @@
-/*
- * communication.c
- *
- * Created: 2015-03-23 22:37:02
- *  Author: Filip
+/* 
+ * communication_unit.c
+ * Ronny-the-robot/communication_unit
+ * ------------------------------
+ * This file contains the logic for sending data to and from the PC-module.
+ * ------------------------------ 
+ * Author: F. Östman
  */ 
 #include <avr/io.h>
 #define F_CPU 18432000UL

@@ -1,8 +1,10 @@
-/*
+/* 
  * I2C.c
- *
- * Created: 2015-03-26 19:16:02
- *  Author: Filip
+ * Ronny-the-robot/communication_unit
+ * ------------------------------
+ * This file contains the functions required to use the i2c-bus.
+ * ------------------------------ 
+ * Author: F. Östman
  */ 
 
 #include <avr/io.h>
@@ -15,7 +17,7 @@ volatile uint8_t helpdata[16];
 volatile uint8_t startpointer;
 volatile uint8_t endpointer;
 
-//TWCR definitions
+/* TWCR definitions */
 #define SEND 0xc5
 #define STOP 0xd5
 #define START 0xe5
@@ -23,7 +25,7 @@ volatile uint8_t endpointer;
 #define NACK 0x85
 #define RESET 0xc5
 
-//Init
+/* Init */
 void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t address) {
 	receiverstart = 0x00;
 	receiverstop = 0x00;
@@ -34,18 +36,18 @@ void i2c_init(uint8_t bitrate, uint8_t prescaler, uint8_t address) {
 	is_sending = 0;
 }
 
+/* Clear the buffer to prepare for new data */
 void i2c_clear_buffer() {
 	memset(busbuffer, 0, sizeof(busbuffer));
 	receiverstart = 0x00;
 	receiverstop = 0x00;
 }
 
-
 void i2c_start() {
 	TWCR = START;
 }
 
-//Write to I2C
+/* Write to I2C */
 uint8_t i2c_write(uint8_t address, uint8_t* data, uint8_t length) {
 	if(!is_sending) {
 		helpaddress = address | 0; // Write
@@ -63,7 +65,7 @@ uint8_t i2c_write(uint8_t address, uint8_t* data, uint8_t length) {
 		return 0;
 }
 
-// Write one byte to I2C
+/* Write one byte to I2C */
 uint8_t i2c_write_byte(uint8_t address, uint8_t data) {
 	if (!is_sending) {
 		helpaddress = address | 0; //Write
@@ -78,6 +80,7 @@ uint8_t i2c_write_byte(uint8_t address, uint8_t data) {
 		return 0;
 }
 
+/* Interrupt vector */
 ISR(TWI_vect) {
 	switch (TWSR & 0xf8) {
 		//Status codes for master transmitter mode
