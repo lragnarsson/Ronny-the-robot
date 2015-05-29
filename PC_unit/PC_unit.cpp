@@ -1,5 +1,13 @@
-#include "PC_unit.h"
+/*
+ * PC_unit.cpp
+ * Ronny-the-robot/PC_unit
+ * ------------------------------
+ * This file contains definitions for the PC_unit's functions and windowapplications.
+ * ------------------------------
+ * Author: M. Östlund Visén, E. Söderström
+ */
 
+#include "PC_unit.h"
 
 using namespace System;
 using namespace System::Windows::Forms;
@@ -15,38 +23,20 @@ void main(array<String^>^args)
 
 }
 
+/* 
+ * Finds existing COM-ports.
+ */
 void PC_unit::findPorts(void)
 {
-	// get port names
 	array<Object^>^ objectArray = SerialPort::GetPortNames();
-	// add string array to combobox
 	this->comboBox1->Items->AddRange(objectArray);
 }
 
-//Keypressevents and clicks
-
-System::Void PC_unit::PC_unit_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
-	/*Function to make the keys "light up" when pressed*/
-	switch (e->KeyCode){
-	case Keys::A:
-		this->Leftarrow_unpressed->Visible = false;
-		break;
-
-	case Keys::D:
-		this->Rightarrow_unpressed->Visible = false;
-		break;
-
-	case Keys::S:
-		this->Downarrow_unpressed->Visible = false;
-		break;
-
-	case Keys::W:
-		this->Uparrow_unpressed->Visible = false;
-		break;
-	}
-}
+/*
+ * Function to show original arrowkeys on window after a keypress.
+ */
 System::Void PC_unit::PC_unit_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
-	/*Function to make the keys "light up" when pressed*/
+
 	switch (e->KeyCode){
 	case Keys::A:
 		this->Leftarrow_unpressed->Visible = true;
@@ -65,16 +55,42 @@ System::Void PC_unit::PC_unit_KeyUp(System::Object^  sender, System::Windows::Fo
 		break;
 	}
 }
+
+/*
+ * Function to mark the arrowkeys while pressed.
+ */
+System::Void PC_unit::PC_unit_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+	switch (e->KeyCode){
+	case Keys::A:
+		this->Leftarrow_unpressed->Visible = false;
+		break;
+
+	case Keys::D:
+		this->Rightarrow_unpressed->Visible = false;
+		break;
+
+	case Keys::S:
+		this->Downarrow_unpressed->Visible = false;
+		break;
+
+	case Keys::W:
+		this->Uparrow_unpressed->Visible = false;
+		break;
+	}
+}
+
+/*
+ * Function to send steeringcommands to the robot.
+ */
 System::Void PC_unit::PC_unit_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
-	/*Controls the steering, sending the correct headers to the robot*/
-	auto dataleft = gcnew array < System::Byte > { 0xC3 };
+	auto dataleft = gcnew array < System::Byte > { 0xC3 }; // Sending the correct headers to the robot.
 	auto databack = gcnew array < System::Byte > { 0xC4 };
 	auto dataforward = gcnew array < System::Byte > { 0xC1 };
 	auto dataright = gcnew array < System::Byte > { 0xC2 };
 	auto datarforwardright = gcnew array < System::Byte > { 0xC5 };
-	auto dataforwardleft = gcnew array < System::Byte > { 0xC6 };
+	auto dataforwardleft = gcnew array < System::Byte > { 0xC6 }; 
 
-	if (!automode) //Steering is only possible if in manualmode!
+	if (!automode) // Steering is only possible in manualmode.
 	{
 
 		switch (e->KeyChar){
@@ -119,23 +135,32 @@ System::Void PC_unit::PC_unit_KeyPress(System::Object^  sender, System::Windows:
 		this->Kommandon->Text = "Autonomous mode";
 	}
 }
+
+/*
+ * Opens the serialport when button is clicked. 
+ */
 System::Void PC_unit::open_Click(System::Object^  sender, System::EventArgs^  e) {
-	/*Opening the serialport when button pressed */
 	auto data = gcnew array < System::Byte > { 12 };
 	this->serialPort1->PortName = this->comboBox1->Text;
 	this->open_closed->Text = "port openeing, waiting";
 	this->serialPort1->Open();
 	this->open_closed->Text = "port open";
 }
+
+/*
+ * Closes the serialport when button is clicked.
+ */
 System::Void PC_unit::close_Click(System::Object^  sender, System::EventArgs^  e) {
-	/* Closing connection if open when button pressed */
 	if (this->serialPort1->IsOpen){
 		this->serialPort1->Close();
 		this->open_closed->Text = "connection closed";
 	}
 }
+
+/*
+ * Resets the map and the matrix with mapinfo.
+ */
 System::Void PC_unit::Reset_Click(System::Object^  sender, System::EventArgs^  e) {
-	/*reset the map and matrix with mapinfo*/
 	createarray(image1);
 	x_start = 0;
 	y_start = 8;
@@ -145,23 +170,32 @@ System::Void PC_unit::Reset_Click(System::Object^  sender, System::EventArgs^  e
 		}
 	}
 }
+
+/*
+ * Sends a command to the robot to calibrate the reflexsensor.
+ */
 System::Void PC_unit::calibration_Click(System::Object^  sender, System::EventArgs^  e){
-	/*sends request to robot to calibrate the reflexsensor*/
 	auto tejpref = gcnew array < System::Byte > { CALIBRATE_SENSORS };
 	this->serialPort1->Write(tejpref, 0, 1);
 }
 
+/*
+ * Function to trim the motor.
+ */
 System::Void PC_unit::change_motor_Click(System::Object^  sender, System::EventArgs^  e){
-	/*function to trim the motor*/
 	if (motor->Text->Length == 0){
 		motor->Text = "set motor-trim value";
 	}
 	else
 	{
-		auto motor_trim_value = gcnew array < System::Byte > { 0xC9,(System::Byte)Convert::ToSByte(motor->Text) };
+		auto motor_trim_value = gcnew array < System::Byte > { 0xC9, (System::Byte)Convert::ToSByte(motor->Text) };
 		this->serialPort1->Write(motor_trim_value, 0, 2);
 	}
 }
+
+/*
+ * Sends a command to the robot to change the Kp parameter.
+ */
 System::Void PC_unit::change_Kp_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (Kp_value->Text->Length != 0)
 	{
@@ -170,6 +204,10 @@ System::Void PC_unit::change_Kp_Click(System::Object^  sender, System::EventArgs
 	}
 
 }
+
+/*
+ * Sends a command to the robot to change the Kd parameter.
+ */
 System::Void PC_unit::change_Kd_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (Kd_value->Text->Length != 0)
 	{
@@ -178,57 +216,58 @@ System::Void PC_unit::change_Kd_Click(System::Object^  sender, System::EventArgs
 	}
 }
 
-//Serialport
+/*
+ * SerialPort
+ * If there are any bytes to read, find how many and read all of them.
+ * call the receive_data function to handle the bytes and allow new
+ * events to be raised! (Invoke is a pointer to a function).
+ */
 System::Void PC_unit::serialPort1_DataReceived(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e) {
-	/*
-	 * If there are any bytes to read, find how many and read all of them.		
-	 * call the recievedata function to handle the bytes and allow new			
-	 * events to be raised! (Invoke is a pointer to a function)				
-	 */
 	if (serialPort1->BytesToRead > 0){
 		count = serialPort1->BytesToRead;
 		serialPort1->Read(data_recieved_buffer, 0, count);
-		recievedata_delegate^ d = gcnew recievedata_delegate(&PC_unit::recievedata);
+		receive_data_delegate^ d = gcnew receive_data_delegate(&PC_unit::receive_data);
 		this->Invoke(d, gcnew array < Object^ > { 'h' });
 	}
 }
 
-System::Void PC_unit::recievedata(char status){
-	/*
-	 * The first byte is always a header. Call handle headerfunction to 		
-	 * see what header it is and how many bytes tp expect. Then if buffer	
-	 * consists of enough bytes to read all of them handlebyte and	count 		
-	 * up buffer index and buffer length. If not enough bytes mask them out
-	 */
-	int bufferlength = count; //buffer length is the ammount of bytes collected
+/*
+ * Function to handle incomming data.
+ * The first byte is always a header. Call handle headerfunction to
+ * see what header it is and how many bytes tp expect. Then if buffer
+ * consists of enough bytes to read all of them handle_byte and	count
+ * up buffer index and buffer length. If not enough bytes mask them out
+ */
+System::Void PC_unit::receive_data(char status){
+	int bufferlength = count; // buffer length is the ammount of bytes collected
 	while (!finished)
 	{
 		if (bufferlength > 0){ 
-			handleheader(data_recieved_buffer[bufferindex]);
-			if ((bufferlength >= expected_length) && !finished) //makes sure that we have enough bytes and that we
-																//didn't recieve a header without any following bytes
+			handle_header(data_recieved_buffer[bufferindex]);
+			if ((bufferlength >= expected_length) && !finished) // makes sure that we have enough bytes and that we
+																// didn't recieve a header without any following bytes
 			{
-				handlebyte();
-				bufferindex = bufferindex + expected_length;  //count up the index if not all bytes are handled
-				bufferlength = bufferlength - expected_length; //take away the bytes just hanled.
+				handle_byte();
+				bufferindex = bufferindex + expected_length;  // count up the index if not all bytes are handled
+				bufferlength = bufferlength - expected_length; // take away the bytes just hanled.
 
-				write_position = 0;  //reset writeposition and expected length.
+				write_position = 0;  // reset writeposition and expected length.
 				expected_length = 0;
 			}
-			else if (bufferlength < expected_length && bufferlength > 0 && !finished) //if not enough bytes in buffer
+			else if (bufferlength < expected_length && bufferlength > 0 && !finished) // if not enough bytes in buffer
 			{
-				int index = 1; //help index for adding masked bytes into the original buffer without counting up the used buffer index
+				int index = 1; // help index for adding masked bytes into the original buffer without counting up the used buffer index
 				while (bufferlength < expected_length)
 				{
-					if (serialPort1->BytesToRead > 0){ //mask out bytes if there are bytes to read
+					if (serialPort1->BytesToRead > 0){ // mask out bytes if there are bytes to read
 						serialPort1->Read(remaining_buffer, 0, 1);
-						data_recieved_buffer[bufferindex + bufferlength] = remaining_buffer[0]; //put the masked byte into the buffer
-						bufferlength = bufferlength + 1; //count up the bufferlength
+						data_recieved_buffer[bufferindex + bufferlength] = remaining_buffer[0]; // put the masked byte into the buffer
+						bufferlength = bufferlength + 1; // count up the bufferlength
 						index++;
 					}
 
 				}
-				handlebyte(); //handle the message
+				handle_byte(); // handle the message
 				bufferlength = bufferlength - expected_length;
 				write_position = 0;
 				expected_length = 0;
@@ -243,7 +282,7 @@ System::Void PC_unit::recievedata(char status){
 				bufferindex = 0;
 			}
 		}
-		else //if buffer is 0 then finished
+		else // if buffer is 0 then finished
 		{
 			write_position = 0;
 			expected_length = 0;
@@ -254,65 +293,65 @@ System::Void PC_unit::recievedata(char status){
 	finished = false;
 }
 
-System::Void PC_unit::handleheader(unsigned char byte){
-
-	if (write_position == 0)  //If readposition = 0 we have a header. 
+/*
+* Function to handle incomming data.
+* The first byte is always a header. Call handle headerfunction to
+* see what header it is and how many bytes tp expect. Then if buffer
+* consists of enough bytes to read all of them handle_byte and	count
+* up buffer index and buffer length. If not enough bytes mask them out
+*/
+System::Void PC_unit::handle_header(unsigned char byte){
+	if (write_position == 0)  // If readposition = 0 we have a header. 
 	{
 		switch (byte)
 		{
-		case ABSOLUTEVALUE: //Absolutevalue x,y (position)
-			//Console::WriteLine("Header: ABSOLUTEVALUE ");
+		case ABSOLUTEVALUE: 
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
-		case AUTOMODE: //Auto mode
+		case AUTOMODE: 
 			SetText("Auto mode", Kommandon);
 			write_position = 0;
 			automode = true; 
-			finished = true; //only one byte -> finished.
+			finished = true; 
 			break;
-		case MANUALMODE: //Manual mode
+		case MANUALMODE: 
 			SetText("Manual mode", Kommandon);
 			write_position = 0;
 			automode = false;
-			finished = true; // only one byte->finished.
+			finished = true; 
 			break;
-		case DRIVABLE_SQUARE: //drivalbe square
-			//Console::WriteLine("Header: DRIVALBE_SQUARE ");
+		case DRIVABLE_SQUARE: 
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
-		case DISTRESSEDFOUND: //Distressed found
-			//Console::WriteLine("Header: DISTRESSEDFOUND");
+		case DISTRESSEDFOUND: 
 			expected_length = 3;
 			header = byte;
 			break;
-		case SENSOR_VALUES: //Sensorvalues
+		case SENSOR_VALUES: 
 			expected_length = 11;
 			header = byte;
 			++write_position;
 			break;
 		case WALL:
-			//Console::WriteLine("Header: WALL ");
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
-		case WHEELENCODERS://Wheelencodervärden
-			//Console::WriteLine("Header: WHEELENCODERS ");
+		case WHEELENCODERS:
 			expected_length = 3;
 			header = byte;
 			++write_position;
 			break;
-		case TEJP_FOUND: //Tejpbit funnen.
-			//Console::WriteLine("TEJP FOUND");
+		case TEJP_FOUND: 
 			finished = true; // only one byte->finished.
 			write_position = 0;
 			tejp_found = true;
 			break;
-		case TEJP_REF: //Referensvärde tejp
+		case TEJP_REF: 
 			expected_length = 2;
 			header = byte;
 			++write_position;
@@ -324,26 +363,30 @@ System::Void PC_unit::handleheader(unsigned char byte){
 		return;
 	}
 }
-System::Void PC_unit::handlebyte(){
 
+/*
+ * This function handle the incomming bytes and calls the mapping functions.
+ */
+ System::Void PC_unit::handle_byte(){
 	switch (header)
 	{
-	case ABSOLUTEVALUE: //Absolutvärde x,y (alltså position)
+	case ABSOLUTEVALUE: 
 		current_xpos = data_recieved_buffer[bufferindex + 1];
 		current_ypos = data_recieved_buffer[bufferindex + 2];
 		move_grid(current_xpos, current_ypos);
 		update_map();
 		current_robot = false;
 		break;
-	case DRIVABLE_SQUARE: //Körbar ruta x,y
+	case DRIVABLE_SQUARE: 
 		drivablesquare_xpos = data_recieved_buffer[bufferindex + 1];
 		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
 		move_grid(drivablesquare_xpos, drivablesquare_ypos);
 		update_map();
 		break;
-	case DISTRESSEDFOUND: //Nödställd funnen
+	case DISTRESSEDFOUND: 
 		distressedfound_xpos = data_recieved_buffer[bufferindex + 1];
 		distressedfound_ypos = data_recieved_buffer[bufferindex + 2];
+		distressedfound = true;
 		map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
 		move_grid(distressedfound_xpos, distressedfound_ypos);
 		update_map();
@@ -355,7 +398,7 @@ System::Void PC_unit::handlebyte(){
 		move_grid(wall_xpos, wall_ypos);
 		update_map();
 		break;
-	case SENSOR_VALUES:  //Dealing with sensorvalues
+	case SENSOR_VALUES:  
 	{
 		rear_left = data_recieved_buffer[bufferindex + 1];
 		rear_left = rear_left << 8;
@@ -387,7 +430,7 @@ System::Void PC_unit::handlebyte(){
 		current_distance = current_distance + added_distance;
 		SetText(Convert::ToString(current_distance), totaldistance);
 		break;
-	case TEJP_REF: //Referensvärde tejp
+	case TEJP_REF: 
 		tejp_ref_value = data_recieved_buffer[bufferindex +1];
 		break;
 	default:
@@ -395,6 +438,9 @@ System::Void PC_unit::handlebyte(){
 	}
 }
 
+/*
+ * Function to change text in a textbox.
+ */
 System::Void PC_unit::SetText(String^ text, TextBox^ textbox){
 	if (textbox->InvokeRequired){
 		SetTextDelegate^ d = gcnew SetTextDelegate(&PC_unit::SetText);
@@ -405,7 +451,9 @@ System::Void PC_unit::SetText(String^ text, TextBox^ textbox){
 	}
 }
 
-//Map
+/*
+ * Makes a 17x17 grid inside the picturebox (gray squares).
+ */
 System::Void PC_unit::createarray(Bitmap^ image1){
 
 	for (int y = 0; y < 17; y++)
@@ -438,6 +486,11 @@ System::Void PC_unit::createarray(Bitmap^ image1){
 	pictureBox1->Image = image1;
 }
 
+/*
+ * This function checks if the receiving square's position is out of range 
+ * for the 17x17 grid and changes the starcoordinate for the drawing of the grid,
+ * if necessary.
+ */
 System::Void PC_unit::move_grid(unsigned int x_newrecieved, unsigned int y_newrecieved){
 	if (x_newrecieved > x_start + 16){
 		x_start = x_newrecieved - 16;
@@ -456,23 +509,42 @@ System::Void PC_unit::move_grid(unsigned int x_newrecieved, unsigned int y_newre
 	}
 }
 
+/*
+ * This function updates the map (with the robots currentposition) and fills the grid 
+ * by calling fill_map for every square.
+ */
 System::Void PC_unit::update_map(){
-	if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos){
-		map_squares[current_xpos, current_ypos] = 'C';
+	if (!distressedfound){
+		if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos){
+			map_squares[current_xpos, current_ypos] = 'C';
+		}
+		else {
+			map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
+		}
 	}
 	else {
-		map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
+		if (distressedfound_xpos == current_xpos && distressedfound_ypos == current_ypos || distressedfound_xpos == drivablesquare_xpos && distressedfound_ypos == drivablesquare_ypos){
+			map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
+		}
+		else if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos && distressedfound_xpos != current_xpos && distressedfound_ypos != current_ypos){
+			map_squares[current_xpos, current_ypos] = 'C';
+		}
+		else {
+			map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
+		}
 	}
 	for (int i = x_start; i < (x_start + 17); ++i){
 		for (int j = y_start; j < (y_start + 17); ++j){			
-			fillkarta(image1, (i - x_start), (j - y_start), map_squares[i, j]);
-
-			pictureBox1->Image = image1;
+			fill_map(image1, (i - x_start), (j - y_start), map_squares[i, j]);
+			Show_Map();
 		}
 	}
 }
 
-System::Void PC_unit::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status){
+/*
+ * This function fills the square with the associated colour for the incomming square's status.
+ */
+System::Void PC_unit::fill_map(Bitmap^ Karta, int x_ny, int y_ny, char status){
 
 	switch (status)
 	{
@@ -575,8 +647,11 @@ System::Void PC_unit::fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status){
 		}
 		break;
 	}
-	Show_Map();
 }
+
+/*
+ * Show Map.
+ */
 System::Void PC_unit::Show_Map(){
 	pictureBox1->Image = image1;
 }

@@ -1,24 +1,17 @@
+/*
+* PC_unit.h
+* Ronny-the-robot/PC_unit
+* ------------------------------
+* This file contains declarations for the PC_unit's functions and windowapplications.
+* ------------------------------
+* Author: M. Östlund Visén, E. Söderström
+*/
 #pragma once
 #include <windows.h>
-//#include <stdafx.h>
-//#pragma comment (lib, "th32.lib")
-
-//#include <pplawait.h>
-
 
 /*
-TODO v17:
-* Bluetooth till data:
--> lägga till cases för inkommande data. ---> CECK
--> hantera inkommande data.
-* Utritning:
--> Skapa bitmap array med lämplig storlek
-* Visning av sensorvärden på robot.
-* Visa sensorvärden i tabell i nytt fönster.    --->TESTA
-* Möjlighet att ändra reglerkonstanter.
-* Grafer till sensorvärden.
-*/
-
+ * Headers 
+ */
 #define ABSOLUTEVALUE 0x30
 #define AUTOMODE 0x31
 #define MANUALMODE 0x32
@@ -70,6 +63,7 @@ namespace PC_unit_namespace {
 		static array <int, 2 >^ Karta = gcnew array < int, 2 >(17, 17);
 		static array <char, 2 >^ map_squares = gcnew array < char, 2>(33, 33);
 
+		/* Variables */
 		static unsigned int current_xpos = 16;
 		static unsigned int current_ypos = 16;
 		static unsigned int distressedfound_xpos = 0;
@@ -90,11 +84,12 @@ namespace PC_unit_namespace {
 
 		bool Header = false;
 		bool Recieved_all_bytes = false;
+		static bool distressedfound = false;
 		static bool current_robot = false;
 		static bool first_square = true;
 
 
-		//Data received
+		/* Data received */ 
 		static array < System::Byte >^ data_recieved_buffer = gcnew array < System::Byte >(1000);
 		static array < System::Byte >^ remaining_buffer = gcnew array < System::Byte >(1000);
 		static int write_position = 0;
@@ -109,6 +104,7 @@ namespace PC_unit_namespace {
 		static int bufferindex = 0;
 		static SByte added_distance_conveted = 0;
 
+		/* Windowforms application declarations */
 	private: static System::Windows::Forms::Button^  Reset;
 	protected:
 	private: static System::Windows::Forms::Label^  label3;
@@ -134,6 +130,7 @@ namespace PC_unit_namespace {
 				 delete components;
 			 }
 		 }
+		 /* Windowforms application declarations */
 	private: static System::Windows::Forms::PictureBox^  Ronny_robot;
 	private: static System::Windows::Forms::Label^  Sensorvärden;
 	private: static System::Windows::Forms::PictureBox^  Leftarrow_unpressed;
@@ -390,7 +387,7 @@ namespace PC_unit_namespace {
 			// 
 			this->serialPort1->BaudRate = 115200;
 			this->serialPort1->PortName = L"COM3";
-			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &PC_unit::serialPort1_DataReceived_1);
+			this->serialPort1->DataReceived += gcnew System::IO::Ports::SerialDataReceivedEventHandler(this, &PC_unit::serialPort1_DataReceived);
 			// 
 			// open
 			// 
@@ -666,33 +663,34 @@ namespace PC_unit_namespace {
 
 #pragma endregion
 
-			 // find available ports
+			 /* Finds available ports*/
 	private: void findPorts(void);
 
-			 // Keypressevents & click
+			 /* Keypressevents & Mouseclick */
 	private: System::Void PC_unit_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
 	private: System::Void PC_unit_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e);
 	private: System::Void PC_unit_KeyPress(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e);
 	private: System::Void open_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void close_Click(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void Reset_Click(System::Object^  sender, System::EventArgs^  e);
-			 //Data recieved from serialport.
-	private: delegate void recievedata_delegate(char status);
+
+			 /* Data recieved from serialport */
+	private: delegate void receive_data_delegate(char status);
 	private: delegate void hanldebyte(unsigned char byte);
 	private: System::Void serialPort1_DataReceived(System::Object^  sender, System::IO::Ports::SerialDataReceivedEventArgs^  e);
-	private: static void recievedata(char status);
-	private: static void handleheader(unsigned char byte);
-	private: static void handlebyte();
+	private: static void receive_data(char status);
+	private: static void handle_header(unsigned char byte);
+	private: static void handle_byte();
 
-			 //using data from serialport
+			 /* Using data from serialport */
 	private: delegate void SetTextDelegate(String^ text, TextBox^ textbox);
 	private: static void SetText(String^ text, TextBox^ textbox);
 
-			 //Map
+			 /* Map */
 	private: static void createarray(Bitmap^ image1);
 	private: static void move_grid(unsigned int x_newrecieved, unsigned int y_newrecieved);
 	private: static void update_map();
-	private: static void fillkarta(Bitmap^ Karta, int x_ny, int y_ny, char status);
+	private: static void fill_map(Bitmap^ Karta, int x_ny, int y_ny, char status);
 	private: static void Show_Map();
 
 private: System::Void calibration_Click(System::Object^  sender, System::EventArgs^  e);
