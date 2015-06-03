@@ -199,7 +199,7 @@ System::Void PC_unit::change_motor_Click(System::Object^  sender, System::EventA
 System::Void PC_unit::change_Kp_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (Kp_value->Text->Length != 0)
 	{
-		auto kpvalue = gcnew array < System::Byte > {P_PARAMETER, (Byte)Convert::ToSByte(Kp_value)};
+		auto kpvalue = gcnew array < System::Byte > {P_PARAMETER, (Byte)Convert::ToSByte(Kp_value->Text)};
 		serialPort1->Write(kpvalue, 0, kpvalue->Length);
 	}
 
@@ -211,7 +211,7 @@ System::Void PC_unit::change_Kp_Click(System::Object^  sender, System::EventArgs
 System::Void PC_unit::change_Kd_Click(System::Object^  sender, System::EventArgs^  e) {
 	if (Kd_value->Text->Length != 0)
 	{
-		auto kdvalue = gcnew array < System::Byte > {D_PARAMETER, (Byte)Convert::ToSByte(Kd_value)};
+		auto kdvalue = gcnew array < System::Byte > {D_PARAMETER, (Byte)Convert::ToSByte(Kd_value->Text)};
 		serialPort1->Write(kdvalue, 0, kdvalue->Length);
 	}
 }
@@ -376,10 +376,12 @@ System::Void PC_unit::handle_header(unsigned char byte){
 		move_grid(current_xpos, current_ypos);
 		update_map();
 		current_robot = false;
+		Console::WriteLine("absolutevalue: X" + current_xpos + " Y " + current_ypos);
 		break;
 	case DRIVABLE_SQUARE: 
 		drivablesquare_xpos = data_recieved_buffer[bufferindex + 1];
 		drivablesquare_ypos = data_recieved_buffer[bufferindex + 2];
+		Console::WriteLine("drivablesquare: X" + drivablesquare_xpos + " Y " + drivablesquare_ypos);
 		move_grid(drivablesquare_xpos, drivablesquare_ypos);
 		update_map();
 		break;
@@ -387,6 +389,7 @@ System::Void PC_unit::handle_header(unsigned char byte){
 		distressedfound_xpos = data_recieved_buffer[bufferindex + 1];
 		distressedfound_ypos = data_recieved_buffer[bufferindex + 2];
 		distressedfound = true;
+		Console::WriteLine("distressedfound: X" + distressedfound_xpos + " Y " + distressedfound_ypos);
 		map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
 		move_grid(distressedfound_xpos, distressedfound_ypos);
 		update_map();
@@ -394,6 +397,7 @@ System::Void PC_unit::handle_header(unsigned char byte){
 	case WALL:
 		wall_xpos = data_recieved_buffer[bufferindex + 1];
 		wall_ypos = data_recieved_buffer[bufferindex + 2];
+		Console::WriteLine("wall: X" + wall_xpos + " Y " + wall_ypos);
 		map_squares[wall_xpos, wall_ypos] = 'W';
 		move_grid(wall_xpos, wall_ypos);
 		update_map();
@@ -426,8 +430,8 @@ System::Void PC_unit::handle_header(unsigned char byte){
 		break;
 	case WHEELENCODERS:
 		added_distance = data_recieved_buffer[bufferindex + 1];
-		added_distance_conveted = (int)added_distance;
-		current_distance = current_distance + added_distance;
+		added_distance_converted = (SByte)added_distance;
+		current_distance = current_distance + (int)added_distance_converted;
 		SetText(Convert::ToString(current_distance), totaldistance);
 		break;
 	case TEJP_REF: 
@@ -523,10 +527,12 @@ System::Void PC_unit::update_map(){
 		}
 	}
 	else {
-		if (distressedfound_xpos == current_xpos && distressedfound_ypos == current_ypos || distressedfound_xpos == drivablesquare_xpos && distressedfound_ypos == drivablesquare_ypos){
+		if (distressedfound_xpos == current_xpos && distressedfound_ypos == current_ypos ||
+			distressedfound_xpos == drivablesquare_xpos && distressedfound_ypos == drivablesquare_ypos){
 			map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
 		}
-		else if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos && distressedfound_xpos != current_xpos && distressedfound_ypos != current_ypos){
+		else if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos && 
+			distressedfound_xpos != current_xpos && distressedfound_ypos != current_ypos){
 			map_squares[current_xpos, current_ypos] = 'C';
 		}
 		else {

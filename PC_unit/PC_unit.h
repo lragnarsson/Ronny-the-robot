@@ -54,6 +54,26 @@ namespace PC_unit_namespace {
 			findPorts();
 
 			createarray(image1);
+
+			/*data_recieved_buffer[0] = 0x33;
+			data_recieved_buffer[1] = 16;
+			data_recieved_buffer[2] = 16;
+			data_recieved_buffer[3] = 0x34;
+			data_recieved_buffer[4] = 16;
+			data_recieved_buffer[5] = 17;
+			data_recieved_buffer[6] = 0x34;
+			data_recieved_buffer[7] = 16;
+			data_recieved_buffer[8] = 15;
+			data_recieved_buffer[9] = 0x33;
+			data_recieved_buffer[10] = 17;
+			data_recieved_buffer[11] = 16;
+			data_recieved_buffer[12] = 0x34;
+			data_recieved_buffer[13] = 15;
+			data_recieved_buffer[14] = 16;
+			count = 15;
+			//header = WALL;
+			//handlebyte();
+			receive_data('h');*/
 		}
 
 
@@ -68,8 +88,8 @@ namespace PC_unit_namespace {
 		static unsigned int current_ypos = 16;
 		static unsigned int distressedfound_xpos = 0;
 		static unsigned int distressedfound_ypos = 0;
-		static unsigned int drivablesquare_xpos = 0;
-		static unsigned int drivablesquare_ypos = 0;
+		static unsigned int drivablesquare_xpos = 16;
+		static unsigned int drivablesquare_ypos = 16;
 		static unsigned int wall_xpos = 0;
 		static unsigned int wall_ypos = 0;
 		static Byte tejp_ref_value = 0;
@@ -102,7 +122,7 @@ namespace PC_unit_namespace {
 		static int count = 0;
 		static bool finished = false;
 		static int bufferindex = 0;
-		static SByte added_distance_conveted = 0;
+		static SByte added_distance_converted = 0;
 
 		/* Windowforms application declarations */
 	private: static System::Windows::Forms::Button^  Reset;
