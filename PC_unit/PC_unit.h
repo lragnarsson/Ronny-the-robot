@@ -101,6 +101,7 @@ namespace PC_unit_namespace {
 		static unsigned int x_start = 0;
 		static unsigned int y_start = 8;
 		static int squaresize = 35;
+		static bool nogridmoved = false;
 
 		bool Header = false;
 		bool Recieved_all_bytes = false;

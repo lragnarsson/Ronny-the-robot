@@ -169,6 +169,15 @@ System::Void PC_unit::Reset_Click(System::Object^  sender, System::EventArgs^  e
 			map_squares[i, j] = 0;
 		}
 	}
+	for (int i = 0; i < data_recieved_buffer->Length; i++){
+		data_recieved_buffer[i] = 0;
+		bufferindex = 0;
+		count = 0;
+		write_position = 0;
+		expected_length = 0;
+		finished = true;
+
+	}
 }
 
 /*
@@ -400,6 +409,10 @@ System::Void PC_unit::handle_header(unsigned char byte){
 		Console::WriteLine("wall: X" + wall_xpos + " Y " + wall_ypos);
 		map_squares[wall_xpos, wall_ypos] = 'W';
 		move_grid(wall_xpos, wall_ypos);
+		if (nogridmoved){
+			fill_map(image1, wall_xpos - x_start, wall_ypos - y_start, map_squares[wall_xpos, wall_ypos]);
+			Show_Map();
+		}
 		update_map();
 		break;
 	case SENSOR_VALUES:  
@@ -498,17 +511,22 @@ System::Void PC_unit::createarray(Bitmap^ image1){
 System::Void PC_unit::move_grid(unsigned int x_newrecieved, unsigned int y_newrecieved){
 	if (x_newrecieved > x_start + 16){
 		x_start = x_newrecieved - 16;
+		nogridmoved = false;
 	}
 	else if (y_newrecieved > y_start + 16){
 		y_start = y_newrecieved - 16;
+		nogridmoved = false;
 	}
 	else if (y_newrecieved < y_start){
 		y_start = y_newrecieved;
+		nogridmoved = false;
 	}
 	else if (x_newrecieved < x_start){
-		Console::Write("Impossible coordinates" + x_newrecieved);  
+		Console::Write("Impossible coordinates" + x_newrecieved); 
+		nogridmoved = false;
 	}
 	else{
+		nogridmoved = true;
 		return;
 	}
 }
@@ -521,31 +539,59 @@ System::Void PC_unit::update_map(){
 	if (!distressedfound){
 		if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos){
 			map_squares[current_xpos, current_ypos] = 'C';
+			if (nogridmoved){
+				fill_map(image1, current_xpos - x_start, current_ypos - y_start, map_squares[current_xpos, current_ypos]);
+				Show_Map();
+			}
 		}
-		else {
+		else if (drivablesquare_xpos != current_xpos || drivablesquare_ypos != current_ypos) {
 			map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
+			map_squares[current_xpos, current_ypos] = 'D';
+			if (nogridmoved){
+				fill_map(image1, drivablesquare_xpos - x_start, drivablesquare_ypos - y_start, map_squares[drivablesquare_xpos, drivablesquare_ypos]);
+				fill_map(image1, current_xpos - x_start, current_ypos - y_start, map_squares[current_xpos, current_ypos]);
+				Show_Map();
+			}
 		}
 	}
 	else {
 		if (distressedfound_xpos == current_xpos && distressedfound_ypos == current_ypos ||
 			distressedfound_xpos == drivablesquare_xpos && distressedfound_ypos == drivablesquare_ypos){
 			map_squares[distressedfound_xpos, distressedfound_ypos] = 'T';
+			if (nogridmoved){
+				fill_map(image1, distressedfound_xpos - x_start, distressedfound_ypos - y_start, map_squares[distressedfound_xpos, distressedfound_ypos]);
+				Show_Map();
+			}
+
 		}
-		else if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos && 
+		else if (drivablesquare_xpos == current_xpos && drivablesquare_ypos == current_ypos &&
 			distressedfound_xpos != current_xpos && distressedfound_ypos != current_ypos){
 			map_squares[current_xpos, current_ypos] = 'C';
+			if (nogridmoved){
+				fill_map(image1, current_xpos - x_start, current_ypos - y_start, map_squares[current_xpos, current_ypos]);
+				Show_Map();
+			}
 		}
-		else {
+		else if (drivablesquare_xpos != current_xpos || drivablesquare_ypos != current_ypos) {
 			map_squares[drivablesquare_xpos, drivablesquare_ypos] = 'D';
+			map_squares[current_xpos, current_ypos] = 'D';
+			if (nogridmoved){
+				fill_map(image1, drivablesquare_xpos - x_start, drivablesquare_ypos - y_start, map_squares[drivablesquare_xpos, drivablesquare_ypos]);
+				fill_map(image1, current_xpos - x_start, current_ypos - y_start, map_squares[current_xpos, current_ypos]);
+				Show_Map();
+			}
 		}
 	}
-	for (int i = x_start; i < (x_start + 17); ++i){
-		for (int j = y_start; j < (y_start + 17); ++j){			
-			fill_map(image1, (i - x_start), (j - y_start), map_squares[i, j]);
-			Show_Map();
+	if (!nogridmoved){
+		for (int i = x_start; i < (x_start + 17); ++i){
+			for (int j = y_start; j < (y_start + 17); ++j){
+				fill_map(image1, (i - x_start), (j - y_start), map_squares[i, j]);
+				Show_Map();
+			}
 		}
 	}
 }
+
 
 /*
  * This function fills the square with the associated colour for the incomming square's status.
