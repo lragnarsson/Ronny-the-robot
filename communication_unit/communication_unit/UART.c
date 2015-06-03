@@ -80,7 +80,8 @@ void UART_get_buffer(uint8_t* data) {
  * Init UART.
  */
 void Init_UART(uint16_t baudrate) {
-	cli();											//Disable interrupts
+	cli();	
+	UART_flag = 0;										//Disable interrupts
 	unsigned int baud = baudrate;
 	UBRR0H = (unsigned char)(baud >> 8);
 	UBRR0L |= (unsigned char)baud;

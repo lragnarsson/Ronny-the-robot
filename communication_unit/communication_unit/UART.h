@@ -12,7 +12,7 @@
 #define UART_H_
 
 volatile uint8_t buffer[8];
-volatile uint8_t UART_flag=0;
+volatile uint8_t UART_flag;
 
 void UART_get_buffer(uint8_t* data);
 void UART_empty(void);

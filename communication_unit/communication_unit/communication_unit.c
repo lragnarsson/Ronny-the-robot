@@ -22,16 +22,16 @@ void init_personality() {
 	OCR1AH = (100 >> 8);
 	OCR1AL = 100;
 
-	for (int i=0; i < 250; i++) {
-		ICR1H = (imperial_march[i] >> 8);
-		ICR1L = imperial_march[i];
-		++i;
-		delay_ms(imperial_march[i]);
-		ICR1H = (0 >> 8);
-		ICR1L = 0;
-		++i;
-		delay_ms(imperial_march[i]);		
-	}
+	TCCR3A = TIMER3_CLEAR_ON_MATCH_L;
+	TCCR3B = TIMER3_CLEAR_ON_MATCH_H | TIMER3_PRESCALE_64;
+	TIMSK3 = TIMER3_INTERRUPT_ENABLE;
+	OCR3A = TIMER3_MATCH_FREQUENCY_100HZ;
+	
+	current_sound = 0;
+	sound_phase = 2;
+	sound_index = 0;
+	sound_clock = 0;
+
 }
 
 void handle_received_message() {
@@ -55,6 +55,17 @@ void handle_received_message() {
 		case MAPPED_GOAL:
 			for(uint8_t j=0; j<3; j++) {
 				Send_to_PC(busbuffer[j]);
+			}
+			break;
+		case PLAY_SOUND:
+			sound_index = 0;
+			sound_clock = 0;
+			if (busbuffer[1] == 11)
+				sound_phase = 2;
+			else
+			{
+				current_sound = busbuffer[1];
+				sound_phase = 0;
 			}
 			break;
 		case MOVED_DISTANCE_AND_ANGLE:
@@ -89,7 +100,7 @@ void handle_received_message() {
 int main(void) {
 	Init_UART(9); //Set baudrate to 115.2kbps and initiate UART
 	i2c_init(BITRATE_18MHZ, PRESCALER_18MHZ, COMMUNICATION_UNIT);
-	//init_personality();
+	init_personality();
 	while(1) {
 		_delay_ms(50);
 		is_sending = 0;
@@ -134,4 +145,46 @@ int main(void) {
 		}
 	}
 	return 0;
+}
+
+ISR(TIMER3_COMPA_vect)
+{
+	++sound_clock;
+	switch(sound_phase)
+	{
+		case 0: 
+			if (sound_clock == music[current_sound][sound_index])
+			{
+				++sound_index;
+				if (music[current_sound][sound_index] == 0)
+					sound_phase = 2;
+				else
+				{
+					sound_phase = 1;
+					ICR1H = (music[current_sound][sound_index] >> 8);
+					ICR1L = music[current_sound][sound_index];
+					sound_clock = 0;
+					++sound_index;
+				}	
+			}
+			break;
+		case 1:
+			if (sound_clock == music[current_sound][sound_index])
+			{
+				ICR1H = (0 >> 8);
+				ICR1L = 0;
+				sound_clock = 0;
+				++sound_index;
+				sound_phase = 0;
+			}
+			break;
+		case 2:
+		if (sound_clock == 100)
+		{
+			ICR1H = (0 >> 8);
+			ICR1L = 0;
+			sound_clock = 0;
+		}
+		break;
+	}
 }

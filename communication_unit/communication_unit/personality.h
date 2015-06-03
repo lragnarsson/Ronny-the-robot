@@ -13,6 +13,12 @@
 #define F_CPU 18432000UL
 #include <util/delay.h>
 
+#define TIMER3_CLEAR_ON_MATCH_H (0<<WGM13) | (1<<WGM12)
+#define TIMER3_CLEAR_ON_MATCH_L (0<<WGM11) | (0<<WGM10)
+#define TIMER3_PRESCALE_64 (0<<CS12) | (1<<CS11) | (1<<CS10)
+#define TIMER3_MATCH_FREQUENCY_100HZ F_CPU / 1000 / 64		// = 288
+#define TIMER3_INTERRUPT_ENABLE (1<<OCIE1A)
+
 #define C4 8806
 #define Db4 8312
 #define D4 7846
@@ -68,26 +74,41 @@
 #define Q 60000/BPM
 #define E Q/2
 #define S Q/4
+#define X Q/8
 #define W 4*Q
+#define T Q/3
 
-void delay_ms(uint16_t count) {
-	while(count--) {
-		_delay_ms(1);
+uint8_t current_sound;
+uint8_t sound_index;
+uint8_t sound_phase;
+uint16_t sound_clock;
 
-	}
-}
 
-uint16_t imperial_march[250] = {A4, Q, Q, A4, Q, Q, A4, Q, Q, F4, E+S, E+S, C5, S, S, A4, Q, Q,
-								F4, E+S, E+S, C5, S, S, A4, H, H, E5, Q, Q, E5, Q, Q, E5, Q, Q,
-								F5, E+S, E+S, C5, S, S, Ab4, Q, Q, F4, E+S, E+S, C5, S, S,
-								A4, H, H, A5, Q, Q, A4, E+S, E+S, A4, S, S, A5, Q, Q, Ab5, E+S, E+S,
-								G5, S, S, Gb5, S, S, E5, S, S, F5, E, E+Q, Bb4, E, E, Eb5, Q, Q,
-								D5, E+S, E+S, Db5, S, S, C5, S, S, B4, S, S, C5, E, E+Q, F4, E, E,
-								Ab4, Q, Q, F4, E+S, E+S, A4, S, S, C5, Q, Q, A4, E+S, E+S, C5, S, S,
-								E5, H, H, A5, Q, Q, A4, E+S, E+S, A4, S, S, A5, Q, Q, Ab5, E+S, E+S,
-								G5, S, S, Gb5, S, S, E5, S, S, F5, E, E+Q, Bb4, E, E, Eb5, Q, Q,
-								D5, E+S, E+S, Db5, S, S, C5, S, S, B4, S, S, C5, E, E+Q, F4, E, E,
-								Ab4, Q, Q, F4, E+S, E+S, C5, S, S, A4, Q, Q, F4, E+S, E+S, C5, S, S,
-								A4, H, H};
+uint16_t music[10][250] = {{Q, A4, Q, Q, A4, Q, Q, A4, Q, Q, F4, E+S, E+S, C5, S, S, A4, Q, Q,
+							F4, E+S, E+S, C5, S, S, A4, H, H, E5, Q, Q, E5, Q, Q, E5, Q, Q,
+							F5, E+S, E+S, C5, S, S, Ab4, Q, Q, F4, E+S, E+S, C5, S, S,
+							A4, H, H, A5, Q, Q, A4, E+S, E+S, A4, S, S, A5, Q, Q, Ab5, E+S, E+S,
+							G5, S, S, Gb5, S, S, E5, S, S, F5, E, E+Q, Bb4, E, E, Eb5, Q, Q,
+							D5, E+S, E+S, Db5, S, S, C5, S, S, B4, S, S, C5, E, E+Q, F4, E, E,
+							Ab4, Q, Q, F4, E+S, E+S, A4, S, S, C5, Q, Q, A4, E+S, E+S, C5, S, S,
+							E5, H, H, A5, Q, Q, A4, E+S, E+S, A4, S, S, A5, Q, Q, Ab5, E+S, E+S,
+							G5, S, S, Gb5, S, S, E5, S, S, F5, E, E+Q, Bb4, E, E, Eb5, Q, Q,
+							D5, E+S, E+S, Db5, S, S, C5, S, S, B4, S, S, C5, E, E+Q, F4, E, E,
+							Ab4, Q, Q, F4, E+S, E+S, C5, S, S, A4, Q, Q, F4, E+S, E+S, C5, S, S,
+							A4, H, H},
+							{Q, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+							    Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+								Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+								Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+								Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+								Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+								Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+								Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S,
+								Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S, Bb6, H, S, F5, H, S},
+							{Q, G4, T, X, C4, T, X, E4, T, X, G5, T, X, C5, T, X, E5, T, X, 
+							 G6, S+ E, X, E5, Q, S, Ab4, T, X, C4, T, X, Eb4, T, X, Ab5, T, X,
+							 C5, T, X, Eb5, T, X, Ab6, S + E, X, Eb6, Q, S, Bb4, T, X, D5, T, X,
+							 F5, T, X, Bb5, T, X, D6, T, X, F6, T, X, Bb6, E + S, S, Bb6, T, X,
+							 Bb6, T, X, Bb6, T, X, C7, H, H}};
 
 #endif /* PERSONALITY_H_ */

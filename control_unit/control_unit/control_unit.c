@@ -445,6 +445,10 @@ void grab_package_state()
 	}
 	
 	set_desired_engine_speed(0);
+		
+	uint8_t msg[] = { PLAY_SOUND, 1};
+	i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+	_delay_ms(10);
 
 	_delay_ms(500);
 	close_claw();
@@ -494,6 +498,9 @@ void drop_package_state()
 
 	open_claw();
 	_delay_ms(250);
+	uint8_t msg[] = { PLAY_SOUND, 11};
+	i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+	_delay_ms(10);
 
 	last_distance_travelled = distance_travelled;
 	set_desired_engine_speed(MAPPING_SPEED);
@@ -563,11 +570,16 @@ void end_state()
 	set_desired_engine_speed(0);
 	_delay_ms(200);
 
+	uint8_t msg[] = { PLAY_SOUND, 2};
+	i2c_write(COMMUNICATION_UNIT, msg, sizeof(msg));
+	_delay_ms(10);
+
 	/* Send all map data again */
 	for(uint8_t i = 1; i<MAP_SIZE-1; ++i)
 	{
 		for(uint8_t j = 1; j<MAP_SIZE-1; ++j)
 		{
+			is_sending = 0;
 			if(map[i][j] == WALL)
 			{
 				uint8_t msg[] = {MAPPED_WALL, i, j};
@@ -582,6 +594,11 @@ void end_state()
 			}
 		}
 	}
+	
+	is_sending = 0;
+	uint8_t msg2[] = {MAPPED_SQUARE, goal_position.x, goal_position.y};
+	while(!i2c_write(COMMUNICATION_UNIT, msg2, sizeof(msg2))){_delay_ms(1);}
+	_delay_ms(100);
 
 	while (1)
 	{

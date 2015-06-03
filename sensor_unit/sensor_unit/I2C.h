@@ -51,7 +51,7 @@
 #define D_PARAMETER 0xC8				// 2 bytes
 #define MOTOR_TRIM 0xC9					// 2 bytes
 #define CALIBRATE_TAPE_SENSOR 0xD0
-
+#define PLAY_SOUND 0xD1					// 2 bytes
 
 volatile uint8_t busbuffer[16];
 volatile uint8_t receiverstart;
